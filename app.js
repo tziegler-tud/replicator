@@ -83,6 +83,9 @@ intentManager.getIntent("LightBrightnessGroup").addHandlerArray(lightBrightnessG
 
 const lightBrightnessLight = require("./intentHandlers/lightBrightnessLight");
 intentManager.getIntent("LightBrightnessLight").addHandlerArray(lightBrightnessLight);
+
+const lightScenes = require("./intentHandlers/lightScenes");
+intentManager.getIntent("LightScenes").addHandlerArray(lightScenes);
 //init voice command service
 let voiceCommandService = new VoiceCommandService(intentManager);
 
