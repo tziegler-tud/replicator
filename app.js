@@ -72,6 +72,9 @@ let intentManager = new IntentManager();
 intentManager.loadConfig("/rhinoModels/0_3_1/replicator_v0_3_1.yml");
 
 //add handlers
+const ignore = require("./intentHandlers/ignore");
+intentManager.getIntent("Ignore").addHandlerArray(ignore);
+
 const changeLightState = require("./intentHandlers/changeLightState");
 intentManager.getIntent("changeLightState").addHandlerArray(changeLightState);
 
