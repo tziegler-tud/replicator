@@ -415,7 +415,7 @@ class LightsService {
                         scenesArray.push(oj);
                     })
                     //check if scene exists
-                    let scene = scenesArray.find(s => (s.name === sceneName && s.type === "GroupScene"));
+                    let scene = scenesArray.find(s => (s.name === sceneName && s.type === "GroupScene" && s.group === groupId));
                     if(scene !== undefined) {
                         self.BridgeApi.setGroupScene(groupId, {scene: scene.id})
                             .then(result => {
