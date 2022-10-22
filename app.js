@@ -69,7 +69,7 @@ intent manager setup
  */
 
 let intentManager = new IntentManager();
-intentManager.loadConfig("/rhinoModels/replicator_v0_3.yml");
+intentManager.loadConfig("/rhinoModels/0_3_1/replicator_v0_3_1.yml");
 
 //add handlers
 const changeLightState = require("./intentHandlers/changeLightState");
