@@ -1,0 +1,7 @@
+{
+  "connectionString": "mongodb://localhost:27017/replicator",
+  "secret": "mySecret:)",
+  "username": "replicator",
+  "pwd": "replicator",
+  "authSource": "replicator"
+}

@@ -11,10 +11,11 @@ const PvRecorder = require("@picovoice/pvrecorder-node");
 const IntentManager = require('./services/IntentManager');
 const LocationManager = require('./services/LocationManager');
 const VoiceCommandService = require("./services/voiceCommandService");
+const ClientService = require("./services/ClientService");
 const LightsService = require("./services/LightsService");
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var clientRouter = require('./routes/client');
 
 var app = express();
 
@@ -38,8 +39,10 @@ app.use(cookieParser());
 // }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/api/v1/client', clientRouter);
+// app.use("/api", errorHandler.apiErrorHandler);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -86,6 +89,8 @@ intentManager.getIntent("LightBrightnessLight").addHandlerArray(lightBrightnessL
 //init voice command service
 let voiceCommandService = new VoiceCommandService(intentManager);
 
+let clientService = new ClientService();
+
 
 
 
@@ -110,6 +115,5 @@ livingroom.addLight("Schreibtisch", ["desk lamp", "desk light"]);
 livingroom.addRecorder(-1);
 livingroom.addLedInterface(12);
 livingroom.start();
-
 
 module.exports = app;
