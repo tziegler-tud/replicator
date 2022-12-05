@@ -1,7 +1,7 @@
-const https = require('https');
-const http = require('http');
+import https from 'https';
+import http from 'http';
 
-class LightsService {
+export default class LightsService {
     constructor(BridgeUrl, BridgeUser){
         this.locations = [];
         this.lights = [];
@@ -49,7 +49,7 @@ class LightsService {
     async init(){
         let self = this;
         console.log("Initializing LightsService...");
-        this.BridgeUrl = "192.168.1.115";
+        // this.BridgeUrl = "192.168.1.102";
         this.Bridge = undefined;
         //try to reach the bridge
         try {
@@ -782,4 +782,4 @@ function parseState(state){
     }
 }
 
-module.exports = LightsService;
+// module.exports = LightsService;

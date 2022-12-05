@@ -1,6 +1,6 @@
-const Location = require("./Location")
+import Location from "./Location.js";
 
-class LocationManager {
+export default class LocationManager {
     constructor(intentManager){
         this.intentManager = intentManager;
         this.locations = [];
@@ -70,4 +70,4 @@ class LocationManager {
     }
 }
 
-module.exports = LocationManager;
+// module.exports = LocationManager;

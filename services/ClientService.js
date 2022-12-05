@@ -1,13 +1,13 @@
-const db = require('../schemes/mongo');
+import db from '../schemes/mongo.js';
 const dbClient = db.Client;
-
-const Client = require("Client");
+//
+import Client from "./Client.js";
 
 //Handles client registration and data processing
 //Singleton
 
 
-class ClientService {
+export default class ClientService {
     constructor(){
         this.clients = [];
         ClientService.setInstance(this);
@@ -20,16 +20,15 @@ class ClientService {
             return this._instance;
         }
         else {
-            console.log("Cannot get instance: Instance does not exists.");
-            return undefined;
+            return this.createInstance();
         }
     }
-    static createInstance(intentManager) {
+    static createInstance() {
         if (this._instance) {
             return this._instance;
         }
 
-        this._instance = new ClientService(intentManager);
+        this._instance = new ClientService();
         return this._instance;
     }
 
@@ -105,4 +104,4 @@ class ClientService {
     }
 }
 
-module.exports = ClientService;
+// module.exports = ClientService;

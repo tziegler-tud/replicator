@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 /** @typedef {{ username: string, firstName: string, lastName: string, email?: string, hash: string, generalData?: { memberId?: string, phone?: string, customData?: any, qualifications: QualificationObject[], hasPhoto: boolean, isDisplayedOnPublic: boolean, loginEnabled: boolean, createdDate: Date } }} UserScheme */
 /** @typedef {{ title: {title: string, value: string}, description: {shortDesc: string, longDesc: string}, date: {startDate: Date, endDate: Date}, participants: User[], createdDate: Date}} ProtocolScheme */
@@ -34,4 +34,4 @@ var ClientScheme = new Schema({
 
 ClientScheme.set('toJSON', { virtuals: true, getters: true });
 
-module.exports = mongoose.model('Client', ClientScheme);
+export default mongoose.model('Client', ClientScheme);

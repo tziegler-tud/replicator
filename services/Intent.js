@@ -94,4 +94,5 @@ class Intent {
 
 }
 
-module.exports = Intent;
+export default Intent;
+// module.exports = Intent;

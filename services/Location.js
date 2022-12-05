@@ -1,12 +1,11 @@
-const { Picovoice } = require("@picovoice/picovoice-node");
-const PvRecorder = require("@picovoice/pvrecorder-node");
+import { Picovoice } from "@picovoice/picovoice-node";
+import PvRecorder from "@picovoice/pvrecorder-node";
 
-const picoVoiceConfig = require("../config/picovoice-pi.json");
-const VoiceCommandService = require("./voiceCommandService");
-const LedInterface = require("./LedInterface.js");
+import picoVoiceConfig from"../config/picovoice-pi.json" assert { type: 'json' };
+import VoiceCommandService from "./voiceCommandService.js";
+// import LedInterface from "./LedInterface.js");
 
-const LightsService = require("./LightsService");
-const lightsService = LightsService.getInstance();
+import LightsService from "./LightsService.js";
 
 /**
  * @typedef {Object} LightGroupObject
@@ -22,7 +21,7 @@ const lightsService = LightsService.getInstance();
  *
  * @property {LightGroupObject[]} lightGroups
  */
-class Location {
+export default class Location {
     /**
      *
      * @param identifier {string}
@@ -36,6 +35,8 @@ class Location {
         this.picoVoiceConfig = picoVoiceConfig;
         this.ledInterface = {};
 
+        this.lightsService = LightsService.getInstance();
+
         /** @type {LightGroupObject[]} */
         this.lightGroups = [];
         this.lights = [];
@@ -43,7 +44,7 @@ class Location {
 
     addLedInterface(ledAmount){
         let self = this;
-        this.ledInterface = new LedInterface(ledAmount);
+        // this.ledInterface = new LedInterface(ledAmount);
         this.ledInterface.init
             .then(ledIf=> {
                 console.log("LED interface set up for Location: " + self.identifier);
@@ -124,7 +125,7 @@ class Location {
      * @param groupName {string} name of the group assigned by the hue bridge.
      */
     addLightGroup(groupName) {
-        lightsService.getLightGroupIdByName(groupName)
+        this.lightsService.getLightGroupIdByName(groupName)
             .then(id => {
                 let o = {id: id, name: groupName};
                 this.lightGroups.push(o);
@@ -136,7 +137,7 @@ class Location {
     }
 
     addLight(lightName, aliases) {
-        lightsService.getLightIdByName(lightName)
+        this.lightsService.getLightIdByName(lightName)
             .then(id => {
                 let o = {id: id, name: lightName, aliases: aliases};
                 this.lights.push(o);
@@ -152,4 +153,4 @@ class Location {
     }
 }
 
-module.exports = Location;
+// module.exports = Location;

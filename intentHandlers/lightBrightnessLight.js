@@ -1,6 +1,6 @@
-const IntentHandler = require("./intentHandler");
-const LightsService = require("../services/LightsService");
-const LocationManager = require("../services/LocationManager");
+import IntentHandler from"./intentHandler.js";
+import LightsService from"../services/LightsService.js";
+import LocationManager from"../services/LocationManager.js";
 
 const lightsService = LightsService.getInstance();
 
@@ -121,6 +121,5 @@ function parseVariables(variables){
     }
     return parsedVars;
 }
-
-module.exports = lightBrightnessLight;
+export default lightBrightnessLight;
 

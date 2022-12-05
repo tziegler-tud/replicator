@@ -4,7 +4,7 @@ const EXPECTATION = {
     FORBIDDEN: 0,
 };
 
-class IntentHandler {
+export default class IntentHandler {
     constructor() {
         this.variables = {
             required: {},
@@ -67,4 +67,4 @@ class IntentHandler {
 
 IntentHandler.EXPECTATION = EXPECTATION;
 
-module.exports = IntentHandler;
+// module.exports = IntentHandler;

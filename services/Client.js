@@ -1,8 +1,8 @@
 import fetch from 'node-fetch';
-const db = require('../schemes/mongo');
-const dbClient = db.Client;
+import db from '../schemes/mongo.js';
+const DbClient = db.Client;
 
-class Client {
+export default class Client {
     /**
      * creates a new client
      * @param clientInformation
@@ -54,7 +54,7 @@ class Client {
      */
     saveToDb(){
         const dbObject = this.parseToDb();
-        let dbClient = new dbClient(dbObject);
+        let dbClient = new DbClient(dbObject);
         return new Promise((resolve, reject)=> {
             dbClient.save()
                 .then(dbCient => {
@@ -124,4 +124,4 @@ class Client {
     }
 }
 
-module.exports = Client;
+// module.exports = Client;

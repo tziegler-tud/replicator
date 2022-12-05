@@ -1,26 +1,32 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+import createError from 'http-errors';
+import express from 'express';
+import path from 'path';
+import cookieParser from 'cookie-parser';
+import logger from 'morgan';
+import { fileURLToPath } from 'url';
+
+// var createError = require('http-errors');
+// var express = require('express');
+// var path = require('path');
+// var cookieParser = require('cookie-parser');
+// var logger = require('morgan');
 // var sassMiddleware = require('node-sass-middleware');
 
-const { Picovoice } = require("@picovoice/picovoice-node");
-const PvRecorder = require("@picovoice/pvrecorder-node");
+import { Picovoice } from "@picovoice/picovoice-node";
+import PvRecorder from "@picovoice/pvrecorder-node";
 
-const IntentManager = require('./services/IntentManager');
-const LocationManager = require('./services/LocationManager');
-const VoiceCommandService = require("./services/voiceCommandService");
-const ClientService = require("./services/ClientService");
-const LightsService = require("./services/LightsService");
+import IntentManager from './services/IntentManager.js';
+import  VoiceCommandService from "./services/voiceCommandService.js";
+import  ClientService from "./services/ClientService.js";
+import  LightsService from "./services/LightsService.js";
 
-var indexRouter = require('./routes/index');
-var clientRouter = require('./routes/client');
+import indexRouter from './routes/index.js';
+import clientRouter from './routes/client.js';
 
 var app = express();
 
 // index.js
-var path = require('path');
+ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 global.appRoot = path.resolve(__dirname);
 
 // view engine setup
@@ -37,7 +43,11 @@ app.use(cookieParser());
 //   indentedSyntax: true, // true = .sass and false = .scss
 //   sourceMap: true
 // }));
+
 app.use(express.static(path.join(__dirname, 'public')));
+
+let clientService = new ClientService();
+
 
 
 app.use('/', indexRouter);
@@ -61,7 +71,7 @@ app.use(function(err, req, res, next) {
 });
 
 //init LightsService and connect to Hue Bridge
-let BridgeUrl = "192.168.1.115";
+let BridgeUrl = "192.168.1.102";
 let BridgeUser = "G2wTDFWTbQnqJ5VfaBfXC5G5fVcBMLim61FK0njf";
 LightsService.BridgeUrl = BridgeUrl;
 LightsService.BridgeUser = BridgeUser;
@@ -75,45 +85,19 @@ let intentManager = new IntentManager();
 intentManager.loadConfig("/rhinoModels/replicator_v0_3.yml");
 
 //add handlers
-const changeLightState = require("./intentHandlers/changeLightState");
+import changeLightState from"./intentHandlers/changeLightState.js";
 intentManager.getIntent("changeLightState").addHandlerArray(changeLightState);
 
-const changeLightStateOff = require("./intentHandlers/changeLightStateOff");
+import changeLightStateOff from"./intentHandlers/changeLightStateOff.js";
 intentManager.getIntent("changeLightStateOff").addHandlerArray(changeLightStateOff);
 
-const lightBrightnessGroup = require("./intentHandlers/lightBrightnessGroup");
+import lightBrightnessGroup from"./intentHandlers/lightBrightnessGroup.js";
 intentManager.getIntent("LightBrightnessGroup").addHandlerArray(lightBrightnessGroup);
 
-const lightBrightnessLight = require("./intentHandlers/lightBrightnessLight");
+import lightBrightnessLight from"./intentHandlers/lightBrightnessLight.js";
 intentManager.getIntent("LightBrightnessLight").addHandlerArray(lightBrightnessLight);
 //init voice command service
 let voiceCommandService = new VoiceCommandService(intentManager);
 
-let clientService = new ClientService();
 
-
-
-
-/*
-picovoice setup
- */
-
-const locationManager = new LocationManager(intentManager);
-
-let bedroom = locationManager.addLocation("bedroom", -1);
-bedroom.addLightGroup("Schlafzimmer");
-const devices = PvRecorder.getAudioDevices();
-// console.log(devices);
-// bedroom.addRecorder(-1);
-// bedroom.start();
-
-let livingroom = locationManager.addLocation("living room", -1);
-livingroom.addLightGroup("Wohnzimmer");
-livingroom.addLight("Stehlampe", ["floor lamp", "floor light", "reading light", "reading lamp"]);
-livingroom.addLight("Esstisch", ["main light", "main light", "ceiling light"]);
-livingroom.addLight("Schreibtisch", ["desk lamp", "desk light"]);
-livingroom.addRecorder(-1);
-livingroom.addLedInterface(12);
-livingroom.start();
-
-module.exports = app;
+export default app;

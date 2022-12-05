@@ -1,6 +1,6 @@
-const IntentHandler = require("./intentHandler");
-const LightsService = require("../services/LightsService");
-const LocationManager = require("../services/LocationManager");
+import IntentHandler from"./intentHandler.js"
+import LightsService from"../services/LightsService.js"
+import LocationManager from"../services/LocationManager.js"
 
 const lightsService = LightsService.getInstance();
 
@@ -77,6 +77,5 @@ h1.setHandlerFunction(function(variables, location, handler){
 })
 changeLightState.push(h1);
 
-
-module.exports = changeLightState;
+export default changeLightState;
 

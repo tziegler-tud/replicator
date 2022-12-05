@@ -1,6 +1,5 @@
-const config = require('../config/db.json');
-const mongoose = require('mongoose');
-
+import config from '../config/db.json' assert { type: 'json' };
+import mongoose from 'mongoose';
 mongoose.set('debug', false);
 
 var opt = {
@@ -14,6 +13,8 @@ var opt = {
 mongoose.connect(config.connectionString,opt);  // use this for remote database
 mongoose.Promise = global.Promise;
 
-module.exports = {
-    Client: require('./clientScheme'),
-};
+import Client from "./clientScheme.js"
+let db = {
+    Client: Client
+}
+export default db;

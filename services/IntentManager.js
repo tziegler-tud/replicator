@@ -1,9 +1,9 @@
-const yaml = require('js-yaml');
-const fs   = require('fs');
+import yaml from 'js-yaml';
+import fs from 'fs';
 
-const Intent = require("./Intent");
+import Intent from "./Intent.js";
 
-class IntentManager {
+export default class IntentManager {
     constructor(){
         this.intents = [];
     }
@@ -103,4 +103,4 @@ var line = function(index, raw, groups){
     return this;
 }
 
-module.exports = IntentManager;
+// module.exports = IntentManager;

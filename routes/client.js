@@ -1,8 +1,9 @@
-var express = require('express');
+import express from 'express';
 var router = express.Router();
 
-const ClientService = require("./ClientService");
+import ClientService from "../services/ClientService.js";
 const clientService = ClientService.getInstance();
+
 
 
 //router for client interaction
@@ -20,4 +21,4 @@ router.post('/register', function(req, res, next) {
         })
 });
 
-module.exports = router;
+export default router

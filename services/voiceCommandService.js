@@ -8,7 +8,7 @@
  * @property slots {Object} dynamic object containing the variables defined by the rhino model. Check model description for docs
  */
 
-class VoiceCommandService {
+export default class VoiceCommandService {
     constructor(intentManager){
         this.intentManager = intentManager;
         this.mutex = false;
@@ -107,4 +107,4 @@ class VoiceCommandService {
     }
 }
 
-module.exports = VoiceCommandService;
+// module.exports = VoiceCommandService;

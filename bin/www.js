@@ -4,9 +4,11 @@
  * Module dependencies.
  */
 
-var app = require('../app');
-var debug = require('debug')('replicator:server');
-var http = require('http');
+import app from '../app.js';
+// var debug = require('debug')('replicator:server');
+import makeDebug from 'debug';
+const debug = makeDebug('replicator:server');
+import http from 'http';
 
 /**
  * Get port from environment and store in Express.
