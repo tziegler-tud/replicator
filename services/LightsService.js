@@ -2,18 +2,20 @@ import https from 'https';
 import http from 'http';
 
 export default class LightsService {
-    constructor(BridgeUrl, BridgeUser){
+    constructor(BridgeUrl, BridgeUser, init){
         this.locations = [];
         this.lights = [];
 
         this.BridgeUrl = BridgeUrl;
         this.BridgeUser = BridgeUser;
-
-        this.init = this.init()
-            .then()
-            .catch(err=> {
-               process.exit();
-            });
+        this.initStarted = false;
+        if(init) {
+            this.startInit();
+        }
+        else {
+            this.init = new Promise(function(resolve, reject){
+            })
+        }
         LightsService.setInstance(this);
     }
     static _instance;
@@ -35,6 +37,7 @@ export default class LightsService {
         if (this._instance) {
             this._instance.BridgeUrl = this._BridgeUrl;
             this._instance.BridgeUser = this._BridgeUser;
+            if(!this._instance.initStarted) this._instance.startInit();
             return this._instance;
         }
 
@@ -46,7 +49,16 @@ export default class LightsService {
         this._instance = instance;
         return this._instance;
     }
-    async init(){
+
+    startInit(){
+        this.initStarted = true;
+        this.init = this.initFunc()
+            .then()
+            .catch(err=> {
+                process.exit();
+            });
+    }
+    async initFunc(){
         let self = this;
         console.log("Initializing LightsService...");
         // this.BridgeUrl = "192.168.1.102";

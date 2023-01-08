@@ -75,7 +75,7 @@ let BridgeUrl = "192.168.1.102";
 let BridgeUser = "G2wTDFWTbQnqJ5VfaBfXC5G5fVcBMLim61FK0njf";
 LightsService.BridgeUrl = BridgeUrl;
 LightsService.BridgeUser = BridgeUser;
-let lightsService = LightsService.createInstance(BridgeUrl, BridgeUser);
+let lightsService = LightsService.createInstance(BridgeUrl, BridgeUser, true);
 
 /*
 intent manager setup

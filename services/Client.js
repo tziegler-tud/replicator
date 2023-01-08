@@ -82,7 +82,7 @@ export default class Client {
         })
     }
     getStatus(){
-        const url = this.url + "/mute";
+        const url = this.url + "/state";
         return new Promise((resolve, reject)=> {
             const options = {
                 method: "GET",
