@@ -82,9 +82,15 @@ intent manager setup
  */
 
 let intentManager = new IntentManager();
-intentManager.loadConfig("/rhinoModels/replicator_v0_3.yml");
+intentManager.loadConfig("/rhinoModels/0_3_1/replicator_v0_3_1.yml");
 
 //add handlers
+
+const ignore = require("./intentHandlers/ignore");
+intentManager.getIntent("Ignore").addHandlerArray(ignore);
+
+const changeLightState = require("./intentHandlers/changeLightState");
+
 import changeLightState from"./intentHandlers/changeLightState.js";
 intentManager.getIntent("changeLightState").addHandlerArray(changeLightState);
 
@@ -96,6 +102,9 @@ intentManager.getIntent("LightBrightnessGroup").addHandlerArray(lightBrightnessG
 
 import lightBrightnessLight from"./intentHandlers/lightBrightnessLight.js";
 intentManager.getIntent("LightBrightnessLight").addHandlerArray(lightBrightnessLight);
+
+const lightScenes = require("./intentHandlers/lightScenes");
+intentManager.getIntent("LightScenes").addHandlerArray(lightScenes);
 //init voice command service
 let voiceCommandService = new VoiceCommandService(intentManager);
 

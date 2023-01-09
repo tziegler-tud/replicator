@@ -13,6 +13,7 @@
     "@picovoice/picovoice-node": "^2.1.8",
     "@picovoice/porcupine-node": "^2.1.7",
     "@picovoice/pvrecorder-node": "^1.1.0",
+    "@picovoice/rhino-node": "^2.1.10",
     "cookie-parser": "~1.4.4",
     "debug": "~4.3.4",
     "express": "~4.18.2",

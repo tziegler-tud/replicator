@@ -1,11 +1,10 @@
 import { Picovoice } from "@picovoice/picovoice-node";
 import PvRecorder from "@picovoice/pvrecorder-node";
 
-import picoVoiceConfig from"../config/picovoice-pi.json" assert { type: 'json' };
 import VoiceCommandService from "./voiceCommandService.js";
 // import LedInterface from "./LedInterface.js");
-
 import LightsService from "./LightsService.js";
+
 
 /**
  * @typedef {Object} LightGroupObject
@@ -62,12 +61,12 @@ export default class Location {
         if(recorderDeviceIndex === undefined) {
             recorderDeviceIndex = -1;
         }
-        const keywordCallback = function (keyword) {
+        this.keywordCallback = function (keyword) {
             console.log(`wake word detected for location: ` + self.identifier);
             self.voiceCommandService.processKeyword(keyword, self);
         };
 
-        const inferenceCallback = function (inference) {
+        this.inferenceCallback = function (inference) {
             console.log("bind test: " + self.identifier)
             console.log("Inference:");
             console.log(JSON.stringify(inference, null, 4));
@@ -76,15 +75,36 @@ export default class Location {
             self.voiceCommandService.processCommand(inference, self);
 
         };
-        //initalize new picovoice rt-obj
-        this.picovoice= new Picovoice(
+        // initalize new picovoice rt-obj
+        // this.picovoice= new Picovoice(
+        //     self.picoVoiceConfig.accessKey,
+        //     self.picoVoiceConfig.keywordArgument,
+        //     keywordCallback,
+        //     self.picoVoiceConfig.contextPath,
+        //     inferenceCallback,
+        //     self.picoVoiceConfig.porcupineSensitivity,
+        // );
+        this.porcupine = new Porcupine(
             self.picoVoiceConfig.accessKey,
             self.picoVoiceConfig.keywordArgument,
-            keywordCallback,
-            self.picoVoiceConfig.contextPath,
-            inferenceCallback
+            self.picoVoiceConfig.porcupineSensitivity,
         );
-        this.recorder = new PvRecorder(recorderDeviceIndex, this.picovoice.frameLength);
+
+        this.rhino = new Rhino(
+            self.picoVoiceConfig.accessKey,
+            self.picoVoiceConfig.contextPath,
+            0.5,
+        );
+        this._frameLength = 512;
+        this._sampleRate = 16000;
+        this._version = "2.1.0";
+
+        this._porcupineVersion = this.porcupine.version;
+        this._rhinoVersion = this.rhino.version;
+        this._contextInfo = this.rhino.getContextInfo();
+
+        this.isWakeWordDetected = false;
+        this.recorder = new PvRecorder(recorderDeviceIndex, this._frameLength);
     }
 
     start() {
@@ -99,8 +119,27 @@ export default class Location {
                     })
             }
             while (1) {
-                const frames = await self.recorder.read();
-                self.picovoice.process(frames);
+                const frame = await self.recorder.read();
+                if (self.porcupine === null || self.rhino === null) {
+                    throw new Error(
+                        "Attempting to process but resources have been released."
+                    );
+                }
+                if (!self.isWakeWordDetected) {
+                    const keywordIndex = self.porcupine.process(frame);
+
+                    if (keywordIndex !== -1) {
+                        self.isWakeWordDetected = true;
+                        self.keywordCallback(keywordIndex);
+                    }
+                } else {
+                    const isFinalized = self.rhino.process(frame);
+
+                    if (isFinalized) {
+                        self.isWakeWordDetected = false;
+                        self.inferenceCallback(self.rhino.getInference());
+                    }
+                }
             }
         }
         if(self.recorder){

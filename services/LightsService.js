@@ -409,6 +409,67 @@ export default class LightsService {
             })
     }
 
+    /**
+     * sets a groups state
+     * @param groupId {Integer}
+     * @param sceneName {string} name of the scene to select. Must match a scene name that is known to the hue bridge
+     */
+    setLightGroupScene(groupId, sceneName) {
+        let self = this;
+        return new Promise(function(resolve, reject){
+            self.BridgeApi.getScenes()
+                .then(scenes => {
+                    //flatten object into array
+                    let scenesArray = [];
+                    Object.keys(scenes).forEach(key => {
+                        let oj = scenes[key];
+                        oj.id = key;
+                        scenesArray.push(oj);
+                    })
+                    //check if scene exists
+                    let scene = scenesArray.find(s => (s.name === sceneName && s.type === "GroupScene" && s.group === groupId));
+                    if(scene !== undefined) {
+                        self.BridgeApi.setGroupScene(groupId, {scene: scene.id})
+                            .then(result => {
+                                resolve();
+                            })
+                            .catch(e => {
+                                reject(e)
+                            })
+                    }
+                    else {
+                        reject("Scene not found: "+ sceneName);
+                    }
+
+                })
+                .catch(err => {
+                    console.error(err);
+                    reject()
+                })
+        })
+
+    }
+
+    /**
+     *
+     * sets a groups state by group name
+     *
+     * @param groupName {string} group name as assigned by hue bridge
+     * @param sceneName {string} name of the scene to select, as it is known by the hue bridge
+     */
+    setLightGroupSceneByName(groupName, sceneName) {
+        //find group
+        this.getLightGroupIdByName(groupName)
+            .then(id => {
+                if(id){
+                    this.setLightGroupScene(id, sceneName);
+                }
+            })
+            .catch(e => {
+                return false;
+            })
+    }
+
 }
 
 LightsService.STATES = {
@@ -558,6 +619,12 @@ class BridgeApi {
 
     setGroupState(groupId, state) {
         return this.put("groups/"+groupId + "/action", state);
+    }
+    getScenes(){
+        return this.get("scenes");
+    }
+    setGroupScene(groupId, sceneId) {
+        return this.put("groups/"+groupId + "/action", sceneId)
     }
 }
 
