@@ -1,6 +1,6 @@
 import IntentHandler from"./intentHandler.js"
 import LightsService from"../services/LightsService.js"
-import LocationManager from"../services/LocationManager.js"
+import LocationManager from"../managers/LocationManager.js"
 
 const lightsService = LightsService.getInstance();
 
@@ -21,7 +21,7 @@ stateAll.setHandlerFunction(
         let newState = variables.state;
         //change state of lights in current location
         if(variables.location){
-            location = LocationManager.getInstance().getLocation(variables.location);
+            location = LocationManager.getByVoiceAlias(variables.location);
             if(!location) {
                 console.warn("Location " + variables.location + " not found. Aborting command.")
                 return false;
@@ -42,7 +42,7 @@ location.setHandlerFunction(function(variables, location, handler){
     //toggle state of lights in the given location
     if(variables.location){
         //get the location
-        location = LocationManager.getInstance().getLocation(variables.location);
+        location = LocationManager.getByVoiceAlias(variables.location);
     }
     location.lightGroups.forEach(function(lightGroup){
         lightsService.toggleLightGroupByName(lightGroup.name);
@@ -61,7 +61,7 @@ h1.setHandlerFunction(function(variables, location, handler){
 
     }
     if(variables.location) {
-        location = LocationManager.getInstance().getLocation(variables.location);
+        location = LocationManager.getByVoiceAlias(variables.location);
     }
     let lights = location.getLightsByAlias(variables.lightSelect)
     if(variables.state) {

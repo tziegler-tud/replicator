@@ -1,46 +1,68 @@
 import db from '../schemes/mongo.js';
-const dbClient = db.Client;
+const DbClient = db.Client;
 //
 import Client from "./Client.js";
+import Service from "./Service.js";
+import CommunicationService from "./CommunicationService.js"
+import voiceCommandService from "./voiceCommandService.js"
+
+import ApiError from "../helpers/ApiError.js";
+import tcpResponse from "../helpers/tcpResponseGenerator.js"
+import communicationService from "./CommunicationService.js";
 
 //Handles client registration and data processing
 //Singleton
 
 
-export default class ClientService {
-    constructor(){
+class ClientService extends Service{
+    constructor(init=false){
+        super();
+        let self = this;
+
         this.clients = [];
-        ClientService.setInstance(this);
         return this;
     }
-    static _instance;
 
-    static getInstance() {
-        if (this._instance) {
-            return this._instance;
-        }
-        else {
-            return this.createInstance();
-        }
-    }
-    static createInstance() {
-        if (this._instance) {
-            return this._instance;
-        }
-
-        this._instance = new ClientService();
-        return this._instance;
+    initFunc(args) {
+        let self = this;
+        return new Promise(function(resolve, reject){
+            console.log("Initializing ClientService...");
+            let loader = self.loadKnownClients();
+        })
     }
 
-    static setInstance(instance) {
-        this._instance = instance;
-        return this._instance;
+    getAllClients() {
+        let self = this;
+        return new Promise(function(resolve, reject){
+            //return all clients
+            resolve(self.clients)
+        })
+    }
+
+    /**
+     *
+     * @param id
+     * @returns {}
+     */
+    getById(id){
+        return DbClient.findById(id)
+    }
+
+    /**
+     *
+     * @param identifier
+     * @returns {}
+     */
+    getByIdentifier(identifier){
+        return DbClient.find({identifier: identifier})
     }
 
     registerClient(clientInformation={}){
         //add a new client
+        let self = this;
+
         const identifier = clientInformation.identifier;
-        const url = clientInformation.url;
+        const url = clientInformation.url ? clientInformation.url : clientInformation.requestUrl;
         const versionData = clientInformation.versionData;
 
         const defaultSettings = {
@@ -59,34 +81,145 @@ export default class ClientService {
             skills: skills,
         }
         let client = new Client(clientParams);
+
         return new Promise((resolve,reject) => {
             client.saveToDb()
-                .then(result => {
-                    resolve(client);
+                .then(client => {
+                    //client saved successfully. Add to runtime
+                    self.clients.push(client);
+                    const response = {
+                        clientId: client.clientId,
+                        client: client,
+                    }
+                    resolve(response);
                 })
                 .catch(err => {
-                    reject(err);
+                    reject(err)
                 })
         })
     }
 
-    loadKnownClients(){
-        //retrieve clients from db
-        dbClient.find()
-            .then(clients => {
-                console.log("found "+ clients.length + " known clients in database.")
-                clients.forEach((client)=> {
-                    this.loadClientFromDb(client);
-                })
-            })
+    connectClient(clientInformation){
+        //connect a client that is already known
+        let self = this;
+
+        const identifier = clientInformation.identifier;
+        const clientId = clientInformation.clientId;
+        const url = clientInformation.url ? clientInformation.url : clientInformation.requestUrl;
+        const versionData = clientInformation.versionData;
+        const skills = clientInformation.skills;
+
+        return new Promise((resolve,reject) => {
+            //check known clients for identifier
+            let client = self.findOneById(clientId); //try id
+            if(client) {
+                clientInformation.settings = clientInformation.settings ? clientInformation.settings : {};
+                client.settings = Object.assign(client.settings, clientInformation.settings);
+                client.setConnected(); //mark as connected
+                const response = {
+                    clientId: client.clientId,
+                    status: "connected",
+                    client: client,
+                }
+                resolve(response);
+            }
+            else {
+                //client not found.
+                const reason = new ApiError("Client not known.", 401, "UnauthorizedError");
+                reject(reason)
+            }
+        })
     }
+
+    /**
+     *
+     * @param id {ObjectId} client database id
+     * @param force {Boolean} allow deletion if no matching runtime object was found
+     */
+    removeClient(id, force=false){
+        let self = this;
+        return new Promise(function(resolve, reject){
+            //find client in runtime object
+            let rtClientIndex = this.clients.findIndex(client=>client.clientId.toString() === id.toString());
+            if(rtClientIndex > -1){
+                //remove from rt clients
+                this.clients.splice(rtClientIndex, 1);
+                //remove from db
+                DbClient.findByIdAndDelete(id)
+                    .then(result => {
+                        resolve(result)
+                    })
+                    .catch(err => {
+                        reject(err)
+                    })
+            }
+            else {
+                //runtime client not found. Trying Database lookup to see if its there
+                DbClient.findById(id)
+                    .then(result => {
+                        //client found in Db, but not in rt object. This is strange, and most likely unwanted. Only remove if force option is set
+                        if(force){
+                            DbClient.findByIdAndDelete(id)
+                                .then(result => {
+                                    resolve(result)
+                                })
+                                .catch(err => {
+                                    reject(err)
+                                })
+                        }
+                    })
+                    .catch(err => {
+                        reject(err);
+                    })
+            }
+        })
+    }
+
+    loadKnownClients(){
+        let self = this;
+        return new Promise(function(resolve, reject){
+            //retrieve clients from db
+            DbClient.find()
+                .then(dbClients => {
+                    console.log("found "+ dbClients.length + " known clients in database.")
+                    let clientTests = [];
+                    dbClients.forEach((dbClient)=> {
+                        clientTests.push(self.loadClientFromDb(dbClient).catch(function(clientTestResult){
+                            //client.test() failed, for whatever reason. Add the client anyway, but set state to error
+                            clientTestResult.client.error = clientTestResult.error;
+                            return clientTestResult;
+                        }));
+                    })
+                    Promise.all(clientTests)
+                        .then(function(clientTestResults){
+                            //add clients to runtime client list
+                            let clientsToAdd = clientTestResults.map(result => {return result.client})
+                            self.clients = self.clients.concat(clientsToAdd);
+                        })
+                        .catch(err => {
+                            throw new Error(err);
+                        })
+                })
+        })
+    }
+
     loadClientFromDb(dbClient){
-        let client = new Client(dbClient);
-        //test connection
-        client.test()
-            .then(result=> {
-                this.clients.push(client)
-            })
+        let self = this;
+        return new Promise(function(resolve, reject){
+            let client = new Client(dbClient, dbClient._id);
+            //test connection
+            client.test()
+                .then(result=> {
+                    let state = result ? "connected" : "disconnected";
+                    //result holds the test result. Note that Client.test() resolves regardless of the client connection status.
+                    resolve({state: state, client: client, error: undefined})
+                })
+                .catch(err => {
+                    //request failed with error
+                    //most likely a problem with node fetch. Check Client.test() function code for errors.
+                    reject({state: "error", client: client, error: err})
+                })
+        })
     }
 
     saveClientsToDb(){
@@ -102,6 +235,63 @@ export default class ClientService {
                 console.error("Failed to save clients to db.");
             })
     }
+
+    findOneByIdentfier(identifier) {
+        return this.clients.find(client => client.identifier.toString() === identifier.toString())
+    }
+
+    findOneById(id) {
+        return this.clients.find(function(client){
+            return client.clientId.toString() === id.toString()
+        })
+    }
+
+    processClientCommand(client, commandData, emitter){
+        return new Promise(function(resolve, reject){
+            console.log("processing client command:");
+            const command = commandData.command;
+            const commandClientId = commandData.clientId;
+            if(!command) {
+                let response = {
+                    err: undefined,
+                    response: tcpResponse.tpcResponse.ARGUMENTS.MISSING,
+                    data: {},
+                }
+                reject(response);
+            }
+            //retrieve client
+            if(!client){
+                //no client connected, connections seems corrupted.
+                //send connection fail and kill channel
+                let response = {
+                    err: undefined,
+                    response: tcpResponse.tpcResponse.CONNECTION.FAIL,
+                    data: {},
+                }
+                reject(response);
+            }
+
+            if(!client.clientId === commandClientId) {
+                //missmatch. Something is wrong
+                let response = {
+                    err: undefined,
+                    response: tcpResponse.tpcResponse.ARGUMENTS.INVALIDCLIENTID,
+                    data: {},
+                }
+                reject(response);
+            }
+            else {
+                //client found.
+                //forward to voiceCommandService
+                client.processCommand(command, emitter);
+            }
+        })
+    }
+
+    discoverClient(data) {
+        return communicationService.discoverClient(data);
+    }
+
 }
 
-// module.exports = ClientService;
+export default new ClientService();

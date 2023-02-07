@@ -1,4 +1,4 @@
-function webErrorHandler(err, req, res, next) {
+export function webErrorHandler(err, req, res, next) {
     if (typeof (err) === 'string') {
         // custom application error
         return res.status(400).json({ message: err });
@@ -43,7 +43,7 @@ function webErrorHandler(err, req, res, next) {
     });
 }
 
-function apiErrorHandler(err, req, res, next) {
+export function apiErrorHandler(err, req, res, next) {
     if (typeof (err) === 'string') {
         // custom application error
         return res.status(400).json({message: err});
@@ -72,7 +72,3 @@ function apiErrorHandler(err, req, res, next) {
     // default to 500 server error
     res.status(err.status || 500).json({message: err.message});
 }
-
-module.exports = {
-    webErrorHandler,
-    apiErrorHandler};

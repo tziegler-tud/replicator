@@ -1,4 +1,6 @@
-const IntentHandler = require("./intentHandler");
+import IntentHandler from "./intentHandler.js";
+
+
 
 var ignore = []
 
@@ -10,5 +12,5 @@ h1.setHandlerFunction(function(variables, location, handler){
 ignore.push(h1);
 
 
-module.exports = ignore;
+export default ignore;
 

@@ -1,117 +1,373 @@
 import https from 'https';
 import http from 'http';
+import Service from "./Service.js";
+import db from '../schemes/mongo.js';
+const DbLight = db.Light;
+const DbLightGroup = db.LightGroup;
+const DbLightScene = db.LightScene;
 
-export default class LightsService {
-    constructor(BridgeUrl, BridgeUser, init){
-        this.locations = [];
+class LightsService extends Service {
+    constructor(){
+        super();
+        this.groups = [];
         this.lights = [];
-
-        this.BridgeUrl = BridgeUrl;
-        this.BridgeUser = BridgeUser;
-        this.initStarted = false;
-        if(init) {
-            this.startInit();
-        }
-        else {
-            this.init = new Promise(function(resolve, reject){
-            })
-        }
-        LightsService.setInstance(this);
-    }
-    static _instance;
-    static _BridgeUrl;
-    static _BridgeUser;
-
-    static getInstance() {
-        if (this._instance) {
-            return this._instance;
-        }
-        else {
-            this._instance = new LightsService(this._BridgeUrl, this._BridgeUser);
-            return this._instance;
-        }
-    }
-    static createInstance(BridgeUrl, BridgeUser) {
-        this._BridgeUrl = (BridgeUrl === undefined) ? this._BridgeUrl : BridgeUrl;
-        this._BridgeUser = (BridgeUser === undefined) ? this._BridgeUser : BridgeUser;
-        if (this._instance) {
-            this._instance.BridgeUrl = this._BridgeUrl;
-            this._instance.BridgeUser = this._BridgeUser;
-            if(!this._instance.initStarted) this._instance.startInit();
-            return this._instance;
-        }
-
-        this._instance = new LightsService(this._BridgeUrl, this._BridgeUser);
-        return this._instance;
+        this.scenes = [];
     }
 
-    static setInstance(instance) {
-        this._instance = instance;
-        return this._instance;
-    }
-
-    startInit(){
-        this.initStarted = true;
-        this.init = this.initFunc()
-            .then()
-            .catch(err=> {
-                process.exit();
-            });
-    }
-    async initFunc(){
+    initFunc(){
         let self = this;
         console.log("Initializing LightsService...");
-        // this.BridgeUrl = "192.168.1.102";
-        this.Bridge = undefined;
-        //try to reach the bridge
-        try {
-            this.Bridge = await verifyBridge(self.BridgeUrl);
-        }
-        catch(e){
-            console.warn("Failed to reach Hue Bridge via default IP address. Trying Web lookup...")
-            //try to find Bridge Ip Address
-            try {
-                let discoveredIpAddress = await discoverBridgeIp();
-                console.log("Bridge found! IP Adress is: " + discoveredIpAddress);
-                self.BridgeUrl = discoveredIpAddress;
-                verifyBridge(self.BridgeUrl)
-                    .then(result => {
-                        self.Bridge = result;
-                    })
-                    .catch(err => {
-                        throw new Error(e);
-                    })
-            }
-            catch(err){
-                console.warn("Failed to find Hue Bridge. Is your Bridge connected?");
-                throw new Error(e);
-            }
-
-        }
-
-        //check user auth
-        await authBridge(self.BridgeUrl, self.BridgeUser);
-        this.BridgeApi = new BridgeApi(this.BridgeUrl, this.BridgeUser);
-        //find lights
-        this.lights = await this.BridgeApi.get("lights");
-        this.groups = await this.BridgeApi.get("groups");
-        // this.groupsArray = await this.BridgeApi.getGroupsArray();
-        this.scenes = await this.BridgeApi.get("scenes");
-        this.sensors = await this.BridgeApi.get("sensors");
-
-        console.log("LightsService initialized successfully. Bridge IP: " + this.BridgeUrl);
-        return(this);
+        return new Promise(function(resolve, reject){
+            resolve();
+        })
     }
 
-    // getLightGroupByName(groupName) {
-    //     let self = this;
-    //     return new Promise(function(resolve, reject){
-    //         self.init.then(function(){
-    //             let result = self.groupsArray.find(group => group.group.name === groupName);
-    //             resolve(result);
-    //         })
-    //     })
-    // }
+    /**
+     *
+     * @param light {Light}
+     * @returns {Promise<unknown>}
+     */
+    addLight(light) {
+        let self = this;
+        return new Promise(function(resolve, reject){
+            //check if a matching light is present in db
+            DbLight.findOne({uniqueId: light.uniqueId})
+                .then(settings => {
+                    if(settings) {
+                        light.loadSettings(settings);
+                        self.lights.push(light);
+                        resolve(light);
+                    }
+                    else {
+                        //create a new light and save to db
+                        const lightSettings = {
+                            uniqueId: light.uniqueId,
+                            identifier: light.identifier,
+                        }
+                        let dbLight = new DbLight(lightSettings);
+                        dbLight.save()
+                            .then(result => {
+                                light.loadSettings(result)
+                                self.lights.push(light);
+                                resolve(light)
+                            })
+                    }
+                })
+        })
+    }
+
+    /**
+     *
+     * @param group
+     * @returns {Promise<unknown>}
+     */
+    addGroup(group){
+        let self = this;
+        return new Promise(function(resolve, reject){
+            //check if a matching group is present in db
+            DbLightGroup.findOne({uniqueId: group.uniqueId})
+                .then(settings => {
+                    if(settings) {
+                        group.loadSettings(settings);
+                        self.groups.push(group);
+                        resolve(group);
+                    }
+                    else {
+                        //create a new group and save to db
+                        const groupSettings = {
+                            uniqueId: group.uniqueId,
+                            identifier: group.identifier,
+                            lights: [],
+                        }
+                        let dbLightGroup = new DbLightGroup(groupSettings);
+                        dbLightGroup.save()
+                            .then(result => {
+                                group.loadSettings(result)
+                                self.groups.push(group);
+                                resolve(group)
+                            })
+                    }
+                })
+        })
+    }
+
+    /**
+     *
+     * @param scene {LightScene}
+     * @returns {Promise<unknown>}
+     */
+    addScene(scene){
+        let self = this;
+        return new Promise(function(resolve, reject){
+            //check if a matching group is present in db
+            DbLightScene.findOne({uniqueId: scene.uniqueId})
+                .then(settings => {
+                    if(settings) {
+                        scene.loadSettings(settings);
+                        self.scenes.push(scene);
+                        resolve(scene);
+                    }
+                    else {
+                        //create a new group and save to db
+                        const sceneSettings = {
+                            uniqueId: scene.uniqueId,
+                            identifier: scene.identifier,
+                        }
+                        let dbLightScene = new DbLightScene(sceneSettings);
+                        dbLightScene.save()
+                            .then(result => {
+                                scene.loadSettings(result)
+                                self.scenes.push(scene);
+                                resolve(scene)
+                            })
+                    }
+                })
+        })
+    }
+
+    addLightsToGroup({groupUniqueId, lightUniqueIdArray}) {
+        let self = this;
+        return new Promise(function(resolve, reject){
+            const group = self.findGroupByUniqueId(groupUniqueId);
+            const lights = [];
+
+            let changed = false;
+
+            if(!group) {
+                //group not found.
+                reject("Group not found.");
+            }
+
+            lightUniqueIdArray.forEach(lightUniqueId => {
+                let light = self.findLightByUniqueId(lightUniqueId);
+                if (!light) reject("Light not found");
+                // check if light is already in group
+                const inGroup = group.lights.find(l => {
+                    return l.toString() === light.id.toString();
+                });
+                if (inGroup){
+                }
+                else {
+                    changed = true;
+                    group.lights.push(light.id);
+                }
+            });
+            if(changed){
+                group.saveToDb()
+                    .then(result => {
+                        resolve(result);
+                    })
+                    .catch(err => {
+                        reject(err)
+                    })
+            }
+            else resolve();
+        })
+    }
+
+    addLightToGroup({groupUniqueId, lightUniqueId}) {
+        let self = this;
+        return new Promise(function(resolve, reject){
+            const group = self.findGroupByUniqueId(groupUniqueId);
+            const light = self.findLightByUniqueId(lightUniqueId);
+            if(!group) {
+                //group not found.
+                reject("Group not found.");
+            }
+            if (!light) reject("Light not found");
+
+            // check if light is already in group
+            const inGroup = group.lights.find(l => {
+                return l._id.toString() === light._id.toString();
+            });
+            if (inGroup){
+                resolve(group);
+            }
+            else {
+                group.lights.push(light);
+                group.save()
+                    .then(result => {
+                        resolve(result);
+                    })
+                    .catch(err => {
+                        reject(err)
+                    })
+            }
+        })
+    }
+
+    removeLightFromGroup(groupId, lightId) {
+        let self = this;
+        return new Promise(function(resolve, reject){
+            const group = self.findGroupById(groupId);
+            const light = self.findLightById(lightId);
+            if(!group) {
+                //group not found.
+                reject("Group not found.");
+            }
+            if (!light) reject("Light not found");
+
+            // check if light is already in group
+            const inGroup = group.lights.indexOf(l => {
+                return l.id.toString() === light.id.toString();
+            });
+            if (inGroup > -1){
+                group.lights.splice(inGroup, 1);
+                group.save()
+                    .then(result => {
+                        resolve(result);
+                    })
+                    .catch(err => {
+                        reject(err);
+                    })
+            }
+            else {
+                reject("Light is not in group")
+            }
+        })
+    }
+
+    addScenesToGroup({groupUniqueId, sceneUniqueIdArray}) {
+        let self = this;
+        return new Promise(function(resolve, reject){
+            const group = self.findGroupByUniqueId(groupUniqueId);
+            const lights = [];
+
+            let changed = false;
+
+            if(!group) {
+                //group not found.
+                reject("Group not found.");
+            }
+
+            sceneUniqueIdArray.forEach(sceneUniqueId => {
+                let scene = self.findSceneByUniqueId(sceneUniqueId);
+                if (!scene) reject("Scene not found");
+                // check if scene is already in group
+                const inGroup = group.scenes.find(s => {
+                    return s.toString() === scene.id.toString();
+                });
+                if (inGroup){
+                }
+                else {
+                    changed = true;
+                    group.scenes.push(scene.id);
+                }
+            });
+            if(changed){
+                group.saveToDb()
+                    .then(result => {
+                        resolve(result);
+                    })
+                    .catch(err => {
+                        reject(err)
+                    })
+            }
+            else resolve();
+        })
+    }
+
+    getLights(){
+        let self = this;
+        return new Promise(function(resolve, reject){
+            let p = [];
+            self.lights.forEach(light => {
+                p.push(light.get());
+            })
+            Promise.all(p)
+                .then(result => {
+                    resolve(result);
+                })
+                .catch(err => {
+                    reject(err)
+                })
+        })
+
+    }
+
+    getGroups(){
+        let self = this;
+        return new Promise(function(resolve, reject){
+            let p = [];
+            self.groups.forEach(light => {
+                p.push(light.get());
+            })
+            Promise.all(p)
+                .then(result => {
+                    resolve(result);
+                })
+                .catch(err => {
+                    reject(err)
+                })
+        })
+    }
+
+    getScenes(){
+        let self = this;
+        return new Promise(function(resolve, reject){
+            let p = [];
+            self.scenes.forEach(light => {
+                p.push(light.get());
+            })
+            Promise.all(p)
+                .then(result => {
+                    resolve(result);
+                })
+                .catch(err => {
+                    reject(err)
+                })
+        })
+    }
+
+    async getGroupById(id=""){
+        const group = this.groups.find(group => group.id.toString() === id.toString());
+        return group.get();
+    }
+
+    async getGroupByUniqueId(uniqueId){
+        const group = this.groups.find(group => group.uniqueId === uniqueId);
+        return group.get();
+    }
+
+    async getLightById(id){
+        return this.findLightById(id).get();
+
+    }
+    async getLightByUniqueId(uniqueId){
+        return this.findLightByUniqueId(uniqueId).get();
+    }
+
+    async getSceneById(id=""){
+        const scene = this.scenes.find(scene => scene.id.toString() === id.toString());
+        return scene.get();
+    }
+
+    async getSceneByUniqueId(uniqueId){
+        const scene = this.scenes.find(scene => scene.uniqueId === uniqueId);
+        return scene.get();
+    }
+
+    findGroupById(id=""){
+        return this.groups.find(group => group.id.toString() === id.toString());
+    }
+
+    findGroupByUniqueId(uniqueId){
+        return this.groups.find(group => group.uniqueId === uniqueId);
+    }
+
+    findLightById(id){
+        return this.lights.find(light => light.id.toString() === id.toString());
+    }
+    findLightByUniqueId(uniqueId){
+        return this.lights.find(light => light.uniqueId === uniqueId);
+    }
+
+    findSceneById(id){
+        return this.scenes.find(scene => scene.id.toString() === id.toString());
+    }
+    findSceneByUniqueId(uniqueId){
+        return this.scenes.find(scene => scene.uniqueId === uniqueId);
+    }
 
     /**
      *
@@ -154,17 +410,47 @@ export default class LightsService {
     /**
      *
      * @param lightId {number}
+     * @param newState {Object}
+     */
+    setLightProperty(lightId, newState) {
+        let self = this;
+        return new Promise(function (resolve, reject) {
+            self.init.then(function () {
+                //get light
+                let light = self.findLightById(lightId);
+                light.setState(newState)
+                    .then(result => {
+                        resolve(result)
+                    })
+                    .catch(err => {
+                        reject(err)
+                    })
+            })
+        });
+    }
+
+
+    /**
+     *
+     * @param lightId {number}
      * @param newState {Boolean}
      */
     setLightState(lightId, newState) {
+        let self = this;
         let state = parseState(newState);
-        this.BridgeApi.setLightState(lightId, {on: state})
-            .then(result => {
-
+        return new Promise(function (resolve, reject) {
+            self.init.then(function () {
+                //get light
+                let light = self.findLightById(lightId);
+                light.onOff(state)
+                    .then(result => {
+                        resolve(result)
+                    })
+                    .catch(err => {
+                        reject(err)
+                    })
             })
-            .catch(e => {
-                return false;
-            })
+        });
     }
 
     /**
@@ -492,334 +778,11 @@ class location {
     }
 }
 
-class BridgeApi {
-    constructor(url, user){
-        this.url = url;
-        this.user = user;
-    }
-    get(path){
-        let self = this;
-        return new Promise(function(resolve, reject){
-            let httpUrl = "http://" + self.url + "/api/" + self.user + "/" + path;
-            http.get(httpUrl, res => {
-                const { statusCode } = res;
-                const contentType = res.headers['content-type'];
-
-                let error;
-                // Any 2xx status code signals a successful response but
-                // here we're only checking for 200.
-                if (statusCode !== 200) {
-                    error = new Error('Request Failed.\n' +
-                        `Status Code: ${statusCode}`);
-                } else if (!/^application\/json/.test(contentType)) {
-                    error = new Error('Invalid content-type.\n' +
-                        `Expected application/json but received ${contentType}`);
-                }
-                if (error) {
-                    console.error(error.message);
-                    // Consume response data to free up memory
-                    res.resume();
-                    reject(e);
-                }
-
-                res.setEncoding('utf8');
-                let rawData = '';
-                res.on('data', (chunk) => { rawData += chunk; });
-                res.on('end', () => {
-                    try {
-                        const parsedData = JSON.parse(rawData);
-                        resolve(parsedData);
-                    } catch (e) {
-                        console.error(e.message);
-                        reject(e);
-                    }
-                });
-            }).on('error', (e) => {
-                console.error(`Got error: ${e.message}`);
-                reject(e);
-            });
-        })
-    }
-    post(path, data){
-        let self = this;
-        return new Promise(function(resolve, reject){
-            let reqData = JSON.stringify(data);
-            let options = {method: "POST"}
-            const req = http.request("http://" + self.url + "/api/" + user + "/" + path, options,(res) => {
-                console.log(`STATUS: ${res.statusCode}`);
-                console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
-                res.setEncoding('utf8');
-                res.on('data', (chunk) => {
-                    console.log(`BODY: ${chunk}`);
-                });
-                res.on('end', () => {
-                    console.log('No more data in response.');
-                });
-            });
-
-            req.on('error', (e) => {
-                console.error(`problem with request: ${e.message}`);
-            });
-            // Write data to request body
-            req.write(reqData);
-            req.end();
-        })
-    }
-    put(path, data){
-        let self = this;
-        return new Promise(function(resolve, reject){
-            let reqData = JSON.stringify(data);
-            let options = {method: "PUT"}
-            const req = http.request("http://" + self.url + "/api/" + self.user + "/" + path, options,(res) => {
-                console.log(`STATUS: ${res.statusCode}`);
-                console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
-                res.setEncoding('utf8');
-                res.on('data', (chunk) => {
-                    console.log(`BODY: ${chunk}`);
-                });
-                res.on('end', () => {
-                    console.log('No more data in response.');
-                });
-            });
-
-            req.on('error', (e) => {
-                console.error(`problem with request: ${e.message}`);
-            });
-            // Write data to request body
-            req.write(reqData);
-            req.end();
-        })
-    }
-    getGroupsArray(){
-        let self = this;
-        return new Promise(function(resolve, reject) {
-            self.get("groups")
-                .then(groupsObject => {
-                    let groupsArray = [];
-                    Object.keys(groupsObject).forEach(function (key) {
-                        groupsArray.push({id: key, group: groupsObject[key]});
-                    })
-                    resolve(groupsArray);
-                })
-                .catch(e => {
-                    reject(e);
-                })
-        })
-    }
-    getLightState(lightId) {
-        return this.get("lights/"+lightId);
-    }
-    setLightState(lightId, state) {
-        return this.put("lights/"+lightId + "/state", state);
-    }
-
-    getGroupState(groupId) {
-        return this.get("groups/"+groupId);
-    }
-
-    setGroupState(groupId, state) {
-        return this.put("groups/"+groupId + "/action", state);
-    }
-    getScenes(){
-        return this.get("scenes");
-    }
-    setGroupScene(groupId, sceneId) {
-        return this.put("groups/"+groupId + "/action", sceneId)
-    }
-}
-
-function verifyBridge(url){
-    return new Promise(function(resolve, reject){
-        httpGet(url + "/api/0/config")
-            .then(result => {
-                //successfull. Return bridge info
-                console.log("Hue Bridge discovered successfully.")
-                resolve(result);
-            })
-            .catch(error => {
-                console.log("Failed to find Hue Bridge.")
-                reject(error);
-            })
-    })
-}
-
-function authBridge(bridgeUrl, bridgeUser){
-    return new Promise(function(resolve, reject){
-        httpGet(bridgeUrl + "/api/" + bridgeUser)
-            .then(result => {
-                //successfull.
-                console.log("authorization at Hue Bridge successful.")
-                resolve(result);
-            })
-            .catch(error => {
-                console.log("Failed to authorize at Hue Bridge.")
-                reject(error);
-            })
-    })
-}
-
-
-function getBridgeLights(bridgeUrl, bridgeUser){
-    return new Promise(function(resolve, reject){
-        httpGet(bridgeUrl + "/api/" + bridgeUser + "/lights")
-            .then(result => {
-                resolve(result);
-            })
-            .catch(error => {
-                reject(error);
-            })
-    })
-}
-
-function discoverBridgeIp(){
-    return new Promise(function(resolve, reject){
-        httpsGet("discovery.meethue.com",)
-            .then(result=>{
-                if(result[0].internalipaddress) {
-                    resolve(result[0].internalipaddress);
-                }
-                else reject()
-            })
-            .catch(e=> reject(e))
-    })
-}
-
-function httpsGet(url){
-    return new Promise(function(resolve, reject){
-        https.get("https://" + url, res => {
-            const { statusCode } = res;
-            const contentType = res.headers['content-type'];
-
-            let error;
-            // Any 2xx status code signals a successful response but
-            // here we're only checking for 200.
-            if (statusCode !== 200) {
-                error = new Error('Request Failed.\n' +
-                    `Status Code: ${statusCode}`);
-            } else if (!/^application\/json/.test(contentType)) {
-                error = new Error('Invalid content-type.\n' +
-                    `Expected application/json but received ${contentType}`);
-            }
-            if (error) {
-                console.error(error.message);
-                // Consume response data to free up memory
-                res.resume();
-                reject(e);
-            }
-
-            res.setEncoding('utf8');
-            let rawData = '';
-            res.on('data', (chunk) => { rawData += chunk; });
-            res.on('end', () => {
-                try {
-                    const parsedData = JSON.parse(rawData);
-                    //try to find local IP adress
-                    resolve(parsedData);
-                } catch (e) {
-                    console.error(e.message);
-                    reject(e);
-                }
-            });
-        }).on('error', (e) => {
-            console.error(`Got error: ${e.message}`);
-            reject(e);
-        });
-    })
-}
-
-
-function httpGet(url){
-    return new Promise(function(resolve, reject){
-        let httpUrl = "http://" + url;
-        http.get(httpUrl, res => {
-            const { statusCode } = res;
-            const contentType = res.headers['content-type'];
-
-            let error;
-            // Any 2xx status code signals a successful response but
-            // here we're only checking for 200.
-            if (statusCode !== 200) {
-                error = new Error('Request Failed.\n' +
-                    `Status Code: ${statusCode}`);
-            } else if (!/^application\/json/.test(contentType)) {
-                error = new Error('Invalid content-type.\n' +
-                    `Expected application/json but received ${contentType}`);
-            }
-            if (error) {
-                console.error(error.message);
-                // Consume response data to free up memory
-                res.resume();
-                reject(e);
-            }
-
-            res.setEncoding('utf8');
-            let rawData = '';
-            res.on('data', (chunk) => { rawData += chunk; });
-            res.on('end', () => {
-                try {
-                    const parsedData = JSON.parse(rawData);
-                    //try to find local IP adress
-                    resolve(parsedData);
-                } catch (e) {
-                    console.error(e.message);
-                    reject(e);
-                }
-            });
-        }).on('error', (e) => {
-            console.error(`Got error: ${e.message}`);
-            reject(e);
-        });
-    })
-}
-
-function httpRequest(url, options, data){
-    return new Promise(function(resolve, reject){
-        let reqData = JSON.stringify(data);
-        const req = http.request("http://" + url, options,(res) => {
-            console.log(`STATUS: ${res.statusCode}`);
-            console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
-            res.setEncoding('utf8');
-            res.on('data', (chunk) => {
-                console.log(`BODY: ${chunk}`);
-            });
-            res.on('end', () => {
-                console.log('No more data in response.');
-            });
-        });
-
-        req.on('error', (e) => {
-            console.error(`problem with request: ${e.message}`);
-        });
-        // Write data to request body
-        req.write(reqData);
-        req.end();
-    })
-}
-
-function httpsRequest(url, options, data){
-    return new Promise(function(resolve, reject){
-        let reqData = JSON.stringify(data);
-        const req = https.request("https://" + url, options,(res) => {
-            console.log(`STATUS: ${res.statusCode}`);
-            console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
-            res.setEncoding('utf8');
-            res.on('data', (chunk) => {
-                console.log(`BODY: ${chunk}`);
-            });
-            res.on('end', () => {
-                console.log('No more data in response.');
-            });
-        });
-
-        req.on('error', (e) => {
-            console.error(`problem with request: ${e.message}`);
-        });
-        // Write data to request body
-        req.write(reqData);
-        req.end();
-    })
-}
-
+/**
+ *
+ * @param percent {String|Number} percent value, potentially a string with % at the end
+ * @returns {number} A number in range 0 - 254, where 0 equals 0% and 254 equals 100%;
+ */
 function parseBrightness(percent){
     //percent might be a string with the % symbol at the end. remove it
     if(typeof percent === "string") {
@@ -832,13 +795,16 @@ function parseBrightness(percent){
     return Math.round(percent * 2.54)
 }
 
+/**
+ * Returns a Value as integer between 0 - 254.
+ * @param brightness {Number|String}
+ * @returns {Integer}
+ */
 function normalizeBrightness(brightness) {
-    if(typeof brightness !== "number") {
-        brightness = parseInt(brightness);
-    }
+    brightness = parseInt(brightness);
     if (brightness > 254) return 254;
     if (brightness < 0) return 0;
-    return brightness;
+    return brightness
 }
 
 function parseState(state){
@@ -848,12 +814,10 @@ function parseState(state){
             if(state.toUpperCase() === "off".toUpperCase()) return LightsService.STATES.OFF;
             if(state.toUpperCase() === "on".toUpperCase()) return LightsService.STATES.ON;
             else return false;
-            break;
         case "object":
             if(state.toString().toUpperCase() === "off".toUpperCase()) return LightsService.STATES.OFF;
             if(state.toString().toUpperCase() === "on".toUpperCase()) return LightsService.STATES.ON;
             else return false;
-            break;
         case "boolean":
             return state;
         default:
@@ -861,4 +825,4 @@ function parseState(state){
     }
 }
 
-// module.exports = LightsService;
+export default new LightsService();

@@ -1,13 +1,14 @@
 import mongoose from 'mongoose';
-
-/** @typedef {{ username: string, firstName: string, lastName: string, email?: string, hash: string, generalData?: { memberId?: string, phone?: string, customData?: any, qualifications: QualificationObject[], hasPhoto: boolean, isDisplayedOnPublic: boolean, loginEnabled: boolean, createdDate: Date } }} UserScheme */
-/** @typedef {{ title: {title: string, value: string}, description: {shortDesc: string, longDesc: string}, date: {startDate: Date, endDate: Date}, participants: User[], createdDate: Date}} ProtocolScheme */
-
+import mongooseAutoPopulate from "mongoose-autopopulate";
 const Schema = mongoose.Schema;
 
 // create instance of Schema
 var ClientScheme = new Schema({
     identifier: {
+        type: String,
+    },
+    clientId: {
+        unique: true,
         type: String,
         required: true,
     },
@@ -20,9 +21,16 @@ var ClientScheme = new Schema({
     settings: {
 
     },
-    skills: {
+    skills: [
 
-    },
+    ],
+    locations: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Location',
+            autopopulate: true,
+        }
+    ],
     lastConnection: {
         type: Date,
     },
@@ -33,5 +41,5 @@ var ClientScheme = new Schema({
 });
 
 ClientScheme.set('toJSON', { virtuals: true, getters: true });
-
+ClientScheme.plugin(mongooseAutoPopulate);
 export default mongoose.model('Client', ClientScheme);

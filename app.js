@@ -5,23 +5,24 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import { fileURLToPath } from 'url';
 
-// var createError = require('http-errors');
-// var express = require('express');
-// var path = require('path');
-// var cookieParser = require('cookie-parser');
-// var logger = require('morgan');
+import endpoints from './config/endpoints.json' assert { type: 'json' };
+
+import {apiErrorHandler, webErrorHandler} from "./helpers/error-handler.js";
 // var sassMiddleware = require('node-sass-middleware');
 
-import { Picovoice } from "@picovoice/picovoice-node";
-import PvRecorder from "@picovoice/pvrecorder-node";
+import IntentService from './services/IntentService.js';
+import VoiceCommandService from "./services/voiceCommandService.js";
+import CommunicationService from "./services/CommunicationService.js";
+import ClientService from "./services/ClientService.js";
+import LightsService from "./services/LightsService.js";
+import IntegrationService from "./services/IntegrationService.js";
 
-import IntentManager from './services/IntentManager.js';
-import  VoiceCommandService from "./services/voiceCommandService.js";
-import  ClientService from "./services/ClientService.js";
-import  LightsService from "./services/LightsService.js";
+import indexRouter from './routes/api/v1/index.js';
+import clientRouter from './routes/api/v1/client.js';
+import intentRouter from './routes/api/v1/intents.js';
+import locationRouter from './routes/api/v1/location.js';
+import lightRouter from './routes/api/v1/lights.js';
 
-import indexRouter from './routes/index.js';
-import clientRouter from './routes/client.js';
 
 var app = express();
 
@@ -46,13 +47,12 @@ app.use(cookieParser());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-let clientService = new ClientService();
-
-
-
 app.use('/', indexRouter);
-app.use('/api/v1/client', clientRouter);
-// app.use("/api", errorHandler.apiErrorHandler);
+app.use('/api/v1/clients', clientRouter);
+app.use('/api/v1/intents', intentRouter);
+app.use('/api/v1/locations', locationRouter);
+app.use('/api/v1/lights', lightRouter);
+app.use("/api", apiErrorHandler);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -71,42 +71,55 @@ app.use(function(err, req, res, next) {
 });
 
 //init LightsService and connect to Hue Bridge
-let BridgeUrl = "192.168.1.102";
+let BridgeUrl = "192.168.1.120";
 let BridgeUser = "G2wTDFWTbQnqJ5VfaBfXC5G5fVcBMLim61FK0njf";
-LightsService.BridgeUrl = BridgeUrl;
-LightsService.BridgeUser = BridgeUser;
-let lightsService = LightsService.createInstance(BridgeUrl, BridgeUser, true);
 
+let deconzUrl = "192.168.1.112";
+let deconzUser = "F3E88E3AC0";
 /*
 intent manager setup
  */
 
-let intentManager = new IntentManager();
-intentManager.loadConfig("/rhinoModels/0_3_1/replicator_v0_3_1.yml");
+IntentService.start({config: "/rhinoModels/0_3_1/replicator_v0_3_1.yml"});
 
 //add handlers
+//
+// import ignore from "./intentHandlers/ignore.js";
+// intentManager.getIntent("Ignore").addHandlerArray(ignore);
+//
+// import changeLightState from"./intentHandlers/changeLightState.js";
+// intentManager.getIntent("changeLightState").addHandlerArray(changeLightState);
+//
+// import changeLightStateOff from"./intentHandlers/changeLightStateOff.js";
+// intentManager.getIntent("changeLightStateOff").addHandlerArray(changeLightStateOff);
+//
+// import lightBrightnessGroup from"./intentHandlers/lightBrightnessGroup.js";
+// intentManager.getIntent("LightBrightnessGroup").addHandlerArray(lightBrightnessGroup);
+//
+// import lightBrightnessLight from"./intentHandlers/lightBrightnessLight.js";
+// intentManager.getIntent("LightBrightnessLight").addHandlerArray(lightBrightnessLight);
+//
+// import lightScenes from "./intentHandlers/lightScenes.js";
+// intentManager.getIntent("LightScenes").addHandlerArray(lightScenes);
 
-const ignore = require("./intentHandlers/ignore");
-intentManager.getIntent("Ignore").addHandlerArray(ignore);
-
-const changeLightState = require("./intentHandlers/changeLightState");
-
-import changeLightState from"./intentHandlers/changeLightState.js";
-intentManager.getIntent("changeLightState").addHandlerArray(changeLightState);
-
-import changeLightStateOff from"./intentHandlers/changeLightStateOff.js";
-intentManager.getIntent("changeLightStateOff").addHandlerArray(changeLightStateOff);
-
-import lightBrightnessGroup from"./intentHandlers/lightBrightnessGroup.js";
-intentManager.getIntent("LightBrightnessGroup").addHandlerArray(lightBrightnessGroup);
-
-import lightBrightnessLight from"./intentHandlers/lightBrightnessLight.js";
-intentManager.getIntent("LightBrightnessLight").addHandlerArray(lightBrightnessLight);
-
-const lightScenes = require("./intentHandlers/lightScenes");
-intentManager.getIntent("LightScenes").addHandlerArray(lightScenes);
 //init voice command service
-let voiceCommandService = new VoiceCommandService(intentManager);
+VoiceCommandService.start({});
+
+//init clientService
+let clientServiceEndpoints = endpoints.clients;
+ClientService.start({});
+
+//init communication service
+CommunicationService.start({});
+
+//init lights service
+LightsService.start({});
+
+//load Integration Service
+IntegrationService.start({})
+    .then(init => {
+      IntegrationService.loadIntegration(IntegrationService.integrations.HUE, {BridgeUrl: BridgeUrl, BridgeUser: BridgeUser});
+    });
 
 
 export default app;

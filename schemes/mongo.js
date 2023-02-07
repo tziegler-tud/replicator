@@ -14,7 +14,15 @@ mongoose.connect(config.connectionString,opt);  // use this for remote database
 mongoose.Promise = global.Promise;
 
 import Client from "./clientScheme.js"
+import Location from "./locationScheme.js"
+import Light from "./lightScheme.js"
+import LightGroup from "./lightGroupScheme.js"
+import LightScene from "./lightSceneScheme.js"
 let db = {
-    Client: Client
+    Client: Client,
+    Location: Location,
+    Light: Light,
+    LightGroup: LightGroup,
+    LightScene: LightScene
 }
 export default db;

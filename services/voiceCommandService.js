@@ -1,5 +1,6 @@
 //this class takes the voice command object from picovoice and processes it
-
+import Service from "./Service.js";
+import IntentService from "./IntentService.js";
 
 /**
  * @typedef VoiceCommandObject
@@ -8,103 +9,79 @@
  * @property slots {Object} dynamic object containing the variables defined by the rhino model. Check model description for docs
  */
 
-export default class VoiceCommandService {
-    constructor(intentManager){
-        this.intentManager = intentManager;
+class VoiceCommandService extends Service {
+    constructor(args={}, init=false){
+        super();
+        let self = this;
+        this.args = args;
         this.mutex = false;
-        VoiceCommandService.setInstance(this);
+
         return this;
     }
-    static _instance;
 
-    static getInstance() {
-        if (this._instance) {
-            return this._instance;
-        }
-        else {
-            console.log("Cannot get instance: Instance does not exists.");
-            return undefined;
-        }
-    }
-    static createInstance(intentManager) {
-        if (this._instance) {
-            return this._instance;
-        }
-
-        this._instance = new VoiceCommandService(intentManager);
-        return this._instance;
-    }
-
-    static setInstance(instance) {
-        this._instance = instance;
-        return this._instance;
-    }
-
-    processKeyword(keyword, location) {
-        //check if location has LEDs
-        if(location.ledInterface.isActive) {
-            location.ledInterface.play("wake");
-        }
+    initFunc(args) {
+        let self = this;
+        return new Promise(function(resolve, reject){
+            console.log("Initializing VoiceCommandService...");
+            resolve();
+        })
     }
 
     /**
      *
+     * @param client {Client}
      * @param command {VoiceCommandObject}
-     * @param location {Location}
+     * @param emitter {Emitter}
+     * @param args {Object}
      */
-    processCommand(command, location){
-        //check if understood
-        if(!command.isUnderstood) {
-            //not understood. nothing we can do
-            if(location.ledInterface.isActive) {
-                location.ledInterface.play("notunderstood");
-            }
-            return false;
-        }
-        else {
-            if(location.ledInterface.isActive) {
-                location.ledInterface.play("working");
-            }
-            //get intent
-            let title = command.intent;
-            //retrieve matching intent
-            let intent = this.intentManager.getIntent(title);
-            //determine which variables are set
-            //first, retrieve intent variables
-            let intentVariables = intent.variables;
-            //these are the variables we can expect. now, lets check which ones we have:
-            let commandVariables = command.slots; //is an object, the keys are variable names
-            //now, let the intent check its handlers. It returns an array. If its empty, no handlers qualified
-            let matchingHandlers = intent.checkHandlers( command.slots);
-            if(matchingHandlers.length>0) {
-                //it's a match!
-                //run the handlers
-                matchingHandlers.forEach(function(handler){
-                    handler.run(command.slots, location)
-                })
-                if(location.ledInterface.isActive) {
-                    location.ledInterface.play("success")
-                        .then(function(){
-                            location.ledInterface.play("ready")
-                        })
-                }
+    processClientCommand(client, command, emitter, args) {
+        let self = this;
+        this.init.then(function(){
+            //check if understood
+            if (!command.isUnderstood) {
+                //not understood. nothing we can do
+                //this should not even got send by the client, but you know how clients are. Just ignore it.
+                return false;
+            } else {
+                //get intent
+                let title = command.intent;
+                //retrieve matching intent
+                let intent = IntentService.getIntent(title);
+                //determine which variables are set
+                //first, retrieve intent variables
+                let intentVariables = intent.variables;
+                //these are the variables we can expect. now, lets check which ones we have:
+                let commandVariables = command.slots; //is an object, the keys are variable names
+                //now, let the intent check its handlers. It returns an array. If its empty, no handlers qualified
+                let matchingHandlers = intent.checkHandlers(command.slots);
+                if (matchingHandlers.length > 0) {
+                    //it's a match!
+                    //run the handlers
+                    matchingHandlers.forEach(function (handler) {
+                        handler.run(command.slots, location)
+                    })
+                    // if(location.ledInterface.isActive) {
+                    //     location.ledInterface.play("success")
+                    //         .then(function(){
+                    //             location.ledInterface.play("ready")
+                    //         })
+                    // }
 
-            }
-            else {
-                //no handler found
-                if(location.ledInterface.isActive) {
-                    location.ledInterface.play("failed")
-                        .then(function(){
-                            location.ledInterface.play("ready")
-                        })
+                } else {
+                    //no handler found
+                    // if(location.ledInterface.isActive) {
+                    //     location.ledInterface.play("failed")
+                    //         .then(function(){
+                    //             location.ledInterface.play("ready")
+                    //         })
+                    // }
                 }
             }
-
-
-
-
-        }
+        })
+        .catch(err=> {
+            console.log("VoiceCommandService not initialized.");
+        })
     }
 }
 
-// module.exports = VoiceCommandService;
+export default new VoiceCommandService();

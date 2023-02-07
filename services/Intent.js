@@ -1,4 +1,4 @@
-class Intent {
+export default class Intent {
     constructor(args){
         if(args === undefined) args = {};
         this._title = args.title ? args.title : "";
@@ -93,6 +93,3 @@ class Intent {
     }
 
 }
-
-export default Intent;
-// module.exports = Intent;
