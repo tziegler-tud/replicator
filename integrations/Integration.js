@@ -27,15 +27,19 @@ export default class Integration {
     load(args){
         let self = this;
         this.initStarted = true;
-        this.initFunc(args)
-            .then(result => {
-                self.status = self.statusEnum.LOADED;
-                self.resolveInit();
-            })
-            .catch(err => {
-                self.status = self.statusEnum.NOTLOADED;
-                self.rejectInit();
-            });
+        return new Promise(function(resolve, reject){
+            self.initFunc(args)
+                .then(result => {
+                    self.status = self.statusEnum.LOADED;
+                    self.resolveInit();
+                    resolve();
+                })
+                .catch(err => {
+                    self.status = self.statusEnum.NOTLOADED;
+                    self.rejectInit();
+                    reject();
+                });
+        });
     }
 
     async initFunc(){

@@ -18,11 +18,17 @@ import Location from "./locationScheme.js"
 import Light from "./lightScheme.js"
 import LightGroup from "./lightGroupScheme.js"
 import LightScene from "./lightSceneScheme.js"
+import Settings from "./settingsScheme.js"
+import Intent from "./intentScheme.js"
+import IntentHandler from "./intentHandlerScheme.js"
 let db = {
     Client: Client,
     Location: Location,
     Light: Light,
     LightGroup: LightGroup,
-    LightScene: LightScene
+    LightScene: LightScene,
+    Settings: Settings,
+    Intent: Intent,
+    IntentHandler: IntentHandler,
 }
 export default db;

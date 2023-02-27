@@ -471,291 +471,6 @@ class LightsService extends Service {
             })
     }
 
-    /**
-     *
-     * @param lightId {number}
-     */
-    toggleLightState(lightId) {
-        let self = this;
-        this.BridgeApi.getLightState(lightId)
-            .then(group => {
-                let newState = !group.state["any_on"];
-                return self.setLightState(lightId, newState);
-            })
-            .catch(e => {
-                return false;
-            })
-    }
-    /**
-     *
-     * @param lightName
-     * @param newState
-     */
-    toggleLightStateByName(lightName) {
-        let self = this;
-        this.getLightIdByName(lightName)
-            .then(id => {
-                if(id){
-                    return self.toggleLightState(id);
-                }
-            })
-            .catch(e => {
-                return false;
-            })
-    }
-
-
-
-    /**
-     * sets a groups state
-     * @param groupId {Integer}
-     * @param newState {Boolean} true = on, false = off
-     */
-    setLightGroupState(groupId, newState) {
-        let state = parseState(newState);
-        //find group
-        console.log("setting lights to " + state + " for group " + groupId);
-        this.BridgeApi.setGroupState(groupId, {on: state})
-            .then(result => {
-
-            })
-            .catch(e => {
-                return false;
-            })
-    }
-
-    /**
-     *
-     * sets a groups state by group name
-     *
-     * @param groupName {string} group name as assigned by hue bridge
-     * @param newState {Boolean} The absolute or relative percent value to set as new brightness. Must be in interval [-100, 100].
-     */
-    setLightGroupStateByName(groupName, newState) {
-        //find group
-        this.getLightGroupIdByName(groupName)
-            .then(id => {
-                if(id){
-                    this.setLightGroupState(id, newState)
-                }
-            })
-            .catch(e => {
-                return false;
-            })
-    }
-
-    /**
-     * sets the brightness of a light
-     * @param lightId {Integer} light id as given by hue bridge
-     * @param percentValue {Integer} The absolute or relative percent value to set as new brightness. Must be in interval [-100, 100].
-     * @param isRelative {Boolean=false} If true, the percent value is added to the current value. Else, it is set as an absolute value. Default: false
-     */
-    setLightBrightness(lightId, percentValue, isRelative) {
-        if (isRelative === undefined) isRelative = false;
-        let bri = parseBrightness(percentValue);
-        if(isRelative){
-            this.BridgeApi.getLightState(lightId)
-                .then(light => {
-                    let totalBri = normalizeBrightness(bri + light.state.bri);
-                    this.BridgeApi.setLightState(lightId, {on: true, bri: totalBri})
-                        .then(result => {
-
-                        })
-                        .catch(e => {
-                            return false;
-                        })
-                })
-        }
-        else {
-            this.BridgeApi.setLightState(lightId, {on: true, bri: bri})
-                .then(result => {
-
-                })
-                .catch(e => {
-                    return false;
-                })
-        }
-    }
-
-    /**
-     *
-     * sets a lights brightness by group name
-     *
-     * @param lightName {string} light name as assigned by hue bridge
-     * @param percentValue {Integer} The absolute or relative percent value to set as new brightness. Must be in interval [-100, 100].
-     * @param isRelative {Boolean=false} If true, the percent value is added to the current value. Else, it is set as an absolute value. Default: false
-     */
-    setLightBrightnessByName(lightName, percentValue, isRelative) {
-        if (isRelative === undefined) isRelative = false;
-        this.getLightIdByName(lightName)
-            .then(lightId => {
-                if(lightId){
-                    this.setLightBrightness(lightId, percentValue, isRelative)
-                }
-            })
-            .catch(e => {
-                return false;
-            })
-    }
-
-    /**
-     *
-     * sets a groups brightness
-     *
-     * @param groupId {Integer} group Id as assigned by hue bridge
-     * @param percentValue {Integer} The absolute or relative percent value to set as new brightness. Must be in interval [-100, 100].
-     * @param isRelative {Boolean=false} If true, the percent value is added to the current value. Else, it is set as an absolute value. Default: false
-     */
-    setLightGroupBrightness(groupId, percentValue, isRelative) {
-        if (isRelative === undefined) isRelative = false;
-        let bri = parseBrightness(percentValue);
-        //find group
-        if(isRelative){
-            this.BridgeApi.getGroupState(groupId)
-                .then(group => {
-                    let totalBri = normalizeBrightness(bri + group.action.bri)
-                    console.log("setting brightness to " + bri + " for group " + group.name);
-                    this.BridgeApi.setGroupState(groupId, {on: true, bri: totalBri})
-                        .then(result => {
-
-                        })
-                        .catch(e => {
-                            return false;
-                        })
-                })
-        }
-        else {
-            console.log("setting brightness to " + bri + " for group with id " + groupId);
-            this.BridgeApi.setGroupState(groupId, {on: true, bri: normalizeBrightness(bri)})
-                .then(result => {
-
-                })
-                .catch(e => {
-                    return false;
-                })
-        }
-    }
-
-    /**
-     *
-     * sets a groups brightness by group name
-     *
-     * @param groupName {string} group name as assigned by hue bridge
-     * @param percentValue {Integer} The absolute or relative percent value to set as new brightness. Must be in interval [-100, 100].
-     * @param isRelative {Boolean=false} If true, the percent value is added to the current value. Else, it is set as an absolute value. Default: false
-     */
-    setLightGroupBrightnessByName(groupName, percentValue, isRelative) {
-        if (isRelative === undefined) isRelative = false;
-        //find group
-        let g = this.getLightGroupIdByName(groupName)
-            .then(id => {
-                if(id){
-                    this.setLightGroupBrightness(id, percentValue, isRelative)
-                }
-            })
-            .catch(e => {
-                return false;
-            })
-    }
-
-    /**
-     * toggles a light group on or off
-     * @param groupId {number}
-     */
-    toggleLightGroup(groupId) {
-        let self = this;
-        //turn off all lights if any is on, turn on all lights otherwise
-        //get group state
-        this.BridgeApi.getGroupState(groupId)
-            .then(group => {
-                let newState = !group.state["any_on"];
-                return self.setLightGroupState(groupId, newState);
-            })
-            .catch(e => {
-                return false;
-            })
-
-    }
-    /**
-     * toggles a light group on or off
-     * @param groupName {string}
-     */
-    toggleLightGroupByName(groupName) {
-        let self = this;
-        //find group
-        this.getLightGroupIdByName(groupName)
-            .then(id => {
-                if(id){
-                    //turn off all lights if any is on, turn on all lights otherwise
-                    return self.toggleLightGroup(id);
-                }
-            })
-            .catch(e => {
-                return false;
-            })
-    }
-
-    /**
-     * sets a groups state
-     * @param groupId {Integer}
-     * @param sceneName {string} name of the scene to select. Must match a scene name that is known to the hue bridge
-     */
-    setLightGroupScene(groupId, sceneName) {
-        let self = this;
-        return new Promise(function(resolve, reject){
-            self.BridgeApi.getScenes()
-                .then(scenes => {
-                    //flatten object into array
-                    let scenesArray = [];
-                    Object.keys(scenes).forEach(key => {
-                        let oj = scenes[key];
-                        oj.id = key;
-                        scenesArray.push(oj);
-                    })
-                    //check if scene exists
-                    let scene = scenesArray.find(s => (s.name === sceneName && s.type === "GroupScene" && s.group === groupId));
-                    if(scene !== undefined) {
-                        self.BridgeApi.setGroupScene(groupId, {scene: scene.id})
-                            .then(result => {
-                                resolve();
-                            })
-                            .catch(e => {
-                                reject(e)
-                            })
-                    }
-                    else {
-                        reject("Scene not found: "+ sceneName);
-                    }
-
-                })
-                .catch(err => {
-                    console.error(err);
-                    reject()
-                })
-        })
-
-    }
-
-    /**
-     *
-     * sets a groups state by group name
-     *
-     * @param groupName {string} group name as assigned by hue bridge
-     * @param sceneName {string} name of the scene to select, as it is known by the hue bridge
-     */
-    setLightGroupSceneByName(groupName, sceneName) {
-        //find group
-        this.getLightGroupIdByName(groupName)
-            .then(id => {
-                if(id){
-                    this.setLightGroupScene(id, sceneName);
-                }
-            })
-            .catch(e => {
-                return false;
-            })
-    }
-
 }
 
 LightsService.STATES = {
@@ -781,9 +496,11 @@ class location {
 /**
  *
  * @param percent {String|Number} percent value, potentially a string with % at the end
- * @returns {number} A number in range 0 - 254, where 0 equals 0% and 254 equals 100%;
+ * @param [max] {Number} maximum brightness used for normalizing. Default: 254
+ * @param [min] {Number} minimum brightness used for normalizing. Default: 0
+ * @returns {number} A number in range 0 - max, where 0 equals 0% and max equals 100%;
  */
-function parseBrightness(percent){
+function parseBrightness(percent, max=254, min=0){
     //percent might be a string with the % symbol at the end. remove it
     if(typeof percent === "string") {
         percent.replace("%", "");
@@ -792,18 +509,21 @@ function parseBrightness(percent){
     //254 equals 100%; 0 equals 0%
     if(percent > 100) percent = 100;
     if(percent < -100) percent = -100;
-    return Math.round(percent * 2.54)
+    if(percent === 0) return min;
+    return Math.round(min + (percent/100) * (max-min));
 }
 
 /**
  * Returns a Value as integer between 0 - 254.
  * @param brightness {Number|String}
+ * @param [max] {Number} maximum brightness used for normalizing. Default: 254
+ * @param [min] {Number} minimum brightness used for normalizing. Default: 0
  * @returns {Integer}
  */
-function normalizeBrightness(brightness) {
+function normalizeBrightness(brightness, max=254, min=0) {
     brightness = parseInt(brightness);
-    if (brightness > 254) return 254;
-    if (brightness < 0) return 0;
+    if (brightness > max) return max;
+    if (brightness < min) return min;
     return brightness
 }
 

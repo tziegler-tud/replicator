@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import db from '../schemes/mongo.js';
 import tcpResponse from "../helpers/tcpResponseGenerator.js";
-import voiceCommandService from "./voiceCommandService.js";
+import voiceCommandService from "../services/voiceCommandService.js";
 import LocationManager from "../managers/LocationManager.js"
 const DbClient = db.Client;
 

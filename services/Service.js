@@ -1,3 +1,4 @@
+import SettingsService from "./SettingsService.js";
 /**
  * @class
  * @abstract
@@ -15,6 +16,14 @@ export default class Service {
             self.resolveInit = resolve;
             self.rejectInit = reject;
         })
+
+        this.debugLabel = "Service: ";
+        this.enableDebug = true;
+        this.globalSettings = {};
+    }
+
+    debug(message, level=1) {
+        if(this.globalSettings.system.debugLevel <= level) console.log(this.debugLabel + message);
     }
 
     /**
@@ -24,16 +33,20 @@ export default class Service {
     start(args){
         let self = this;
         this.initStarted = true;
-        this.initFunc(args)
-            .then(result => {
-                self.status = self.statusEnum.RUNNING;
-                self.resolveInit();
-            })
-            .catch(err => {
-                self.status = self.statusEnum.FAILED;
-                self.rejectInit();
-            });
+        SettingsService.getSettings().then(settings => {
+            self.globalSettings = settings;
+            this.initFunc(args)
+                .then(result => {
+                    self.status = self.statusEnum.RUNNING;
+                    self.resolveInit();
+                })
+                .catch(err => {
+                    self.status = self.statusEnum.FAILED;
+                    self.rejectInit();
+                });
+        })
         return this.init;
+
     }
 
     /**

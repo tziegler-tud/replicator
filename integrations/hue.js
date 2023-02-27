@@ -34,7 +34,7 @@ export default class HueIntegration extends Integration {
         this.initStarted = false;
 
     }
-    async initFunc({BridgeUrl, BridgeUser}){
+    initFunc({BridgeUrl, BridgeUser}){
         let self = this;
         if(BridgeUrl) this.BridgeUrl = BridgeUrl;
         if(BridgeUser) this.BridgeUser = BridgeUser;
@@ -42,74 +42,78 @@ export default class HueIntegration extends Integration {
         console.log("Loading " + this.readableName + "...");
         this.Bridge = undefined;
         //try to reach the bridge
-        checkBridge(self.BridgeUrl)
-            .then(checkResult => {
-                self.BridgeUrl = checkResult.url;
-                self.Bridge = checkResult.bridge;
-                //check user auth
-                authBridge(self.BridgeUrl, self.BridgeUser)
-                    .then(result => {
-                        self.BridgeApi = new BridgeApiV2(self.BridgeUrl, self.BridgeUser);
-                        //find lights
-                        let lightsPromise = self.BridgeApi.getLights();
-                        let groupsPromise = self.BridgeApi.getGroups();
-                        let roomsPromise = self.BridgeApi.getRooms();
-                        // let groupsArrayPromise = self.BridgeApi.getGroupsArray();
-                        let scenesPromise = self.BridgeApi.getScenes();
-                        let sensorsPromise = self.BridgeApi.getSensors();
+        return new Promise(function(resolve, reject){
+            checkBridge(self.BridgeUrl)
+                .then(checkResult => {
+                    self.BridgeUrl = checkResult.url;
+                    self.Bridge = checkResult.bridge;
+                    //check user auth
+                    authBridge(self.BridgeUrl, self.BridgeUser)
+                        .then(result => {
+                            self.BridgeApi = new BridgeApiV2(self.BridgeUrl, self.BridgeUser);
+                            //find lights
+                            let lightsPromise = self.BridgeApi.getLights();
+                            let groupsPromise = self.BridgeApi.getGroups();
+                            let roomsPromise = self.BridgeApi.getRooms();
+                            // let groupsArrayPromise = self.BridgeApi.getGroupsArray();
+                            let scenesPromise = self.BridgeApi.getScenes();
+                            let sensorsPromise = self.BridgeApi.getSensors();
 
-                        Promise.all([lightsPromise, groupsPromise, roomsPromise, scenesPromise, sensorsPromise])
-                            .then(result => {
-                                const lights = result[0];
-                                const groups = result[1];
-                                const rooms = result[2];
-                                const scenes = result[3];
-                                const sensors = result[4];
+                            Promise.all([lightsPromise, groupsPromise, roomsPromise, scenesPromise, sensorsPromise])
+                                .then(result => {
+                                    const lights = result[0];
+                                    const groups = result[1];
+                                    const rooms = result[2];
+                                    const scenes = result[3];
+                                    const sensors = result[4];
 
-                                self.lights = lights;
-                                self.grouped_lights = groups;
-                                self.rooms = rooms;
-                                self.scenes = scenes;
-                                self.sensors = sensors;
+                                    self.lights = lights;
+                                    self.grouped_lights = groups;
+                                    self.rooms = rooms;
+                                    self.scenes = scenes;
+                                    self.sensors = sensors;
 
-                                //add lights to runtime
-                                let lightsPromise = self.addLights(lights)
-                                let groupsPromise = self.addGroups(rooms);
-                                let scenesPromise = self.addScenes(scenes);
+                                    //add lights to runtime
+                                    let lightsPromise = self.addLights(lights)
+                                    let groupsPromise = self.addGroups(rooms);
+                                    let scenesPromise = self.addScenes(scenes);
 
-                                Promise.all([lightsPromise, groupsPromise, scenesPromise])
-                                    .then(result => {
-                                        const groups = result[1]
-                                        self.addLightsToGroups(groups)
-                                            .then(()=> {
-                                                self.addScenesToGroups(groups)
-                                                    .then(result => {
-                                                        console.log("Phillips Hue Integration initialized successfully. Bridge IP: " + self.BridgeUrl);
-                                                        return(self);
-                                                    })
-                                                    .catch(err => {
-                                                        throw new Error(errMsg + err)
-                                                    })
-                                            })
-                                            .catch(err => {
-                                                throw new Error(errMsg + err)
-                                            })
-                                    })
-                                    .catch(err => {
-                                        throw new Error(errMsg + err)
-                                    })
-                            })
-                            .catch(err => {
-                                throw new Error(errMsg + err)
-                            })
-                    })
-                    .catch(err => {
-                        throw new Error(errMsg + err)
-                    })
-            })
-            .catch(err => {
-                throw new Error(errMsg + err)
-            })
+                                    Promise.all([lightsPromise, groupsPromise, scenesPromise])
+                                        .then(result => {
+                                            const groups = result[1]
+                                            self.addLightsToGroups(groups)
+                                                .then(()=> {
+                                                    self.addScenesToGroups(groups)
+                                                        .then(result => {
+                                                            console.log("Phillips Hue Integration initialized successfully. Bridge IP: " + self.BridgeUrl);
+                                                            resolve(self);
+                                                        })
+                                                        .catch(err => {
+                                                            reject(errMsg + err);
+
+                                                        })
+                                                })
+                                                .catch(err => {
+                                                    reject(errMsg + err)
+                                                })
+                                        })
+                                        .catch(err => {
+                                            reject(errMsg + err)
+                                        })
+                                })
+                                .catch(err => {
+                                    reject(errMsg + err)
+                                })
+                        })
+                        .catch(err => {
+                            reject(errMsg + err)
+                        })
+                })
+                .catch(err => {
+                    reject(errMsg + err)
+                })
+        })
+
     }
 
     addLightsV1() {
@@ -319,6 +323,7 @@ export default class HueIntegration extends Integration {
     addLightsToGroups(groupArray) {
         let self = this;
         return new Promise(function (resolve, reject) {
+            let p = [];
             groupArray.forEach(function (group) {
                 const uniqueId = group.uniqueId;
                 const array = []
@@ -331,14 +336,16 @@ export default class HueIntegration extends Integration {
                         if(light) array.push(light.uniqueId);
                     }
                 })
-                LightsService.addLightsToGroup({groupUniqueId: uniqueId, lightUniqueIdArray: array})
-                    .then(result => {
-                        resolve(result);
-                    })
-                    .catch(err => {
-                        reject(err);
-                    })
+                p.push(LightsService.addLightsToGroup({groupUniqueId: uniqueId, lightUniqueIdArray: array}))
             })
+            Promise.all(p)
+                .then(result => {
+
+                    resolve(result)
+                })
+                .catch(err => {
+                    reject(err);
+                })
         })
     }
     addScenesToGroups(groupArray) {
@@ -360,7 +367,7 @@ export default class HueIntegration extends Integration {
 
 class HueLight extends Light {
     constructor({bridgeApi, hueObject, uniqueId, lightId, identifier="MyHueLight", integration}={}){
-        super(uniqueId, identifier, {});
+        super({uniqueId: uniqueId, identifier: identifier, nativeObject: hueObject, configuration: {}});
         this.lightId = lightId;
         this.bridgeApi = bridgeApi;
         this.colorParser = new ColorParser({maxBrightness: 100});
@@ -445,21 +452,23 @@ class HueLight extends Light {
         return this.state;
     }
 
-    on(){
+    async on(){
         return this.setState({on: true})
     };
-    off(){
-        return this.setState({on: true})
+    async off(){
+        return this.setState({on: false})
     };
-    toggle(){
-        return this.setState({on: true})
+    async toggle(){
+        let state = await this.getState();
+
+        return this.setState({on: !state.on})
     };
 
     /**
      * relative brightness change. negative values to decrease
      * @param value
      */
-    changeBrightnessRelative(value=0){
+    setBrightnessRelative(value=0){
         let absVal = value;
         let action = "up";
         if(value<0){
@@ -471,6 +480,15 @@ class HueLight extends Light {
             dimming_delta: {
                 action: action,
                 brightness_delta: absVal,
+            }
+        })
+    }
+
+    setBrightnessAbsolute(value=0){
+        const bri = this.normalizeBrightness(value)
+        return this.setState({
+            dimming: {
+                brightness: bri,
             }
         })
     }
@@ -527,7 +545,7 @@ class HueLightScene extends LightScene {
 
 class HueLightGroup extends LightGroup {
     constructor({bridgeApi, hueObject, uniqueId, groupId, identifier="MyHueLight", integration, groupedLight, hueScenes}={}){
-        super(uniqueId, identifier, {});
+        super({uniqueId: uniqueId, identifier: identifier, nativeObject: hueObject, configuration: {}});
         this.uniqueId = uniqueId;
         this.groupId = groupId;
         this.bridgeApi = bridgeApi;
@@ -536,7 +554,6 @@ class HueLightGroup extends LightGroup {
         this.services = hueObject.services;
         this.grouped_light = groupedLight;
         this.hueScenes = hueScenes;
-        this.nativeObject = hueObject;
 
         this.state = this.parseHueToState();
     }
@@ -594,14 +611,14 @@ class HueLightGroup extends LightGroup {
     }
 
     async setState(state){
-        this.state = Object.assign(this.state, state);
-        // we use grouped_light service to set state of lights in this room
+        // this.state = Object.assign(this.state, state);
+        // // we use rooms service to set state of lights in this room
 
-        this.bridgeApi.setGroupState(this.lightId, this.state);
+        this.bridgeApi.setRoomState(this.groupId, this.parseStateChangeToHue(state));
     }
 
     async getState(){
-        this.internalState = await this.bridgeApi.getGroupState(this.id)
+        this.internalState = await this.bridgeApi.getRoomState(this.uniqueId)
         this.state = this.parseState(this.internalState.state);
         return this.parseState(this.internalState);
     }
@@ -610,10 +627,13 @@ class HueLightGroup extends LightGroup {
         return this.setState({on: true})
     };
     async off(){
-        return this.setState({on: false})
+        return this.setState({on: true})
     };
     async toggle(){
-        return this.setState({on: true})
+        //get current state
+        let state = await this.getState();
+
+        return this.setState({on: !state.on})
     };
 
     async setScene(sceneId){
@@ -624,7 +644,7 @@ class HueLightGroup extends LightGroup {
      * relative brightness change. negative values to decrease
      * @param value
      */
-    changeBrightnessRelative(value=0){
+    setBrightnessRelative(value=0){
         let absVal = value;
         let action = "up";
         if(value<0){
@@ -636,6 +656,15 @@ class HueLightGroup extends LightGroup {
             dimming_delta: {
                 action: action,
                 brightness_delta: absVal,
+            }
+        })
+    }
+
+    setBrightnessAbsolute(value=0){
+        const bri = this.normalizeBrightness(value)
+        return this.setState({
+            dimming: {
+                brightness: bri,
             }
         })
     }
@@ -856,7 +885,21 @@ class BridgeApiV2 {
 
     }
     getLightState(lightId) {
-        return this.get("resource/light/"+lightId);
+        let self = this;
+        return new Promise(function(resolve, reject){
+            self.get("resource/light/"+lightId)
+                .then(result => {
+                    if(result.errors.length > 0) {
+                        reject(result.errors);
+                    }
+                    else {
+                        if(result.data.length !== 1) {
+                            reject("No light found");
+                        }
+                        else resolve(result.data[0]);
+                    }
+                })
+        });
     }
     setLightState(lightId, state) {
         return this.put("resource/light/"+lightId, state);

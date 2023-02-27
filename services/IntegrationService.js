@@ -27,10 +27,12 @@ class IntegrationService extends Service{
         })
     }
 
-    loadIntegration(integrationClass, args){
+    async loadIntegration(integrationClass, args){
         const integration = new integrationClass(args);
+        const loader = await integration.load(args);
         this.loaded.push(integration)
-        integration.load(args)
+        return true;
+
     }
 
     integrations = {

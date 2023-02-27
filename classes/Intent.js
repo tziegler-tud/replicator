@@ -1,33 +1,61 @@
+import db from '../schemes/mongo.js';
+const dbIntent = db.Intent;
+
 export default class Intent {
     constructor(args){
         if(args === undefined) args = {};
-        this._title = args.title ? args.title : "";
+        this._identifier = args.identifier ? args.identifier : "";
         this._variables = args.variables? args.variables : {};
         this._lines = [];
-        this.handlers = [];
+        this._handlers = [];
         this._groups = {
             macros: [],
             macrosOptional: [],
             slots: [],
             slotsOptional: [],
         };
+        this.dbObject = undefined;
+
+        if(args._id) {
+            //constructor called with database element.
+            this.dbObject = args;
+        }
     }
 
-    get title(){
-        return this._title;
+    saveToDb(){
+        //check if dbObject exists
+        if(this.dbObject){
+            this.dbObject = Object.assign(this.dbObject, this);
+        }
+        else {
+            this.dbObject = new dbIntent(this.parseToDb());
+        }
+        return this.dbObject.save();
+    }
+
+    parseToDb(){
+        return {
+            identifier: this.identifier,
+            variables: this.variables,
+            lines: this.lines,
+            handlers: this.handlers,
+            groups: this.groups,
+        }
+    }
+
+    get title (){
+        return this._identifier;
+    }
+    get identifier(){
+        return this._identifier;
     }
 
     get variables(){
         return this._variables;
-
     }
 
-    set title(title){
-        this._title = title;
-    }
-
-    set variables(variables) {
-        this._variables = variables;
+    get handlers(){
+        return this._handlers;
     }
 
     get lines() {
@@ -36,6 +64,18 @@ export default class Intent {
 
     get groups() {
         return this._groups;
+    }
+
+    set title(title){
+        this._identifier = title;
+    }
+
+    set identifier(identifier){
+        this._identifier = identifier;
+    }
+
+    set variables(variables) {
+        this._variables = variables;
     }
 
     addLine(line){

@@ -1,7 +1,10 @@
 import yaml from 'js-yaml';
 import fs from 'fs';
 import Service from "./Service.js";
-import Intent from "./Intent.js";
+import Intent from "../classes/Intent.js";
+import SettingsService from "./SettingsService.js";
+import db from '../schemes/mongo.js';
+const dbIntent = db.Intent;
 
 /**
  * @typedef SlotObject {Object}
@@ -21,11 +24,24 @@ class IntentService extends Service{
          */
         this.slots = [];
         this.configLoaded = false;
+        this.debugLabel = "IntentService: ";
     }
 
     initFunc({config}={}){
         let self = this;
         return new Promise(function(resolve, reject){
+            //check if a setting is present in the db
+            if(self.globalSettings.intentConfig.active){
+                self.debug("Using stored intents.");
+                self.loadDatabase()
+                    .then(result => {
+                        resolve();
+
+                    })
+                    .catch(err => {
+                        self.debug("Failed to load database content: " + err);
+                    })
+            }
             if(config) {
                 self.loadConfig(config)
                     .then(result=> {
@@ -34,9 +50,10 @@ class IntentService extends Service{
                     .catch(err => {
                         reject(err);
                     })
+
             }
             else {
-                console.log("IntentService started without loading a config file.")
+                self.debug("IntentService started without intents. Did you forget to load a config?")
                 resolve();
             }
         })
@@ -44,24 +61,24 @@ class IntentService extends Service{
 
     loadConfig(path){
         let self = this;
-        console.log("IntentService is loading config file...");
+        self.debug("IntentService is loading config file...");
         return new Promise(function(resolve, reject){
             //read yaml file
             try {
                 const doc = yaml.load(fs.readFileSync(appRoot + path, 'utf8'));
                 self.parseDoc(doc)
                     .then(function(result){
-                        console.log("IntentService config loaded successfully.");
+                        self.debug("IntentService config loaded successfully.");
                         self.configLoaded = true;
                         self.configPath = path;
                         resolve()
                     })
                     .catch(function(error){
-                        console.error("Error: IntentService - Failed to load config: " + error);
+                        self.debug("Error: IntentService - Failed to load config: " + error);
                         reject();
                     })
             } catch (e) {
-                console.log(e);
+                self.debug("Error: " + e);
                 reject(e);
             }
         })
@@ -75,21 +92,17 @@ class IntentService extends Service{
         let slots = doc.context.slots;
         let self = this;
 
-        Object.keys(expressions).forEach(function(key,index) {
+        for (const key in expressions) {
+        // Object.keys(expressions).forEach(function(key,index) {
             // key: the name of the object key
             // index: the ordinal position of the key within the object
-            let title = key;
+            let identifier = key;
             let lines = expressions[key];
 
-            let intent = new Intent();
-            intent.title = title;
+            let intent = new Intent({identifier: identifier});
+            intent.identifier = identifier;
 
-            var intentGroups = {
-                macros: [],
-                macrosOptional: [],
-                slots: [],
-                slotsOptional: [],
-            }
+            let identifiersLoaded = 0;
 
             lines.forEach(function(line, index){
                 //lines contain 3 types of tokens, seperated by white-spaces, $ or @: words (no prefix), variables($-prefixed), aliases(@-prefixed)
@@ -120,9 +133,22 @@ class IntentService extends Service{
                 }
                 intent.addLine(intentLine)
             })
-
-            self.addIntent(intent)
-        })
+            //check if already registered
+            let dbObject = await dbIntent.findOne({identifier: intent.identifier});
+            if (dbObject){
+                //identifier already taken. Skip and load from db instead
+                self.debug("Failed to load intent from config: Identifier already in database!");
+                intent = new Intent(dbObject);
+            }
+            try {
+                const result = await intent.saveToDb();
+                self.addIntent(intent);
+                identifiersLoaded++;
+            }
+            catch (e){
+                self.debug("Skipping Element: " + intent.identifier + ". Reason: " + e);
+            }
+        }
 
         //parse slots
         Object.keys(slots).forEach(function(key,index) {
@@ -135,7 +161,22 @@ class IntentService extends Service{
                 values: values,
             })
         })
+        self.debug()
         return true;
+    }
+
+    loadDatabase(){
+        let self = this;
+        return new Promise(function(resolve, reject){
+            dbIntent.find()
+                .then(results => {
+                    results.forEach(dbObject => {
+                        let intent = new Intent(dbObject);
+                        self.addIntent(intent);
+                    })
+                    resolve();
+                });
+        })
     }
 
     addIntent(intent){
@@ -144,13 +185,17 @@ class IntentService extends Service{
 
     /**
      * returns an intent
-     * @param intentTitle
+     * @param identifier {String} unique Intent identifier
      * @returns {Intent}
      */
-    getIntent(intentTitle) {
+    getIntent(identifier) {
         return this.intents.find(intent => {
-            return intent.title === intentTitle;
+            return intent.identifier === identifier;
         })
+    }
+
+    getAllIntents(){
+        return this.intents;
     }
 
     /**

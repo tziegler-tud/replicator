@@ -1,7 +1,7 @@
 import db from '../schemes/mongo.js';
 const DbClient = db.Client;
 //
-import Client from "./Client.js";
+import Client from "../classes/Client.js";
 import Service from "./Service.js";
 import CommunicationService from "./CommunicationService.js"
 import voiceCommandService from "./voiceCommandService.js"
@@ -28,6 +28,9 @@ class ClientService extends Service{
         return new Promise(function(resolve, reject){
             console.log("Initializing ClientService...");
             let loader = self.loadKnownClients();
+            loader.then(result => {
+                resolve();
+            })
         })
     }
 
@@ -195,6 +198,7 @@ class ClientService extends Service{
                             //add clients to runtime client list
                             let clientsToAdd = clientTestResults.map(result => {return result.client})
                             self.clients = self.clients.concat(clientsToAdd);
+                            resolve();
                         })
                         .catch(err => {
                             throw new Error(err);

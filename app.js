@@ -11,11 +11,13 @@ import {apiErrorHandler, webErrorHandler} from "./helpers/error-handler.js";
 // var sassMiddleware = require('node-sass-middleware');
 
 import IntentService from './services/IntentService.js';
+import IntentHandlerService from "./services/IntentHandlerService.js";
 import VoiceCommandService from "./services/voiceCommandService.js";
 import CommunicationService from "./services/CommunicationService.js";
 import ClientService from "./services/ClientService.js";
 import LightsService from "./services/LightsService.js";
 import IntegrationService from "./services/IntegrationService.js";
+import SettingsService from "./services/SettingsService.js";
 
 import indexRouter from './routes/api/v1/index.js';
 import clientRouter from './routes/api/v1/client.js';
@@ -80,7 +82,11 @@ let deconzUser = "F3E88E3AC0";
 intent manager setup
  */
 
-IntentService.start({config: "/rhinoModels/0_3_1/replicator_v0_3_1.yml"});
+//load settings from db
+const settingsService = SettingsService.start({})
+
+// IntentService.start();
+const intentService = IntentService.start({config: "/rhinoModels/0_3_1/replicator_v0_3_1.yml"});
 
 //add handlers
 //
@@ -103,23 +109,53 @@ IntentService.start({config: "/rhinoModels/0_3_1/replicator_v0_3_1.yml"});
 // intentManager.getIntent("LightScenes").addHandlerArray(lightScenes);
 
 //init voice command service
-VoiceCommandService.start({});
+const voiceCommandService =VoiceCommandService.start({});
 
 //init clientService
 let clientServiceEndpoints = endpoints.clients;
-ClientService.start({});
+const clientService =ClientService.start({});
 
 //init communication service
-CommunicationService.start({});
+const communicationService =CommunicationService.start({});
 
 //init lights service
-LightsService.start({});
+const lightsService =LightsService.start({});
 
 //load Integration Service
-IntegrationService.start({})
-    .then(init => {
-      IntegrationService.loadIntegration(IntegrationService.integrations.HUE, {BridgeUrl: BridgeUrl, BridgeUser: BridgeUser});
-    });
+const integrationService = new Promise(function(resolve, reject){
+    IntegrationService.start({})
+        .then(init => {
+            IntegrationService.loadIntegration(IntegrationService.integrations.HUE, {BridgeUrl: BridgeUrl, BridgeUser: BridgeUser})
+                .then(()=> {
+                    resolve();
+                })
+                .catch(err=> {
+                    reject(err);
+                })
+        });
+});
 
+const intentHandlerService = IntentHandlerService.start();
+
+/**
+ * testing
+ */
+
+const servicesArray = [
+    settingsService,
+    intentService,
+    voiceCommandService,
+    clientService,
+    communicationService,
+    lightsService,
+    integrationService,
+    intentHandlerService,
+]
+
+
+import createIntentHandler from "./test/intentHandlers.js";
+Promise.all(servicesArray).then(()=> {
+    createIntentHandler();
+});
 
 export default app;

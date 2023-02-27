@@ -7,7 +7,7 @@ import { Server } from "socket.io";
 import { networkInterfaces } from 'os';
 import Service from "./Service.js";
 import clientService from "./ClientService.js"
-import Client from "./Client.js";
+import Client from "../classes/Client.js";
 
 /**
  * @typedef VoiceCommandObject

@@ -3,9 +3,6 @@ const Schema = mongoose.Schema;
 
 // create instance of Schema
 var LightGroupScheme = new Schema({
-    id: {
-
-    },
     uniqueId: {
         type: String,
         required: true,
