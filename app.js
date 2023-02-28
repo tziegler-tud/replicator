@@ -5,6 +5,8 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import { fileURLToPath } from 'url';
 
+import { engine } from 'express-handlebars';
+
 import endpoints from './config/endpoints.json' assert { type: 'json' };
 
 import {apiErrorHandler, webErrorHandler} from "./helpers/error-handler.js";
@@ -19,11 +21,14 @@ import LightsService from "./services/LightsService.js";
 import IntegrationService from "./services/IntegrationService.js";
 import SettingsService from "./services/SettingsService.js";
 
-import indexRouter from './routes/api/v1/index.js';
+import apiIndexRouter from './routes/api/v1/index.js';
 import clientRouter from './routes/api/v1/client.js';
 import intentRouter from './routes/api/v1/intents.js';
 import locationRouter from './routes/api/v1/location.js';
 import lightRouter from './routes/api/v1/lights.js';
+
+import webIndexRouter from './routes/web/index.js';
+
 
 
 var app = express();
@@ -33,8 +38,9 @@ var app = express();
 global.appRoot = path.resolve(__dirname);
 
 // view engine setup
+app.engine('handlebars', engine());
+app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -47,14 +53,16 @@ app.use(cookieParser());
 //   sourceMap: true
 // }));
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'src')));
 
-app.use('/', indexRouter);
+app.use('/api', apiIndexRouter);
 app.use('/api/v1/clients', clientRouter);
 app.use('/api/v1/intents', intentRouter);
 app.use('/api/v1/locations', locationRouter);
 app.use('/api/v1/lights', lightRouter);
 app.use("/api", apiErrorHandler);
+
+app.use('/', webIndexRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

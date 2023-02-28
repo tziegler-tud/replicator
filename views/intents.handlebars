@@ -1,0 +1,19 @@
+<div class="card-container">
+    {{#each intents}}
+        <div class="mdc-card element-card">
+            <div class="mdc-card__primary-action element-card--primary">
+                <div class="mdc-card__title element-card--title">{{this._identifier}}</div>
+                <!-- ... additional primary action content ... -->
+                <div class="mdc-card__ripple"></div>
+            </div>
+            <div class="element-card--secondary">
+                <div class="element-card--secondary">Variables:</div>
+                {{#each this._variables}}
+                <div class="element-card--secondary">{{@key}}: {{this}}</div>
+                {{/each}}
+                <!-- ... additional primary action content ... -->
+                <div class="mdc-card__ripple"></div>
+            </div>
+        </div>
+    {{/each}}
+</div>

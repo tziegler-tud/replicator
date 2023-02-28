@@ -1,0 +1,82 @@
+@use "@material/drawer";
+@use "@material/list";
+@use "@material/button/styles";
+@use "@material/icon-button/icon-button";
+@use "@material/top-app-bar";
+@use "@material/top-app-bar/mdc-top-app-bar";
+@use "@material/card";
+
+@include card.core-styles;
+@include icon-button.core-styles;
+@include drawer.core-styles;
+@include drawer.dismissible-core-styles;
+@include drawer.modal-core-styles;
+@include list.deprecated-core-styles;
+
+.replicator-body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+
+  .replicator-wrapper {
+    display: flex;
+    flex-flow: row nowrap;
+    height: 100vh;
+
+    .mdc-top-app-bar {
+      @include top-app-bar.fill-color(#00293c)
+    }
+
+
+    .mdc-drawer-app-content {
+      flex: auto;
+      overflow: auto;
+      position: relative;
+    }
+
+    .main-content {
+      overflow: auto;
+      height: 100%;
+    }
+
+    .app-bar {
+      position: absolute;
+    }
+
+
+    //.replicator-sidenav {
+    //  height: 100vh;
+    //  flex: 0 0 auto;
+    //}
+    //.replicator-content {
+    //  flex: 1 1 auto;
+    //}
+  }
+
+  .card-container {
+    display: flex;
+    flex-flow: row wrap;
+  }
+  .element-card {
+    margin: 15px;
+    padding: 5px 10px;
+    flex: 1 1 auto;
+    width: 300px;
+    height: 150px;
+
+    .element-card--primary {
+      padding-top: 25px;
+      font-size: 120%;
+
+      .element-card--title {
+      }
+    }
+  }
+}
+
+
+// Only apply this style if below top app bar.
+.mdc-top-app-bar {
+  z-index: 7;
+}
