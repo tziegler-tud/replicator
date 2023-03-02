@@ -8,6 +8,8 @@ import { fileURLToPath } from 'url';
 import { create } from 'express-handlebars';
 
 import endpoints from './config/endpoints.json' assert { type: 'json' };
+import hueConfig from './config/hueConfig.json' assert { type: 'json' };
+import deconzConfig from './config/deconzConfig.json' assert { type: 'json' };
 
 import {apiErrorHandler, webErrorHandler} from "./helpers/error-handler.js";
 // var sassMiddleware = require('node-sass-middleware');
@@ -86,41 +88,12 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-//init LightsService and connect to Hue Bridge
-let BridgeUrl = "192.168.1.120";
-let BridgeUser = "G2wTDFWTbQnqJ5VfaBfXC5G5fVcBMLim61FK0njf";
-
-let deconzUrl = "192.168.1.112";
-let deconzUser = "F3E88E3AC0";
-/*
-intent manager setup
- */
 
 //load settings from db
 const settingsService = SettingsService.start({})
 
 // IntentService.start();
 const intentService = IntentService.start({config: "/rhinoModels/0_3_1/replicator_v0_3_1.yml"});
-
-//add handlers
-//
-// import ignore from "./intentHandlers/ignore.js";
-// intentManager.getIntent("Ignore").addHandlerArray(ignore);
-//
-// import changeLightState from"./intentHandlers/changeLightState.js";
-// intentManager.getIntent("changeLightState").addHandlerArray(changeLightState);
-//
-// import changeLightStateOff from"./intentHandlers/changeLightStateOff.js";
-// intentManager.getIntent("changeLightStateOff").addHandlerArray(changeLightStateOff);
-//
-// import lightBrightnessGroup from"./intentHandlers/lightBrightnessGroup.js";
-// intentManager.getIntent("LightBrightnessGroup").addHandlerArray(lightBrightnessGroup);
-//
-// import lightBrightnessLight from"./intentHandlers/lightBrightnessLight.js";
-// intentManager.getIntent("LightBrightnessLight").addHandlerArray(lightBrightnessLight);
-//
-// import lightScenes from "./intentHandlers/lightScenes.js";
-// intentManager.getIntent("LightScenes").addHandlerArray(lightScenes);
 
 //init voice command service
 const voiceCommandService =VoiceCommandService.start({});
@@ -139,6 +112,8 @@ const lightsService =LightsService.start({});
 const integrationService = new Promise(function(resolve, reject){
     IntegrationService.start({})
         .then(init => {
+            let BridgeUrl = hueConfig.bridgeUrl;
+            let BridgeUser = hueConfig.bridgeUserToken;
             IntegrationService.loadIntegration(IntegrationService.integrations.HUE, {BridgeUrl: BridgeUrl, BridgeUser: BridgeUser})
                 .then(()=> {
                     resolve();
@@ -146,6 +121,16 @@ const integrationService = new Promise(function(resolve, reject){
                 .catch(err=> {
                     reject(err);
                 })
+
+            // let deconzUrl = deconzConfig.bridgeUrl;
+            // let deconzUser = deconzConfig.bridgeUrl;
+            // IntegrationService.loadIntegration(IntegrationService.integrations.DECONZ, {BridgeUrl: deconzUrl, BridgeUser: deconzUser})
+            //     .then(()=> {
+            //         resolve();
+            //     })
+            //     .catch(err=> {
+            //         reject(err);
+            //     })
         });
 });
 

@@ -1,0 +1,8 @@
+{
+  "clients": {
+    "baseUrl": "/api/v1/clients",
+    "register": "/register",
+    "connect": "/connect",
+    "discover": "/discover"
+  }
+}

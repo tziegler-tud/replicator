@@ -54,7 +54,9 @@ This project is still in the early stages of development. Basic functionality is
 - Setting timers/alarms
 
 ## Tech requirements
-
+- Node.js 16+
+- MongoDb 5.0.12 (or any version compatible with the mongoose version used)
+- 
 ### Server Hardware:
 Anything capable of running node.js + mongodb should do. I am using a raspberry pi 4 4GB. 
 
@@ -64,3 +66,9 @@ Anything capable of running node.js + mongodb should do. I am using a raspberry 
 Any mic supported by the pi. I am using the ones below, which add the benefit of having some LEDs and still allow access to some GPIOs: 
 - [Seedstudio ReSpeaker 4-Mic Array](https://wiki.seeedstudio.com/ReSpeaker_4_Mic_Array_for_Raspberry_Pi/)
 - [Seedstudio ReSpeaker 2-Mic Array](https://wiki.seeedstudio.com/ReSpeaker_2_Mics_Pi_HAT/)
+
+## Installation and Quick start:
+For a basic installation, it is enough to clone this repo, install the modules (run npm install for both package.json in root dir and package.json in /src dir), and add an empty database to your mongo instance.
+Then, you need to set up your configuration using the /config dir:
+### Database config:
+Create a file db.json and include the following keys:
