@@ -4,12 +4,12 @@
 
 Creating an offline on-device Smart-Home voice assistant ecosystem with Node.js and [Picovoice](https://picovoice.ai)
 
-This repo contains the server application. For an client implementation, check out https://github.com/tziegler-tud/replicator-client
+This repo contains the server application. For a client implementation, check out https://github.com/tziegler-tud/replicator-client
 
 ## How it works:
 This application acts an as voice-interaction interface between several API-exposing smart-home gateways, e.g. Phillips Hue, Deconz or Homeassistant.
 The server (this repo) acts as a broker for interaction with these apis. Clients connecting to the server are "satellite" devices providing intent-based speech recognition, and forwarding these resulting intents to the server.
-The Server uses several layers of abstraction to provide customizeable handling of these intents.
+The Server uses several layers of abstraction to provide customizable handling of these intents.
 
 ## Core concepts:
 
