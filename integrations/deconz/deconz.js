@@ -1,14 +1,14 @@
 import https from 'https';
 import http from 'http';
-import Integration from "./Integration.js";
-import LightsService from "../services/LightsService.js";
+import Integration from "../Integration.js";
+import LightsService from "../../services/LightsService.js";
 
 export default class DeconzIntegration extends Integration {
     constructor({BridgeUrl, BridgeUser}={}){
         super();
         this.readableName = "Deconz Api Integration"
         this.integration = {
-            type: "Phillips Hue",
+            type: "Deconz",
             data: {
 
             }

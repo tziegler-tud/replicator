@@ -1,8 +1,8 @@
 import yaml from 'js-yaml';
 import fs from 'fs';
 import Service from "./Service.js";
-import HueIntegration from "../integrations/hue.js";
-import DeconzIntegration from "../integrations/deconz.js";
+import HueIntegration from "../integrations/hue/hue.js";
+import DeconzIntegration from "../integrations/deconz/deconz.js";
 
 /**
  * @typedef SlotObject {Object}

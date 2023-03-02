@@ -15,6 +15,11 @@ import communicationService from "./CommunicationService.js";
 
 
 class ClientService extends Service{
+
+    static STATUS = {
+        CONNECTED: "connected",
+        DISCONNECTED: "disconnected",
+    }
     constructor(init=false){
         super();
         let self = this;
@@ -34,11 +39,40 @@ class ClientService extends Service{
         })
     }
 
+    getClientStatus() {
+        let self = this;
+        return new Promise(function(resolve, reject){
+            const total = self.clients.length;
+            const connected = self.clients.filter(client => client.connection.connected);
+            self.getAllClientsJSON()
+                .then(clients => {
+                    const response = {
+                        stats: {
+                            total: total,
+                            connected: connected.length
+                        },
+                        clients: clients,
+                    }
+                    resolve(response)
+                })
+        })
+    }
+
     getAllClients() {
         let self = this;
         return new Promise(function(resolve, reject){
             //return all clients
             resolve(self.clients)
+        })
+    }
+
+    getAllClientsJSON() {
+        let self = this;
+        return new Promise(function(resolve, reject){
+            //return all clients json
+            let jsonArray = []
+            self.clients.forEach(client => jsonArray.push(client.getJSON()))
+            resolve(jsonArray);
         })
     }
 
@@ -121,7 +155,7 @@ class ClientService extends Service{
                 client.setConnected(); //mark as connected
                 const response = {
                     clientId: client.clientId,
-                    status: "connected",
+                    status: ClientService.STATUS.CONNECTED,
                     client: client,
                 }
                 resolve(response);
@@ -214,14 +248,14 @@ class ClientService extends Service{
             //test connection
             client.test()
                 .then(result=> {
-                    let state = result ? "connected" : "disconnected";
+                    let state = result ? ClientService.STATUS.CONNECTED : ClientService.STATUS.DISCONNECTED;
                     //result holds the test result. Note that Client.test() resolves regardless of the client connection status.
                     resolve({state: state, client: client, error: undefined})
                 })
                 .catch(err => {
                     //request failed with error
                     //most likely a problem with node fetch. Check Client.test() function code for errors.
-                    reject({state: "error", client: client, error: err})
+                    reject({state: ClientService.STATUS.ERROR, client: client, error: err})
                 })
         })
     }

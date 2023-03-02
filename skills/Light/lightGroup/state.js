@@ -36,7 +36,7 @@ let LightGroupStateToggle = new Skill({
         groupId: Skill.variableTypes.STRING,
     },
     handler: async function({handlerArgs, configuration, intentHandler}){
-        let light = await LightsService.getGroupById(handlerArgs.groupId);
+        let light = await LightsService.getGroupByUniqueId(handlerArgs.groupId);
         light.toggle();
     }
 })

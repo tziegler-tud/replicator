@@ -1,3 +1,5 @@
-Handlebars.registerHelper('json', function(context) {
+let json = function(context) {
     return JSON.stringify(context);
-});
+};
+
+export default {json};

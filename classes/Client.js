@@ -16,7 +16,7 @@ export default class Client {
      * @param dbId {String} database id. Indicates that a db object exists.
      */
     constructor(clientInformation, dbId = undefined) {
-        this.dbId = dbId.toString();
+        this.dbId = dbId ? dbId.toString() : undefined;
         this.clientId = clientInformation.clientId;
         this.server = clientInformation.server;
         this.identifier = clientInformation.identifier;
@@ -39,6 +39,24 @@ export default class Client {
         }
     }
 
+    getJSON(){
+        return {
+            dbId: this.dbId,
+            clientId: this.clientId,
+            server: this.server,
+            identifier: this.identifier,
+            versionData: this.versionData,
+            settings: this.settings,
+            skills: this.skills,
+            locations: this.locations,
+            lastConnection: this.lastConnection,
+            state: this.state,
+            connection: {
+                connected: this.connection.connected,
+                url: this.connection.url,
+            }
+        }
+    }
 
     /**
      * parses the client to the format used by the db

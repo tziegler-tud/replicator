@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
+import mongooseAutoPopulate from "mongoose-autopopulate";
 import {VariableExpectation} from '../helpers/enums.js';
 
 // create instance of Schema
@@ -41,6 +42,23 @@ var IntentHandlerScheme = new Schema({
             }
         }
     ],
+    finisher: {
+        active: {
+            type: Boolean,
+            default: false,
+        },
+        skill: {
+            identifier: {
+                type: String,
+            }
+        },
+        config: {
+            arguments: {
+                type: Object,
+                default: {},
+            }
+        }
+    }
 },
 {
     methods: {

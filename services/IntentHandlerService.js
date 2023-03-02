@@ -8,6 +8,7 @@ const IntentHandler = db.IntentHandler;
 import {VariableExpectation} from '../helpers/enums.js';
 
 import skills from "../skills/importer.js";
+import ExecutionContext from "../classes/ExecutionContext.js";
 
 
 
@@ -77,6 +78,11 @@ class IntentHandlerService extends Service{
     getSkills() {
         return this.skills;
     };
+
+    async getAll(){
+        let result = await IntentHandler.find();
+        return result;
+    }
 
 
     async create(data){
@@ -170,26 +176,24 @@ class IntentHandlerService extends Service{
         }
     }
 
-    async run(identifier, args){
-        let result = await IntentHandler.findOne({identifier: identifier});
-        if(!result) {
-            return {};
-        }
-        else {
-            let self = this;
-            result.actions.forEach(function(action){
-                const skillIdentifier = action.skill.identifier;
-                const config = action.config;
-
-                //find skill
-                let skill = self.getSkillByIdentifier(skillIdentifier);
-                skill.run({
-                    handlerArgs: args,
-                    configuration: config,
-                    intentHandler: result,
+    createExecutionContext(identifier){
+        let self = this;
+        return new Promise(function(resolve, reject){
+            IntentHandler.findOne({identifier: identifier})
+                .then(result=> {
+                    if(!result) {
+                        reject("IntentHandler not found: " + identifier);
+                    }
+                    else {
+                        //create new executionContext
+                        let ec = new ExecutionContext(result);
+                        resolve(ec);
+                    }
                 })
-            })
-        }
+                .catch(err => {
+                    reject(err);
+                })
+        })
     }
 }
 

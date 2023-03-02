@@ -49,18 +49,16 @@ export default async function createIntentHandler(){
 
     const skills = IntentHandlerService.getSkills();
 
-    // let action = {
-    //     skill: {
-    //         identifier: skills.Light.light.state.LightStateOn.identifier,
-    //     },
-    //     config: {
-    //         arguments: {
-    //             testArg: "testArg",
-    //         }
-    //     }
-    // }
-    // result.addAction(action)
-    // await result.save();
+    let action = {
+        skill: {
+            identifier: skills.Light.lightGroup.state.LightGroupStateToggle.identifier,
+        },
+        config: {
+            arguments: {
+                testArg: "testArg",
+            }
+        }
+    }
     let action2 = {
         skill: {
             identifier: skills.Light.light.state.LightStateToggle.identifier,
@@ -71,9 +69,12 @@ export default async function createIntentHandler(){
             }
         }
     }
-    await IntentHandlerService.addAction(identifier, action2);
-    const handlerResult = await IntentHandlerService.run(identifier, {
-        lightId: "58d2de6c-51ff-4869-a51e-21b4b50524e7",
+    await IntentHandlerService.addAction(identifier, action);
+    // await IntentHandlerService.addAction(identifier, action2);
+    const ec = await IntentHandlerService.createExecutionContext(identifier)
+    const handlerResult = await ec.run({
+        // lightId: "58d2de6c-51ff-4869-a51e-21b4b50524e7",
+        groupId: "99b989a4-3576-4715-a774-7fa408b612ff",
         requiredVar1: "test",
         requiredVar2: "test2"
     })

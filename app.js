@@ -5,7 +5,7 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import { fileURLToPath } from 'url';
 
-import { engine } from 'express-handlebars';
+import { create } from 'express-handlebars';
 
 import endpoints from './config/endpoints.json' assert { type: 'json' };
 
@@ -38,7 +38,13 @@ var app = express();
 global.appRoot = path.resolve(__dirname);
 
 // view engine setup
-app.engine('handlebars', engine());
+import handlebarsHelpers from "./helpers/handlebars/helpers.js"
+const hbs = create({
+    helpers: {
+        json: handlebarsHelpers.json,
+    }
+})
+app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -161,9 +167,9 @@ const servicesArray = [
 ]
 
 
-import createIntentHandler from "./test/intentHandlers.js";
-Promise.all(servicesArray).then(()=> {
-    createIntentHandler();
-});
+// import createIntentHandler from "./test/intentHandlers.js";
+// Promise.all(servicesArray).then(()=> {
+//     createIntentHandler();
+// });
 
 export default app;
