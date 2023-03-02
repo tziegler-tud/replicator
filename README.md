@@ -71,4 +71,4 @@ Any mic supported by the pi. I am using the ones below, which add the benefit of
 For a basic installation, it is enough to clone this repo, install the modules (run npm install for both package.json in root dir and package.json in /src dir), and add an empty database to your mongo instance.
 Then, you need to set up your configuration using the /config dir:
 ### Database config:
-Create a file db.json and include the following keys:
+Check out [exampleConfig](https://github.com/tziegler-tud/replicator/tree/server-rework/exampleConfig)
