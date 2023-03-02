@@ -3,6 +3,10 @@
 <head>
     <meta charset="utf-8">
     <title>Example App</title>
+    <script>
+        //add variables to window
+        window.page = {{{json page}}};
+    </script>
 <!--    <link rel="stylesheet" href="https://cdn.korzh.com/metroui/v4/css/metro-all.min.css">-->
     <script src="/dist/index.js"></script>
 <!--    <script src="/src/dist/index_style.js"></script>-->
@@ -11,41 +15,41 @@
 </head>
 <body class="replicator-body">
     <div class="replicator-wrapper">
-        <header class="mdc-top-app-bar app-bar" id="app-bar">
+        <header id="replicator-topbar" class="mdc-top-app-bar app-bar replicator-topbar" id="app-bar">
             <div class="mdc-top-app-bar__row">
                 <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
                     <button class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button">menu</button>
-                    <span class="mdc-top-app-bar__title">RePIcator dev Interface</span>
+                    <span class="mdc-top-app-bar__title">Replicator dev Interface</span>
                 </section>
             </div>
         </header>
-        <aside class="replicator-sidenav mdc-drawer mdc-drawer--dismissible mdc-top-app-bar--fixed-adjust">
+        <aside id="replicator-sidenav" class="replicator-sidenav mdc-drawer mdc-drawer--open mdc-drawer--dismissible mdc-top-app-bar--fixed-adjust">
             <div class="mdc-drawer__content">
                 <nav class="mdc-deprecated-list">
-                    <a class="mdc-deprecated-list-item" href="#">
+                    <a id="nav-entry--dashboard" class="mdc-deprecated-list-item nav-entry" href="/">
                         <span class="mdc-deprecated-list-item__ripple"></span>
                         <span class="mdc-deprecated-list-item__text">Dashboard</span>
                     </a>
-                    <a class="mdc-deprecated-list-item mdc-deprecated-list-item--activated" href="/clients" aria-current="page">
+                    <a id="nav-entry--clients" class="mdc-deprecated-list-item nav-entry" href="/clients" aria-current="page">
                         <span class="mdc-deprecated-list-item__ripple"></span>
 <!--                                <span class="material-icons mdc-deprecated-list-item__graphic" aria-hidden="true">-->
 <!--                                    <i class="material-icons md-email"></i>-->
 <!--                                </span>-->
                         <span class="mdc-deprecated-list-item__text">Clients</span>
                     </a>
-                    <a class="mdc-deprecated-list-item" href="/intents">
+                    <a id="nav-entry--intents" class="mdc-deprecated-list-item nav-entry" href="/intents">
                         <span class="mdc-deprecated-list-item__ripple"></span>
                         <span class="mdc-deprecated-list-item__text">Intents</span>
                     </a>
-                    <a class="mdc-deprecated-list-item" href="/intenthandlers">
+                    <a id="nav-entry--intenthandlers" class="mdc-deprecated-list-item nav-entry" href="/intenthandlers">
                         <span class="mdc-deprecated-list-item__ripple"></span>
                         <span class="mdc-deprecated-list-item__text">IntentHandlers</span>
                     </a>
-                    <a class="mdc-deprecated-list-item" href="/skills">
+                    <a id="nav-entry--skills" class="mdc-deprecated-list-item nav-entry" href="/skills">
                         <span class="mdc-deprecated-list-item__ripple"></span>
                         <span class="mdc-deprecated-list-item__text">Skills</span>
                     </a>
-                    <a class="mdc-deprecated-list-item" href="entities">
+                    <a id="nav-entry--entities" class="mdc-deprecated-list-item" href="entities">
                         <span class="mdc-deprecated-list-item__ripple"></span>
                         <span class="mdc-deprecated-list-item__text">Entities</span>
                     </a>

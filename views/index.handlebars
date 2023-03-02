@@ -1,1 +1,40 @@
-<h1>Example App: Home</h1>
+<div class="dashboard-container">
+    <div class="dashboard-inner">
+        <div class="dashboard-section dashboard-section-cards">
+            <div class="dashboard-section-header">
+                <span class="dashboard-section-header--title">
+                    Clients
+                </span>
+            </div>
+            <div class="dashboard-cardSet">
+                <div class="dashboard-card card card-amount card-amount--client card-padding">
+                    <div id="amount-renderer-clients" class="card-amount-renderer amount-renderer">
+
+                    </div>
+                    <div class="card-title card-text--primary">connected</div>
+                </div>
+            {{#each clients.clients}}
+                <div class="dashboard-card card element-card client-card client-card--reduced">
+                    <div class="card-header">{{this.identifier}}</div>
+                    <div class="card-body">
+                        <div class="card-property-container">
+                            <div class="card-property">
+                                <span class="card-property--label">versionData</span>
+                                <span class="card-property--value">{{this.versionData}}</span>
+                            </div>
+                            <div class="card-property">
+                                <span class="card-property--label">lastConnection</span>
+                                <span class="card-property--value">{{this.lastConnection}}</span>
+                            </div>
+                            <div class="card-property">
+                                <span class="card-property--label">state</span>
+                                <span class="card-property--value">{{this.connection.state}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {{/each}}
+            </div>
+        </div>
+    </div>
+</div>

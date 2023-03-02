@@ -1,0 +1,66 @@
+@import "./variables.scss";
+$dashboard-bg: $content;
+$dashboard-section-bg: $tertiary;
+
+.dashboard-container {
+  background-color: $dashboard-bg;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-flow: row nowrap;
+  .dashboard-inner {
+    flex: 1 1 auto;
+    margin: 25px 15px;
+
+    .dashboard-section {
+      width: 100%;
+      padding: 20px;
+      border-radius: 5px;
+
+      background-color: $dashboard-section-bg;
+      //box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+
+      .dashboard-section-header {
+        font-size: 180%;
+        font-weight: lighter;
+        font-family: "Open Sans Light", "Open Sans", serif;
+        margin-bottom: 2em;
+      }
+
+      &.dashboard-section-cards {
+        .dashboard-cardSet {
+          display: flex;
+          flex-flow: row wrap;
+
+          .dashboard-card {
+            background-color: $content;
+            box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+
+            .card-title {
+              font-size: 120%;
+            }
+            .card-text--primary {
+              color: $font-content-primary;
+            }
+            .card-text--secondary {
+              color: $font-content-secondary;
+            }
+            .card-text--shy {
+              color: $font-content-shy;
+            }
+            .card-text--good {
+              color: $font-content-good;
+            }
+            .card-text--neutral {
+              color: $font-content-neutral;
+            }
+            .card-text--bad {
+              color: $font-content-bad;
+            }
+          }
+
+        }
+      }
+    }
+  }
+}

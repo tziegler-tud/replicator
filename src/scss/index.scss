@@ -1,11 +1,25 @@
+//@use "@material/theme" with (
+//  $primary: #344955,
+//  $secondary: #3D5563,
+//  $on-primary: #FFF,
+//  $on-secondary: #AAA,
+//  $surface: #edf0f2,
+//  $on-surface: #344955,
+//);
 @use "@material/drawer";
 @use "@material/list";
+@use "@material/button";
 @use "@material/button/styles";
 @use "@material/icon-button/icon-button";
 @use "@material/top-app-bar";
 @use "@material/top-app-bar/mdc-top-app-bar";
 @use "@material/card";
+@use "@material/floating-label/mdc-floating-label";
+@use "@material/line-ripple/mdc-line-ripple";
+@use "@material/notched-outline/mdc-notched-outline";
+@use "@material/textfield";
 
+@include textfield.core-styles;
 @include card.core-styles;
 @include icon-button.core-styles;
 @include drawer.core-styles;
@@ -13,21 +27,21 @@
 @include drawer.modal-core-styles;
 @include list.deprecated-core-styles;
 
+@import "~@fontsource/open-sans/index.css";
+@import "./variables.scss";
+
 .replicator-body {
   margin: 0;
   padding: 0;
   height: 100%;
   width: 100%;
+  font-family: "Open Sans", sans-serif;
 
   .replicator-wrapper {
     display: flex;
     flex-flow: row nowrap;
     height: 100vh;
-
-    .mdc-top-app-bar {
-      @include top-app-bar.fill-color(#00293c)
-    }
-
+    background-color: #f6f9fd;
 
     .mdc-drawer-app-content {
       flex: auto;
@@ -58,25 +72,84 @@
     display: flex;
     flex-flow: row wrap;
   }
+}
+
+/**
+page elements
+
+ */
+
+/**
+cards
+ */
+
+.card-container {
+  display: flex;
+  flex-flow: row wrap;
+
+}
+.card {
+  display: flex;
+  flex-flow: column nowrap;
+  margin: 10px 15px;
+  &.card-padding {
+    padding: 15px 15px;
+  }
+  .card-header {
+    font-size: 120%;
+    font-family: "Open Sans Light", "Open Sans", serif;
+    padding: 5px 10px;
+    border-bottom: 1px solid #CCC;
+  }
+
+  .card-body {
+    padding: 5px 10px;
+  }
+
+  .card-property-container {
+    display: flex;
+    flex-flow: row wrap;
+    width: 100%;
+    .card-property {
+      display: block;
+      .card-property--label {
+
+      }
+      .card-property--value {
+
+      }
+    }
+  }
   .element-card {
     margin: 15px;
-    padding: 5px 10px;
+    padding: 0;
     flex: 1 1 auto;
-    width: 300px;
-    height: 150px;
+  }
+}
 
-    .element-card--primary {
-      padding-top: 25px;
-      font-size: 120%;
+/**
+buttons
+ */
 
-      .element-card--title {
-      }
+.button-container {
+  .button {
+    .mdc-button {
+      @include button.ink-color($primary)
+    }
+  }
+}
+
+/**
+forms
+ */
+
+.replicator-form-container {
+  .replicator-form {
+    .replicator-form-element {
+      margin: 1em 10px;
     }
   }
 }
 
 
-// Only apply this style if below top app bar.
-.mdc-top-app-bar {
-  z-index: 7;
-}
+

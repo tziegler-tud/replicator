@@ -1,0 +1,13 @@
+<div id="{{id}}" class="component-container {{componentName}}-container">
+    <div class="component-inner">
+        <div class="component-title">
+            <h1>{{componentName}}</h1>
+        </div>
+        <div class="component-body">
+            {{#each data}}
+                <span>{{@key}}</span>
+                <span>{{this}}</span>
+            {{/each}}
+        </div>
+    </div>
+</div>

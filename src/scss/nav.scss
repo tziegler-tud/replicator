@@ -1,3 +1,39 @@
-.replicator-nav {
+@use "@material/theme" with (
+  $primary: #FFF,
+  $secondary: #FFF,
+  $on-primary: #333,
+  $on-secondary: #333,
+  //$surface: #00293c,
+  //$on-surface: #FFF,
+);
+@use "@material/drawer";
+@use "@material/list";
+@use "@material/button/styles";
+@use "@material/icon-button/icon-button";
+@use "@material/top-app-bar";
+@use "@material/top-app-bar/mdc-top-app-bar";
 
+@import "./variables.scss";
+
+@include icon-button.core-styles;
+@include drawer.core-styles;
+@include drawer.dismissible-core-styles;
+@include drawer.modal-core-styles;
+@include list.deprecated-core-styles;
+
+.mdc-top-app-bar {
+  z-index: 7;
+  @include top-app-bar.fill-color($primary);
+  @include top-app-bar.ink-color($font-primary);
+  @include top-app-bar.icon-ink-color($font-primary);
+}
+.replicator-sidenav {
+  &.mdc-drawer {
+    @include drawer.surface-fill-color($primary);
+    @include drawer.shape-radius(5px);
+    @include drawer.activated-overlay-color($font-primary);
+    @include drawer.item-text-ink-color($font-primary);
+    @include drawer.item-activated-text-ink-color($font-primary);
+
+  }
 }
