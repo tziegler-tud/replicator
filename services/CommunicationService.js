@@ -94,6 +94,10 @@ class CommunicationService extends Service {
                 socket.on("message", (data) => self.tcpMessage(socket, data));
                 socket.on("disconnect", (reason)=> {
                     console.log("Client disconnected: " + client.identifier);
+                    clientService.disconnectClient(client)
+                        .then(result => {
+                            console.log("Client status set to disconnected: " + client.identifier);
+                        })
                 });
             });
 
@@ -280,7 +284,7 @@ class CommunicationService extends Service {
             let tmp = new Client({identifier: "discovery-tmp-client", url: clientUrl, server: clientServerObject});
             tmp.requestAuthentication()
                 .then(result => {
-                    //successful
+                    //successful, check for details of what happened
                     resolve(result);
                 })
                 .catch(reason => {

@@ -180,9 +180,15 @@ export default class Client {
             self.send({path: path, method: "POST", data: data})
                 .then(response => {
                     if(response.ok){
-                        resolve(response);
+                        response.json()
+                            .then(data => {
+                                resolve(data);
+
+                            })
                     }
-                    reject(response);
+                    else {
+                        reject(response);
+                    }
                 })
                 .catch(err => reject(err))
         });
@@ -226,9 +232,11 @@ export default class Client {
             fetch(url, options)
                 .then(response => {
                     if(response.ok) {
-                        const data = response.json();
-                        self.state = data;
-                        resolve(data);
+                        const data = response.json()
+                            .then(data => {
+                                self.state = data;
+                                resolve(data);
+                            })
                     }
                     else reject(response);
                 })
@@ -311,6 +319,7 @@ export default class Client {
     }
 
     setConnected(){
+        this.lastConnection = Date.now();
         this.connection.connected = true;
     }
 

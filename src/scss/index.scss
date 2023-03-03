@@ -108,15 +108,17 @@ cards
 
   .card-property-container {
     display: flex;
-    flex-flow: row wrap;
+    flex-flow: column nowrap;
     width: 100%;
     .card-property {
-      display: block;
+      flex: 1 1 auto;
+      display: flex;
       .card-property--label {
+        flex: 0 0 50%;
 
       }
       .card-property--value {
-
+        flex: 0 0 50%;
       }
     }
   }

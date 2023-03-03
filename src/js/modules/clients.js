@@ -21,11 +21,12 @@ export default new Module({
                 url: "/api/v1/clients/discover",
                 data: data,
             })
-                .done(()=>{
-
+                .done((response)=>{
+                    //Successfull
+                    console.log(response);
                 })
                 .fail((reason)=>{
-
+                    console.error(reason);
                 })
         })
     }

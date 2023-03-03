@@ -1,0 +1,19 @@
+<div class="card client-card component-container {{componentName}}-component-container">
+    <div class="card-header">{{data.client.identifier}}</div>
+    <div class="card-body">
+        <div class="card-property-container">
+            <div class="card-property">
+                <span class="card-property--label">versionData</span>
+                <span class="card-property--value">{{data.client.versionData}}</span>
+            </div>
+            <div class="card-property">
+                <span class="card-property--label">lastConnection</span>
+                <span class="card-property--value">{{transformDateTimeString data.client.lastConnection}}</span>
+            </div>
+            <div class="card-property">
+                <span class="card-property--label">state</span>
+                <span class="card-property--value">{{data.client.connection.state}}</span>
+            </div>
+        </div>
+    </div>
+</div>

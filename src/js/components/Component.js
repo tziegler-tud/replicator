@@ -3,11 +3,11 @@ import { v4 as uuidv4 } from 'uuid';
 import "../../scss/components/component.scss";
 
 export default class Component {
-    constructor(name, element, config){
+    constructor({name, element, config={}, data={}}){
         this.componentName = name
         this.container = element;
         this.templateUrl = "./templates/default.hbs";
-        this.data = {};
+        this.data = data;
         this.id = name + "-"+ uuidv4();
 
         const defaultClassName = name + "-component-container"

@@ -168,6 +168,36 @@ class ClientService extends Service{
         })
     }
 
+    disconnectClient(clientInformation) {
+        //disconnect a client that is already known
+        let self = this;
+
+        const identifier = clientInformation.identifier;
+        const clientId = clientInformation.clientId;
+        const url = clientInformation.url ? clientInformation.url : clientInformation.requestUrl;
+        const versionData = clientInformation.versionData;
+        const skills = clientInformation.skills;
+
+        return new Promise((resolve,reject) => {
+            //check known clients for identifier
+            let client = self.findOneById(clientId); //try id
+            if(client) {
+                client.setDisconnected(); //mark as connected
+                const response = {
+                    clientId: client.clientId,
+                    status: ClientService.STATUS.DISCONNECTED,
+                    client: client,
+                }
+                resolve(response);
+            }
+            else {
+                //client not found.
+                const reason = new ApiError("Client not known.", 401, "UnauthorizedError");
+                reject(reason)
+            }
+        })
+    }
+
     /**
      *
      * @param id {ObjectId} client database id

@@ -42,9 +42,7 @@ global.appRoot = path.resolve(__dirname);
 // view engine setup
 import handlebarsHelpers from "./helpers/handlebars/helpers.js"
 const hbs = create({
-    helpers: {
-        json: handlebarsHelpers.json,
-    }
+    helpers: handlebarsHelpers,
 })
 app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
