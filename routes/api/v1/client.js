@@ -84,7 +84,7 @@ function discoverClient(req, res, next) {
 
 function getClientLocations(req, res, next) {
     const id = req.params.clientId;
-    clientService.findOneById(id)
+    clientService.getById(id)
         .then(function(client){
             res.json(client.locations);
         })
@@ -96,17 +96,19 @@ function getClientLocations(req, res, next) {
 function addClientLocation(req, res, next) {
     const id = req.params.clientId;
     const locationId = req.body.id;
-    let client = clientService.findOneById(id)
-    if (client) {
-        client.addLocation(locationId)
+    clientService.getById(id)
+        .then(function(client){
+            client.addLocation(locationId)
             .then(result => {
                 res.json(result);
             })
             .catch(err => {
                 next(err);
             })
-    }
-    else next("Client not found.")
+        })
+        .catch(err => {
+            next(err);
+        })
 }
 
 function removeClientLocation(req, res, next) {

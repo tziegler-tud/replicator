@@ -12,6 +12,7 @@ import endpoints from '../../../config/endpoints.json' assert { type: 'json' };
 
 router.get("/", getIntents);
 router.get("/:title", getIntentByTitle);
+router.get("/slots/:title", getSlotByTitle);
 
 
 function getIntents(req, res, next) {
@@ -28,7 +29,18 @@ function getIntentByTitle(req, res, next) {
         //return not found
         next();
     }
+}
 
+
+function getSlotByTitle(req, res, next) {
+    const slot = intentService.getSlot(req.params.title)
+    if(slot){
+        res.json(slot);
+    }
+    else {
+        //return not found
+        next();
+    }
 }
 
 

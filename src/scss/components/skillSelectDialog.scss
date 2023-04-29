@@ -1,0 +1,62 @@
+@import "./../variables.scss";
+
+
+.skillSelectDialog-stage {
+
+  display: none;
+
+  &.skillSelectDialog-stage-active {
+    display: block;
+    .skillSelectDialog-stage-heading {
+      color: $font-content-secondary;
+    }
+  }
+  &.stage-finished {
+    .skillSelectDialog-stage-item {
+
+    }
+  }
+}
+
+.skillSelectDialog-stage-heading {
+  font-size: 140%;
+  color: #AAA;
+
+
+  .skillSelectDialog-stage-step {
+    margin-right: 1em;
+    padding: .25em;
+    border-radius: 3px;
+  }
+}
+
+.skillSelectDialog-stage-content {
+}
+
+.skillSelectDialog-stage-item {
+  background-color: $content;
+  cursor: pointer;
+  position: relative;
+
+  &.disabled {
+    cursor: not-allowed;
+    display: none;
+  }
+
+  &.selected {
+
+  }
+
+  .stage-item--icon {
+    img {
+      width: 1em;
+      height: 1em;
+    }
+  }
+
+  .stage-item--title {
+    font-size: 130%;
+    color: $primary;
+  }
+
+}

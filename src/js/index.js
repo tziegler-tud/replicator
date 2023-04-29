@@ -1,6 +1,3 @@
-import {MDCList} from "@material/list";
-import {MDCDrawer} from "@material/drawer";
-import {MDCTopAppBar} from "@material/top-app-bar";
 import "../scss/index.scss";
 import "../scss/nav.scss";
 import {MDCRipple} from "@material/ripple";
@@ -22,6 +19,12 @@ window.addEventListener('DOMContentLoaded', (event) => {
             })
         })
     }
+    try {
+        const buttonRipple = new MDCRipple(document.querySelector('.mdc-button'));
+    }
+    catch (e) {
+        console.log("Failed to initialize Ripples: " + e);
+    }
 
-    const buttonRipple = new MDCRipple(document.querySelector('.mdc-button'));
+
 });

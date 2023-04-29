@@ -1,0 +1,5 @@
+@use "@material/dialog";
+@use "@material/list";
+
+@include dialog.core-styles;
+@include list.deprecated-core-styles;

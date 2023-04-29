@@ -180,6 +180,14 @@ Handlebars.registerHelper("limitedEach", function(context, limit, options) {
     return ret;
 });
 
+Handlebars.registerHelper("checkVariable", function (key, map, value, options) {
+    'use strict';
+    //find the key in the map
+
+    return options.fn(this);
+    return options.inverse(this);
+});
+
 
 // Legacy dateTime transformer for comparison, in case anything goes wrong
 //

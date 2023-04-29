@@ -1,0 +1,152 @@
+<div id="dashboard-container" class="dashboard-container dashboard-tabs">
+    <div class="dashboard-inner">
+        <div class="dashboard-header">
+            <div class="dashboard-header-inner">
+                <span id="intenthandler--title">{{intentHandler.identifier}}</span><span class="text--shy">:: {{intentHandler.intent._identifier}}</span>
+            </div>
+        </div>
+        <div class="dashboard-menu">
+            <div id="dashboard-save-button" class="dashboard-menu-button dashboard-save-button">
+                <button class="mdc-fab" aria-label="Save">
+                    <div class="mdc-fab__ripple"></div>
+                    <span class="mdc-fab__icon material-icons">save</span>
+                </button>
+            </div>
+            <div id="dashboard-delete-button" class="dashboard-menu-button dashboard-delete-button">
+                <button class="mdc-fab" aria-label="Delete">
+                    <div class="mdc-fab__ripple"></div>
+                    <span class="mdc-fab__icon material-icons">delete</span>
+                </button>
+            </div>
+        </div>
+        <div class="mdc-tab-bar" role="tablist">
+            <div class="mdc-tab-scroller">
+                <div class="mdc-tab-scroller__scroll-area">
+                    <div class="mdc-tab-scroller__scroll-content">
+                        <button class="mdc-tab mdc-tab--active" role="tab" aria-selected="true" tabindex="0">
+                            <span class="mdc-tab__content">
+                                <span class="mdc-tab__icon material-icons" aria-hidden="true">add</span>
+                                <span class="mdc-tab__text-label">Action</span>
+                            </span>
+                            <span class="mdc-tab-indicator mdc-tab-indicator--active">
+                                <span class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span>
+                            </span>
+                            <span class="mdc-tab__ripple"></span>
+                        </button>
+                        <button class="mdc-tab" role="tab" aria-selected="true" tabindex="1">
+                            <span class="mdc-tab__content">
+                                <span class="mdc-tab__icon material-icons" aria-hidden="true">add</span>
+                                <span class="mdc-tab__text-label">Variable mapping</span>
+                            </span>
+                            <span class="mdc-tab-indicator">
+                                <span class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span>
+                            </span>
+                            <span class="mdc-tab__ripple"></span>
+                        </button>
+                        <button class="mdc-tab" role="tab" aria-selected="true" tabindex="2">
+                            <span class="mdc-tab__content">
+                                <span class="mdc-tab__icon material-icons" aria-hidden="true">settings</span>
+                                <span class="mdc-tab__text-label">Configuration</span>
+                            </span>
+                            <span class="mdc-tab-indicator">
+                                <span class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span>
+                            </span>
+                            <span class="mdc-tab__ripple"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="dashboard-tab--01" class="dashboard-tab dashboard-tab--active" data-tabid="0">
+            <div class="dashboard-section dashboard-section-list">
+                <div class="dashboard-section dashboard-section-cards">
+                    <div class="dashboard-section-header">
+                        <span class="dashboard-section-header--title">
+                            Action
+                        </span>
+                    </div>
+                    <div class="dashboard-list-container">
+                        <div class="dashboard-list-header">
+                            <span>Skill</span>
+                        </div>
+                        <ul class="dashboard-list dashboard-actions-list">
+                            <li class="dashboard-list-item dashboard-action-item">
+                                <div class="action-title">{{action.skill.identifier}}</div>
+                                <div class="action-content"></div>
+                            </li>
+                        </ul>
+                        <div class="button-container">
+                            <a class="button button-changeSkill">
+                                <button class="mdc-button mdc-button--outlined mdc-button--icon-leading">
+                                    <span class="mdc-button__ripple"></span>
+                                    <i class="material-icons mdc-button__icon" aria-hidden="true">edit</i>
+                                    <span class="mdc-button__label">change Skill</span>
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="dashboard-tab--02" class="dashboard-tab" data-tabid="1">
+            {{#each action.variables}}<div id="dashboard-tab1" class="dashboard-section dashboard-section-list">
+                <div class="dashboard-section-header">
+                    <span class="dashboard-section-header--title">
+                        <span>{{this.name}}</span>
+                        <span class="text--shy">:: {{this.type}}</span>
+                    </span>
+                </div>
+                <div id="mappingSelect--{{this.name}}" class="mappingSelect" data-variable="{{this.name}}">
+
+                </div>
+            </div>
+            {{/each}}
+        </div>
+        <div id="dashboard-tab--03" class="dashboard-tab" data-tabid="2">
+            <div id="dashboard-tab1" class="dashboard-section dashboard-section-list">
+                <div class="dashboard-section-header">
+                <span class="dashboard-section-header--title">
+                    Intent: {{intentHandler.intent._identifier}}
+                </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="dialog-save" class="mdc-dialog">
+    <div class="mdc-dialog__container">
+        <div class="mdc-dialog__surface"
+             role="alertdialog"
+             aria-modal="true"
+             aria-labelledby="my-dialog-title"
+             aria-describedby="my-dialog-content">
+            <h2 class="mdc-dialog__title" id="my-dialog-title">
+                Edit identifier
+            </h2>
+            <div class="mdc-dialog__content" id="my-dialog-content">
+                <label class="mdc-text-field mdc-text-field--filled">
+                    <span class="mdc-text-field__ripple"></span>
+                    <span class="mdc-floating-label" id="dialog-save-label">Identifier</span>
+                    <input id="dialog-save-input" class="mdc-text-field__input" type="text" aria-labelledby="dialog-save-label" value="{{intentHandler.identifier}}">
+                    <span class="mdc-line-ripple"></span>
+                </label>
+            </div>
+            <div class="mdc-dialog__actions">
+                <button type="button" class="mdc-button mdc-dialog__button button--shy" data-mdc-dialog-action="cancel">
+                    <div class="mdc-button__ripple"></div>
+                    <span class="mdc-button__label">Cancel</span>
+                </button>
+                <button type="button" class="mdc-button mdc-dialog__button button--primary" data-mdc-dialog-action="save" data-mdc-dialog-button-default>
+                    <div class="mdc-button__ripple"></div>
+                    <span class="mdc-button__label">Save</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="mdc-dialog__scrim"></div>
+</div>
+
+<div id="skillSelect-dialog">
+
+</div>

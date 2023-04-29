@@ -55,15 +55,6 @@ helpers.timeFromNow= function (x) {
     return Date.now() + x;
 };
 
-helpers.userHasRole= function (user, role) {
-    //handle populated and non-populated cases
-
-    if (user.role === undefined) return false;
-    let userRoleId = (user.role.id === undefined) ? user.role : user.role.id;
-    let roleId = (role.id === undefined) ? role : role.id;
-    return (userRoleId === roleId);
-};
-
 helpers.not= function (v1) {
     return !v1;
 };
@@ -109,6 +100,21 @@ helpers.json = function(context) {
     return JSON.stringify(context);
 };
 
+/**
+ * returns the key names of an object as a string seperated by comma
+ * @param object
+ * @returns {string}
+ */
+helpers.keysToString = function(object) {
+    let s = "";
+    for (const key in object){
+        s = s+key + ", ";
+    }
+    if(s.length > 0) {
+        s = s.slice(0, -2)
+    }
+    return s;
+};
 
 
 export default helpers;

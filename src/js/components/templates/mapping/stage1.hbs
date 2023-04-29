@@ -1,0 +1,19 @@
+<div id="stage1" class="mappingSelect-stage mappingSelect-stage-active mappingSelect-stage-initial">
+    <div id="stage1--heading" class="mappingSelect-stage-heading">
+        <span>Mapping type</span>
+    </div>
+    <div id="stage1--content" class="mappingSelect-stage-content">
+        <div class="dashboard-list-container">
+            <ul class="dashboard-list">
+                <li class="dashboard-list-item dashboard-list-item--select variable-mapping">
+                    <select id="stage1--select" class="variable-select dashboard-list-item-entry dashboard-list-item-value">
+                        {{#each data.stage.options}}
+                            <option value="{{this.value}}">{{this.name}}</option>
+                        {{/each}}
+                    </select>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+

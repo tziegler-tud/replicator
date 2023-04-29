@@ -3,6 +3,7 @@ import db from '../schemes/mongo.js';
 import tcpResponse from "../helpers/tcpResponseGenerator.js";
 import voiceCommandService from "../services/voiceCommandService.js";
 import LocationManager from "../managers/LocationManager.js"
+import {transformDateTimeString} from "../helpers/utility.js";
 const DbClient = db.Client;
 
 /**
@@ -36,6 +37,51 @@ export default class Client {
             connected: false,
             url: this.url,
             socket: undefined,
+        }
+    }
+
+    getClientDetails(){
+        return {
+            information: {
+                identifier: {
+                    type: "text",
+                    label: "Identifier",
+                    value: this.identifier
+                },
+                clientId: {
+                    type: "text",
+                    label: "database ID",
+                    value: this.clientId,
+                },
+                versionData: {
+                    type: "text",
+                    label: "version",
+                    value: this.versionData,
+                }
+            },
+            connection: {
+                connected: {
+                    type: "Boolean",
+                    label: "connected",
+                    value: this.connection.connected,
+                },
+                url: {
+                    type: "text",
+                    label: "url",
+                    value: this.connection.url,
+                },
+                lastConnection: {
+                    type: "Date",
+                    label: "last connection",
+                    value: transformDateTimeString(this.lastConnection).dateTime,
+                },
+            },
+            state: {
+
+            },
+            skills: this.skills,
+            settings: this.settings,
+
         }
     }
 
@@ -321,6 +367,7 @@ export default class Client {
     setConnected(){
         this.lastConnection = Date.now();
         this.connection.connected = true;
+        this.saveToDb();
     }
 
     setSocket(socket){

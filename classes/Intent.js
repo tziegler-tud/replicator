@@ -1,12 +1,20 @@
 import db from '../schemes/mongo.js';
 const dbIntent = db.Intent;
 
+/**
+ * Intent
+ * @class
+ */
 export default class Intent {
+    /**
+     *
+     * @param args
+     */
     constructor(args){
         if(args === undefined) args = {};
         this._identifier = args.identifier ? args.identifier : "";
         this._variables = args.variables? args.variables : {};
-        this._lines = [];
+        this._lines = args.lines? args.lines : [];
         this._handlers = [];
         this._groups = {
             macros: [],
@@ -14,6 +22,7 @@ export default class Intent {
             slots: [],
             slotsOptional: [],
         };
+        this._groups = Object.assign(this._groups, args.groups)
         this.dbObject = undefined;
 
         if(args._id) {
@@ -25,7 +34,7 @@ export default class Intent {
     saveToDb(){
         //check if dbObject exists
         if(this.dbObject){
-            this.dbObject = Object.assign(this.dbObject, this);
+            this.dbObject = Object.assign(this.dbObject, this.parseToDb());
         }
         else {
             this.dbObject = new dbIntent(this.parseToDb());

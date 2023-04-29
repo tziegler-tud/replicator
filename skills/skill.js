@@ -6,6 +6,10 @@ export default class Skill {
         ID: "string",
         OBJECT: "object",
         FUNCTION: "function",
+
+        light: "Light",
+        lightGroup: "LightGroup",
+        lightScene: "LightScene",
     };
 
     /**

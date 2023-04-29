@@ -10,16 +10,17 @@ var IntentHandlerScheme = new Schema({
         required: true,
         unique: true,
     },
-    client: {
+    clients: [{
         type: Schema.Types.ObjectId,
         ref: 'Client',
-        autopopulate: true,
-        required: true,
+    }],
+    allowAllClients: {
+        type: Boolean,
+        default: false,
     },
     intent: {
-        type: Schema.Types.ObjectId,
-        ref: 'Intent',
-        autopopulate: true,
+        type: String,
+        required: true,
     },
     variables: {
         required: {},
@@ -34,6 +35,23 @@ var IntentHandlerScheme = new Schema({
                     required: true,
                 }
             },
+            variables: [{
+                name: {
+                    type: String,
+                },
+                type: {
+                    type: String,
+                },
+                mapping: {
+                    mappingType: {
+                        //one of "constant", "variable", "dynamic variable"
+                    },
+                    value: {
+
+                    }
+                }
+
+            }],
             config: {
                 arguments: {
                     type: Object,
@@ -62,7 +80,7 @@ var IntentHandlerScheme = new Schema({
 },
 {
     methods: {
-        addVariable(identifier, type, expectation) {
+        addVariable(identifier, type, expectation=VariableExpectation.OPTIONAL) {
             let self = this;
             switch(expectation){
                 case VariableExpectation.REQUIRED:

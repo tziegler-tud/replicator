@@ -1,0 +1,62 @@
+<!--<div class="card-container">-->
+<!--    {{#each intenthandlers}}-->
+<!--        <div class="mdc-card element-card">-->
+<!--            <div class="mdc-card__primary-action ">-->
+<!--                <div class=" element-card--primary mdc-card__title element-card--title">{{this._doc.identifier}}</div>-->
+<!--                <div class="element-card--secondary">-->
+<!--                    <div class="element-card--secondary">Client: {{this._doc.client}}</div>-->
+<!--                    <div class="element-card--secondary">Intent: {{this._doc.intent}}</div>-->
+<!--                    &lt;!&ndash; ... additional primary action content ... &ndash;&gt;-->
+<!--                    <div class="mdc-card__ripple"></div>-->
+<!--                </div>-->
+<!--                &lt;!&ndash; ... additional primary action content ... &ndash;&gt;-->
+<!--                <div class="mdc-card__ripple"></div>-->
+<!--            </div>-->
+
+<!--        </div>-->
+<!--    {{/each}}-->
+<!--</div>-->
+
+<div class="dashboard-container">
+    <div class="dashboard-inner">
+        {{#each intentHandlersGrouped}}
+        <div class="dashboard-section dashboard-section-cards">
+            <div class="dashboard-section-header">
+                <span class="dashboard-section-header--title">
+                    {{@key}}
+                </span>
+            </div>
+            <div class="dashboard-cardSet">
+                {{#each this}}
+                    <div class="dashboard-card card element-card intentHandler-card" data-id="{{this._id}}">
+                        <div class="card-header">{{this.identifier}}</div>
+                        <div class="card-body">
+                            <div class="card-property-container">
+                                {{#each this.variables}}
+                                    <div class="card-property">
+                                        <span class="card-property--label">{{@key}}</span>
+                                        <span class="card-property--value">{{keysToString this}}</span>
+                                    </div>
+                                {{/each}}
+                            </div>
+                        </div>
+                    </div>
+                {{/each}}
+                <div class="dashboard-card card add-smt-card add-intentHandler-card" data-intent="{{@key}}">
+<!--                    <div class="card-header">Add another</div>-->
+                    <div class="card-body">
+                        <div class="add-smt-button">
+                            <div class="add-smt-button--icon">
+                                <i class="material-icons">add_circle</i>
+                            </div>
+                            <div class="add-smt-button--label">
+                                Add IntentHandler
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+</div>

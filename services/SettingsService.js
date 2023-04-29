@@ -43,7 +43,7 @@ class SettingsService {
         return this.init;
     }
 
-    initFunc() {
+    initFunc(args) {
         let self = this;
         return new Promise(function (resolve, reject) {
             console.log("Loading settings...");

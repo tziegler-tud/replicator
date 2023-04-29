@@ -1,0 +1,22 @@
+<div id="stage3" class="mappingSelect-stage">
+    <div id="stage3--heading" class="mappingSelect-stage-heading">
+        <span>Select value</span>
+    </div>
+    <div id="stage3--content" class="mappingSelect-stage-content">
+        <div class="dashboard-list-container">
+            <ul class="dashboard-list">
+                {{#each data.stage.options}}
+                    <li class="dashboard-list-item dashboard-list-item--select variable-mapping" data-variable="{{this.name}}" data-type="{{this.type}}">
+                        <span id="variable-{{this}}" class="dashboard-list-item-entry dashboard-list-item-label">{{this.name}}</span>
+                        <label class="replicator-form-element mdc-text-field mdc-text-field--filled">
+                            <span class="mdc-text-field__ripple"></span>
+                            <span class="mdc-floating-label" id="my-label-id">Value</span>
+                            <input id="intentHandler-identifier" class="mdc-text-field__input" type="text" aria-labelledby="my-label-id">
+                            <span class="mdc-line-ripple"></span>
+                        </label>
+                    </li>
+                {{/each}}
+            </ul>
+        </div>
+    </div>
+</div>

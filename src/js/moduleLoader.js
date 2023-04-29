@@ -1,9 +1,14 @@
 import Dashboard from "./modules/dashboard.js"
 import Clients from "./modules/clients.js"
+import Intents from "./modules/intents.js"
+import IntentHandlers from "./modules/intentHandler/intentHandlers.js"
+import IntentHandlerAdd from "./modules/intentHandler/intentHandlerAdd.js"
+import IntentHandlerDetails from "./modules/intentHandler/intentHandlerDetails.js"
+import IntentHandlerAction from "./modules/intentHandler/intentHandlerAction";
 
 export default class ModuleLoader {
     constructor(){
-        this.modules = [Dashboard, Clients];
+        this.modules = [Dashboard, Clients, Intents, IntentHandlers, IntentHandlerAdd, IntentHandlerDetails, IntentHandlerAction];
 
     }
 

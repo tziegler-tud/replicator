@@ -1,0 +1,21 @@
+<div class="linesPreview component-container {{componentName}}-component-container">
+    <ul class="linesPreview-list mdc-deprecated-list mdc-deprecated-list--two-line">
+    {{#each data.lines}}
+        <li class="linesPreview-list-item mdc-deprecated-list-item {{#if this.enabled}}linesPreview-list-item--active{{/if}} {{#if this.depends}}linesPreview-list-item--depends{{/if}}" tabindex="0" data-slots="{{this.slots}}">
+            <span class="linesPreview-list-item-icon linesPreview-list-item-icon--active mdc-deprecated-list-item__graphic material-icons">
+                task_alt
+            </span>
+            <span class="linesPreview-list-item-icon linesPreview-list-item-icon--depends mdc-deprecated-list-item__graphic material-icons">
+                nearby_error
+            </span>
+            <span class="linesPreview-list-item-icon linesPreview-list-item-icon--inactive mdc-deprecated-list-item__graphic material-icons">
+                remove_done
+            </span>
+            <span class="mdc-deprecated-list-item__text">
+                <span class="mdc-deprecated-list-item__primary-text">{{this.raw}}</span>
+                <span class="mdc-deprecated-list-item__secondary-text">{{this.groups.slots}}, {{#each this.groups.slotsOptional}}({{this}}),{{/each}}</span>
+            </span>
+        </li>
+    {{/each}}
+    </ul>
+</div>

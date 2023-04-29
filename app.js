@@ -2,6 +2,7 @@ import createError from 'http-errors';
 import express from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
+import bodyParser from "body-parser";
 import logger from 'morgan';
 import { fileURLToPath } from 'url';
 
@@ -28,8 +29,12 @@ import clientRouter from './routes/api/v1/client.js';
 import intentRouter from './routes/api/v1/intents.js';
 import locationRouter from './routes/api/v1/location.js';
 import lightRouter from './routes/api/v1/lights.js';
+import intentHandlerRouter from './routes/api/v1/intentHandler.js';
 
 import webIndexRouter from './routes/web/index.js';
+import webClientRouter from './routes/web/clients.js';
+import webIntentRouter from './routes/web/intents.js';
+import webIntentHandlerRouter from './routes/web/intentHandlers.js';
 
 
 
@@ -48,8 +53,15 @@ app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
 
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+app.use(bodyParser.json())
+app.use(bodyParser.text());
+
 app.use(logger('dev'));
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 // app.use(sassMiddleware({
@@ -66,9 +78,13 @@ app.use('/api/v1/clients', clientRouter);
 app.use('/api/v1/intents', intentRouter);
 app.use('/api/v1/locations', locationRouter);
 app.use('/api/v1/lights', lightRouter);
+app.use('/api/v1/intentHandler', intentHandlerRouter);
 app.use("/api", apiErrorHandler);
 
 app.use('/', webIndexRouter);
+app.use('/clients', webClientRouter);
+app.use('/intents', webIntentRouter);
+app.use('/intenthandlers', webIntentHandlerRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -153,6 +169,11 @@ const servicesArray = [
 // import createIntentHandler from "./test/intentHandlers.js";
 // Promise.all(servicesArray).then(()=> {
 //     createIntentHandler();
+// });
+
+// import createDummyHandlers from "./test/createDummyHandlers.js";
+// Promise.all(servicesArray).then(()=> {
+//     createDummyHandlers(25);
 // });
 
 export default app;

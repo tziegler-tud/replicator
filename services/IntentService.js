@@ -23,6 +23,7 @@ class IntentService extends Service{
          * @type {SlotObject[]}
          */
         this.slots = [];
+        this.macros = [];
         this.configLoaded = false;
         this.debugLabel = "IntentService: ";
     }
@@ -31,17 +32,17 @@ class IntentService extends Service{
         let self = this;
         return new Promise(function(resolve, reject){
             //check if a setting is present in the db
-            if(self.globalSettings.intentConfig.active){
-                self.debug("Using stored intents.");
-                self.loadDatabase()
-                    .then(result => {
-                        resolve();
-
-                    })
-                    .catch(err => {
-                        self.debug("Failed to load database content: " + err);
-                    })
-            }
+            // if(self.globalSettings.intentConfig.active){
+            //     self.debug("Using stored intents.");
+            //     self.loadDatabase()
+            //         .then(result => {
+            //             resolve();
+            //
+            //         })
+            //         .catch(err => {
+            //             self.debug("Failed to load database content: " + err);
+            //         })
+            // }
             if(config) {
                 self.loadConfig(config)
                     .then(result=> {
@@ -90,6 +91,7 @@ class IntentService extends Service{
         //parse the json-style yaml config file to find all intents and variables
         let expressions = doc.context.expressions;
         let slots = doc.context.slots;
+        let macros = doc.context.macros;
         let self = this;
 
         for (const key in expressions) {
@@ -111,7 +113,7 @@ class IntentService extends Service{
                 // line = line.replace(/[\(\)]/g, "");
                 // let tokens = line.split(/ |\w\$|\w@|\(\$|\(@/);
                 let raw = line.slice();
-                let tokens = line.matchAll(/(?<macros>(?<!\()@\w+)|(?<macrosOptional>(?<=\()@\w+)|(?<slots>(?<!\()\$\w+:\w+)|(?<slotsOptional>(?<=\()\$\w+:\w+)/g)
+                let tokens = line.matchAll(/(?<macros>(?<!\()@\w+)|(?<macrosOptional>(?<=\()@\w+)|(?<slots>(?<!\()\$\w+\.?\w*:\w+)|(?<slotsOptional>(?<=\()\$\w+:\w+)/g)
                 var groups = {
                     macros: [],
                     macrosOptional: [],
@@ -133,15 +135,15 @@ class IntentService extends Service{
                 }
                 intent.addLine(intentLine)
             })
-            //check if already registered
-            let dbObject = await dbIntent.findOne({identifier: intent.identifier});
-            if (dbObject){
-                //identifier already taken. Skip and load from db instead
-                self.debug("Failed to load intent from config: Identifier already in database!");
-                intent = new Intent(dbObject);
-            }
+            // //check if already registered
+            // let dbObject = await dbIntent.findOne({identifier: intent.identifier});
+            // if (dbObject){
+            //     //identifier already taken. Skip and load from db instead
+            //     self.debug("Failed to load intent from config: Identifier already in database!");
+            //     intent = new Intent(dbObject);
+            // }
             try {
-                const result = await intent.saveToDb();
+                // const result = await intent.saveToDb();
                 self.addIntent(intent);
                 identifiersLoaded++;
             }
@@ -157,6 +159,18 @@ class IntentService extends Service{
             let title = key;
             let values = slots[key];
             self.slots.push({
+                title: title,
+                values: values,
+            })
+        })
+
+        //parse makros
+        Object.keys(macros).forEach(function(key,index) {
+            // key: the name of the object key
+            // index: the ordinal position of the key within the object
+            let title = key;
+            let values = macros[key];
+            self.macros.push({
                 title: title,
                 values: values,
             })
@@ -194,6 +208,19 @@ class IntentService extends Service{
         })
     }
 
+    getIntentPromise(identifier){
+        let self = this;
+        return new Promise(function(resolve, reject){
+            const intent = self.getIntent(identifier);
+            if(intent){
+                resolve(intent);
+            }
+            else {
+                reject("Intent not found.")
+            }
+        })
+    }
+
     getAllIntents(){
         return this.intents;
     }
@@ -207,6 +234,14 @@ class IntentService extends Service{
         return this.slots.find(slot => {
             return slot.title === title;
         })
+    }
+
+    getAllSlots(){
+        return this.slots;
+    }
+
+    getAllMacros(){
+        return this.macros;
     }
 }
 export default new IntentService();

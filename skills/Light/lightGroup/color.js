@@ -11,7 +11,7 @@ let setLightGroupColor = new Skill({
     title: "Color",
     description: "Set the color of the LightGroup",
     variables: {
-        groupId: Skill.variableTypes.STRING,
+        groupId: Skill.variableTypes.lightGroup,
         color: Skill.variableTypes.OBJECT,
     },
     handler: async function({handlerArgs, configuration, intentHandler}){

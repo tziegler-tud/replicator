@@ -16,11 +16,6 @@ const MODULES = {
  * hooked at /
  */
 router.get("/", index)
-router.get("/clients", clients)
-router.get("/clients/add", addClient)
-router.get("/clients/:id", clientDetails)
-router.get("/intents", intents)
-router.get("/intenthandlers", intenthandlers)
 router.get("/skills", skills)
 
 function index(req, res, next){
@@ -48,67 +43,11 @@ function index(req, res, next){
 
 }
 
-function clients(req, res, next){
-
-    //get clients
-    ClientService.getAllClients()
-        .then(clients => {
-            res.render("clients", {
-                clients: {
-                    connected: clients.filter(client => client.connection.connected),
-                    disconnected: clients.filter(client => !client.connection.connected)
-                },
-                page: {
-                    modules: [
-                        MODULES.CLIENTS,
-                    ],
-                    nav: {
-                        currentEntry: "clients"
-                    }
-                }
-            });
-        });
-}
-
-function addClient(req, res, next){
-    res.render("clients/add", {
-        page: {
-            modules: [
-                MODULES.CLIENTS,
-            ],
-            nav: {
-                currentEntry: "clients"
-            }
-        }
-    });
-}
-
-function clientDetails(req, res, next){
-
-}
-
-function intents(req, res, next){
-
-    //get clients
-    const intents = IntentService.getAllIntents()
-    res.render("intents", {
-        intents: intents,
-        page: {
-            modules: [
-
-            ],
-            nav: {
-                currentEntry: "intents"
-            }
-        }
-    });
-}
-
 function skills(req, res, next){
 
     //get clients
     const skills = IntentHandlerService.getSkills()
-    res.render("skills", {
+    res.render("skills/all", {
         skills: skills,
         page: {
             modules: [
@@ -125,7 +64,7 @@ function intenthandlers(req, res, next){
 
     IntentHandlerService.getAll()
         .then(intenthandlers => {
-            res.render("intenthandlers", {
+            res.render("intenthandlers/all", {
                 intenthandlers: intenthandlers,
                 page: {
                     modules: [

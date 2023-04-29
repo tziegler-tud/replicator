@@ -23,6 +23,9 @@ let skills = {
         lightScene: {
             state: lightSceneState,
         }
-    }
+    },
+    Music: {},
+    Sound: {},
+    Voice: {}
 }
 export default skills;

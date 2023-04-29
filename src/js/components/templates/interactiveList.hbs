@@ -1,0 +1,25 @@
+<div class="interactiveList component-container {{componentName}}-component-container">
+    <ul class="interactiveList-list mdc-deprecated-list">
+    {{#each data.entries}}
+        <li class="interactiveList-list-item mdc-deprecated-list-item" tabindex="0">
+            <span class="mdc-deprecated-list-item__graphic material-icons">
+                task_alt
+            </span>
+            <span class="mdc-deprecated-list-item__text">
+                <div class="interactiveList-item-content">
+                    <div class="interactiveList-item-label">
+                        <span>{{this.label}}</span>
+                    </div>
+                    <div class="interactiveList-item-interactionContainer">
+                        {{#each this.interactions}}
+                            {{{this.html}}}
+                        {{/each}}
+                    </div>
+                </div>
+            </span>
+<!--            <span class="mdc-deprecated-list-item__meta">-->
+<!--            </span>-->
+        </li>
+    {{/each}}
+    </ul>
+</div>

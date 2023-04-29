@@ -1,0 +1,50 @@
+@use "@material/list";
+@import "./../variables.scss";
+
+@include list.deprecated-core-styles;
+
+.linesPreview-component-container {
+  .linesPreview-list {
+    .linesPreview-list-item {
+      color: $font-content-shy;
+      cursor: default !important;
+
+      &.linesPreview-list-item--active {
+        color: $primary;
+        .linesPreview-list-item-icon--active {
+          display: block;
+        }
+        .linesPreview-list-item-icon--depends {
+          display: none;
+        }
+        .linesPreview-list-item-icon--inactive {
+          display: none
+        }
+
+        &.linesPreview-list-item--depends {
+          .linesPreview-list-item-icon--active {
+            display: none;
+          }
+          .linesPreview-list-item-icon--depends {
+            display: block;
+          }
+          .linesPreview-list-item-icon--inactive {
+            display: none
+          }
+        }
+      }
+      .linesPreview-list-item-icon--active {
+        color: $primary;
+        display: none;
+      }
+      .linesPreview-list-item-icon--depends {
+        display: none;
+        color: $font-content-neutral;
+      }
+      .linesPreview-list-item-icon--inactive {
+        color: $font-content-shy;
+        display: block;
+      }
+    }
+  }
+}

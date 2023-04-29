@@ -31,7 +31,7 @@ export default async function createIntentHandler(){
     let ih1 = {
         identifier: identifier,
         client: testClient.dbId,
-        intent: testIntent.dbObject,
+        intent: testIntent.identifier,
         variables: {
             required: {
                 requiredVar1: "String",
@@ -71,13 +71,13 @@ export default async function createIntentHandler(){
     }
     await IntentHandlerService.addAction(identifier, action);
     // await IntentHandlerService.addAction(identifier, action2);
-    const ec = await IntentHandlerService.createExecutionContext(identifier)
-    const handlerResult = await ec.run({
-        // lightId: "58d2de6c-51ff-4869-a51e-21b4b50524e7",
-        groupId: "99b989a4-3576-4715-a774-7fa408b612ff",
-        requiredVar1: "test",
-        requiredVar2: "test2"
-    })
-    console.log(handlerResult);
+    // const ec = await IntentHandlerService.createExecutionContext(identifier)
+    // const handlerResult = await ec.run({
+    //     // lightId: "58d2de6c-51ff-4869-a51e-21b4b50524e7",
+    //     groupId: "99b989a4-3576-4715-a774-7fa408b612ff",
+    //     requiredVar1: "test",
+    //     requiredVar2: "test2"
+    // })
+    // console.log(handlerResult);
 
 }
