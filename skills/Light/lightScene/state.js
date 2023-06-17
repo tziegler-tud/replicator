@@ -9,7 +9,7 @@ let LightSceneActivate = new Skill({
     identifier: "LightsceneActivate",
     description: "Activate a scene",
     variables: {
-        sceneId: Skill.variableTypes.STRING,
+        sceneId: Skill.variableTypes.lightScene,
     },
     handler: async function({handlerArgs, configuration, intentHandler}){
         let scene = await LightsService.getSceneByUniqueId(handlerArgs.sceneId);

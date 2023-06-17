@@ -228,14 +228,14 @@ export default new Module({
 
             const variables = {forbidden: {}, optional: {}, required: {}}
             variablesBySelected.forbidden.forEach(variable => {
-                variables.forbidden[variable] = "string";
+                variables.forbidden[variable] = variablesWithTypes[variable];
             })
             variablesBySelected.optional.forEach(variable => {
-                variables.optional[variable] = "string";
+                variables.optional[variable] = variablesWithTypes[variable];
             })
             variablesBySelected.required.forEach(variable => {
                 // variables.required[variable] = variablesWithTypes[variable];
-                variables.required[variable] = "string";
+                variables.required[variable] = variablesWithTypes[variable];
             })
 
             const data = {

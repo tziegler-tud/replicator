@@ -46,6 +46,9 @@ var IntentHandlerScheme = new Schema({
                     mappingType: {
                         //one of "constant", "variable", "dynamic variable"
                     },
+                    variable: {
+
+                    },
                     value: {
 
                     }

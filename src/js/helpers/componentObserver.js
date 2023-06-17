@@ -3,6 +3,9 @@ export default class ComponentObserver {
         if(events.length === 0 || events === "all") {
             events = ["all"];
         }
+        if(!Array.isArray(events)){
+            events = [events]
+        }
         this.events = events;
         this.notifyFunc = notifyFunc
     }

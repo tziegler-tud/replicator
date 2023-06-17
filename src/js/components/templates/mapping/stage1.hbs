@@ -6,9 +6,9 @@
         <div class="dashboard-list-container">
             <ul class="dashboard-list">
                 <li class="dashboard-list-item dashboard-list-item--select variable-mapping">
-                    <select id="stage1--select" class="variable-select dashboard-list-item-entry dashboard-list-item-value">
+                    <select id="stage1--select" class="stage--select variable-select dashboard-list-item-entry dashboard-list-item-value">
                         {{#each data.stage.options}}
-                            <option value="{{this.value}}">{{this.name}}</option>
+                            <option class="selectStage--option" value="{{this.value}}">{{this.name}}</option>
                         {{/each}}
                     </select>
                 </li>

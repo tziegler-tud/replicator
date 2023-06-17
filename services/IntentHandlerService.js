@@ -174,7 +174,8 @@ class IntentHandlerService extends Service{
         }
         else {
             Object.keys(intent.variables).forEach(key => {
-                intentHandler.addVariable(key, "string");
+                // intentHandler.addVariable(key, "string");
+                intentHandler.addVariable(key, intent.variables[key]);
             })
         }
 

@@ -27,7 +27,6 @@ export default new Module({
 
         const saveButton = document.getElementById("dashboard-save-button");
         saveButton.addEventListener("click", function(){
-
             save({data: action});
         })
 
@@ -56,19 +55,30 @@ export default new Module({
         const mappingSelects = $(".mappingSelect");
 
         mappingSelects.each(function(index, element){
-            const mappingSelect = new MappingSelect({element: element}, {variable: element.dataset.variable, intentHandler: intentHandler});
-            mappingSelect.render()
-                .then(()=>{
-                    //create new observer
-                    const mappingSelectObserver = new ComponentObserver("confirmed", function(event, data){
-                        console.log("MappingSelect finished.")
+            let variableId = element.dataset.id;
+            //find in variable array
+            const variable = action.variables.find(e => e._id.toString() === variableId.toString());
+            if(variable) {
+                const mappingSelect = new MappingSelect({element: element}, {variable: variable, intentHandler: intentHandler});
+                mappingSelect.render()
+                    .then(()=>{
+                        //create new observer
+                        const mappingSelectObserver = new ComponentObserver(["finished","changed"], function(event, data) {
+                            console.log("MappingSelect finished.");
+                            let mappingData = mappingSelect.getMapping();
+                            variable.mapping = mappingData;
+                        })
+                        mappingSelect.addObserver(mappingSelectObserver)
                     })
-                    mappingSelect.addObserver(mappingSelectObserver)
-                })
+            }
+            else {
+                console.warn("Failed to update variable: variable with ID: " + variableId + " not found in array.");
+            }
+
         })
 
         function save({data, reload=false}){
-            //get enabled clients from component
+            //update action
             $.ajax({
                 method: "PUT",
                 url: "/api/v1/intentHandler/" + intentHandler.identifier + "/action/"+action._id,
