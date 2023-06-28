@@ -11,8 +11,8 @@ export default class GroupedLight extends HueLight {
     }
 
     async getState(){
-        this.internalState = await this.bridgeApi.getGroupedLightState(this.lightId);
-        this.state = this.parseHueToState(this.nativeObject);
+        let result = await this.bridgeApi.getGroupedLightState(this.lightId);
+        this.state = this.parseHueToState(result);
         return this.state;
     }
 }

@@ -1,0 +1,45 @@
+<div class="entitySelectDialog component-container dialog-component-container {{componentName}}-component-container mdc-dialog__container">
+    <div class="mdc-dialog__surface"
+         role="alertdialog"
+         aria-modal="true"
+         aria-labelledby="my-dialog-title"
+         aria-describedby="my-dialog-content">
+        <h2 class="mdc-dialog__title" id="my-dialog-title">Choose skill</h2>
+        <div class="mdc-dialog__content" id="my-dialog-content">
+            <div class="entitySelectDialog-stages-container">
+                <div id="entitySelectDialog-stage1" class="entitySelectDialog-stage entitySelectDialog-stage-active entitySelectDialog-stage-initial">
+                    <ul id="entitySelectDialog-stage1--content" class="entitySelectDialog-stage-content mdc-deprecated-list mdc-deprecated-list--two-line mdc-deprecated-list--avatar-list" role="listbox">
+                    </ul>
+                </div>
+                <div id="entitySelectDialog-stage2" class="entitySelectDialog-stage">
+                    <ul id="entitySelectDialog-stage2--content" class="entitySelectDialog-stage-content mdc-deprecated-list mdc-deprecated-list--two-line mdc-deprecated-list--avatar-list" role="listbox">
+                    </ul>
+                </div>
+
+                <div id="entitySelectDialog-stage3" class="entitySelectDialog-stage">
+                    <ul id="entitySelectDialog-stage3--content" class="entitySelectDialog-stage-content mdc-deprecated-list mdc-deprecated-list--two-line mdc-deprecated-list--avatar-list" role="listbox">
+                    </ul>
+                </div>
+                <div id="entitySelectDialog-stage4" class="entitySelectDialog-stage">
+                    <ul id="entitySelectDialog-stage4--content" class="entitySelectDialog-stage-content mdc-deprecated-list mdc-deprecated-list--two-line" role="listbox">
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="mdc-dialog__actions">
+            <button id="entitySelectDialog-cancel-button" type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="cancel">
+                <div class="mdc-button__ripple"></div>
+                <span class="mdc-button__label">Cancel</span>
+            </button>
+            <button id="entitySelectDialog-back-button" type="button" class="mdc-button mdc-dialog__button" disabled data-mdc-dialog-action="back">
+                <div class="mdc-button__ripple"></div>
+                <span class="mdc-button__label">Back</span>
+            </button>
+            <button id="entitySelectDialog-confirm-button" type="button" class="mdc-button mdc-dialog__button" disabled data-mdc-dialog-action="confirm">
+                <div class="mdc-button__ripple"></div>
+                <span class="mdc-button__label">Confirm</span>
+            </button>
+        </div>
+    </div>
+    <div class="mdc-dialog__scrim"></div>
+</div>

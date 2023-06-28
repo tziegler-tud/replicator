@@ -1,38 +1,29 @@
 import Component from "./Component.js"
-import "../../scss/components/skillSelectDialog.scss";
+import "../../scss/components/entitySelectDialog.scss";
 import Handlebars from "handlebars";
 import DialogComponent from "./DialogComponent";
 import {MDCList} from "@material/list";
 
-export default class SkillSelectDialog extends DialogComponent{
-    constructor({element, config={}}={}, data={skills: {}}) {
-        super({name: "skillSelect", element: element, config: config, data: data});
+export default class EntitySelectDialog extends DialogComponent{
+    constructor({element, config={}}={}, data={entities: {}}) {
+        super({name: "entitySelect", element: element, config: config, data: data});
 
-        this.skills = data.skills;
+        this.entities = data.entities;
         this.stages = {};
-        this.selectedSkill = undefined;
-        this.templateUrl = "/js/components/templates/skillSelectDialog.hbs";
+        this.selected = undefined;
+        this.templateUrl = "/js/components/templates/entitySelectDialog.hbs";
         this.itemCounter = 0;
 
         //augment descriptions
         this.descriptions = {
             stage1: {
-                Light: {text: "Control Lights and Scenes.", icon: "/icons/lightbulb.png"},
-                Sound: {text: "Play sounds", icon: "/icons/audioFile.png"},
-                Voice: {text: "Use text-to-speech output", icon: "/icons/tts.png"},
-                Music: {text: "Control music playback", icon: "/icons/speaker.png"},
+                lights: {text: "Control individual lights", icon: "/icons/floorLamp.png"},
+                lightGroups: {text: "Control Groups of lights", icon: "/icons/lightGroup.png"},
+                scenes: {text: "Control Light scenes", icon: "/icons/lightScene.png"},
             },
             stage2: {
-                light: {text: "Control individual lights", icon: "/icons/floorLamp.png"},
-                lightGroup: {text: "Control Groups of lights", icon: "/icons/lightGroup.png"},
-                lightScene: {text: "Control Light scenes", icon: "/icons/lightScene.png"},
-            },
-            stage3: {
-                brightness: {text: "Control brightness", icon: "/icons/brightness.png"},
-                color: {text: "Control color", icon: "/icons/lightScene.png"},
-                state: {text: "Control state", icon: "/icons/power.png"},
-            }
 
+            },
         }
     }
 
@@ -50,9 +41,9 @@ export default class SkillSelectDialog extends DialogComponent{
         let self = this;
 
         //setup buttons
-        this.cancelButton = document.getElementById("skillSelectDialog-cancel-button")
-        this.backButton = document.getElementById("skillSelectDialog-back-button")
-        this.confirmButton = document.getElementById("skillSelectDialog-confirm-button")
+        this.cancelButton = document.getElementById("entitySelectDialog-cancel-button")
+        this.backButton = document.getElementById("entitySelectDialog-back-button")
+        this.confirmButton = document.getElementById("entitySelectDialog-confirm-button")
 
         this.backButton.addEventListener("click", function(e){
             e.preventDefault();
@@ -76,22 +67,14 @@ export default class SkillSelectDialog extends DialogComponent{
             //await finished stage
             self.stages.stage2.onFinished(function(selectedItem){
                 //load up stage 2
-                self.loadStage3();
-                self.stages.stage3.onFinished(function(selectedItem){
-                    //load up stage 2
-                    self.loadStage4();
-                    self.stages.stage4.onFinished(function(selectedItem){
-                        //load up stage 2
-                        self.selectedSkill = self.stages.stage4.selectedItem.value;
-                        self.confirmButton.disabled = false;
-                    })
-                })
+                self.selected = self.stages.stage2.selectedItem.value;
+                self.confirmButton.disabled = false;
             })
         })
     }
 
     finish(){
-        this.emitEvent({event: "confirmed", data: {skill: this.selectedSkill}});
+        this.emitEvent({event: "confirmed", data: {entity: this.selected}});
     }
 
     loadPreviousStage(){
@@ -103,7 +86,7 @@ export default class SkillSelectDialog extends DialogComponent{
         const heading = "What do you want to do?"
         const stage1 = new Stage(1, heading, undefined);
         //get first-level options
-        let stage1Options = Object.keys(this.skills);
+        let stage1Options = Object.keys(this.entities);
         //add stage items
         stage1Options.forEach(optionName=> {
             const description = this.descriptions.stage1[optionName] ? this.descriptions.stage1[optionName] : {};
@@ -126,77 +109,22 @@ export default class SkillSelectDialog extends DialogComponent{
         //get selected value from stage1
         const stage1Selected = this.stages.stage1.selectedItem;
 
-        const heading = "Select your case"
+        const heading = "Select entity"
         const stage2 = new Stage(2, heading, this.stages.stage1);
 
-        let stage2Options = Object.keys(this.skills[stage1Selected.value]);
+        let stage2Options = this.entities[stage1Selected.value];
         //add stage items
-        stage2Options.forEach(optionName=> {
-            const description = this.descriptions.stage2[optionName] ? this.descriptions.stage2[optionName] : {};
+        stage2Options.forEach(entity=> {
             const item = new StageItem({
-                title: optionName,
-                text: description.text,
-                icon: description.icon,
-                value: optionName,
-            }, this.itemCounter++);
+                title: entity.identifier,
+                text: entity.uniqueId,
+                value: entity.uniqueId,
+            }, this.itemCounter++, {showIcon: false});
             stage2.addItem(item);
         })
 
         this.stages.stage2 = stage2;
         this.showStage(stage2);
-
-    }
-
-    loadStage3(){
-        //get selected value from stage1
-        const stage1Selected = this.stages.stage1.selectedItem;
-        const stage2Selected = this.stages.stage2.selectedItem;
-
-        const stage3 = new Stage(3, "", this.stages.stage2);
-
-        let stage3Options = Object.keys(this.skills[stage1Selected.value][stage2Selected.value]);
-        //add stage items
-        stage3Options.forEach(optionName => {
-            const description = this.descriptions.stage3[optionName] ? this.descriptions.stage3[optionName] : {};
-            const item = new StageItem({
-                title: optionName,
-                text: description.text,
-                icon: description.icon,
-                value: optionName,
-            }, this.itemCounter++);
-            stage3.addItem(item);
-        })
-        this.stages.stage3 = stage3;
-        this.previousStage = this.stages.stage2;
-        this.showStage(stage3);
-
-    }
-
-    loadStage4(){
-        //get selected value from stage1
-        const stage1Selected = this.stages.stage1.selectedItem;
-        const stage2Selected = this.stages.stage2.selectedItem;
-        const stage3Selected = this.stages.stage3.selectedItem;
-
-        const stage4 = new Stage(4, "", this.stages.stage3);
-
-        const skillsAvailable = this.skills[stage1Selected.value][stage2Selected.value][stage3Selected.value];
-        let stage4Options = Object.keys(skillsAvailable);
-        //add stage items
-        stage4Options.forEach(skillName => {
-            const skill = skillsAvailable[skillName]
-            const item = new StageItem({
-                title: skill.identifier,
-                text: skill.description,
-                icon: "",
-                value: skill.identifier,
-            }, this.itemCounter++, {showIcon: false, showNext: false});
-            stage4.addItem(item);
-        })
-
-        this.stages.stage4 = stage4;
-        this.previousStage = this.stages.stage3;
-        this.showStage(stage4);
 
     }
 
@@ -216,7 +144,7 @@ export default class SkillSelectDialog extends DialogComponent{
 class Stage {
     constructor(level, heading, previous) {
         this.level = level;
-        this.domId = "skillSelectDialog-stage"+level
+        this.domId = "entitySelectDialog-stage"+level
         this.items = [];
         this.element = document.getElementById(this.domId);
         this.contentContainer = document.getElementById(this.domId +"--content");
@@ -262,10 +190,10 @@ class Stage {
     setActive(active=true){
         this.active = active;
         if(active) {
-            this.element.classList.add("skillSelectDialog-stage-active");
+            this.element.classList.add("entitySelectDialog-stage-active");
         }
         else {
-            this.element.classList.remove("skillSelectDialog-stage-active");
+            this.element.classList.remove("entitySelectDialog-stage-active");
         }
     }
 
@@ -311,7 +239,7 @@ class StageItem {
 
     generateHtml(){
         let container = document.createElement("li");
-        container.className = "skillSelectDialog-stage-item mdc-deprecated-list-item";
+        container.className = "entitySelectDialog-stage-item mdc-deprecated-list-item";
         container.id = this.domId;
         container.role = "option";
 

@@ -10,7 +10,7 @@ let setLightBrightnessAbsolute = new Skill({
     title: "Brightness - Absolute",
     description: "Set the brightness to a specific value",
     variables: {
-        lightId: Skill.variableTypes.STRING,
+        lightId: Skill.variableTypes.light,
         percentValue: Skill.variableTypes.PERCENT,
     },
     handler: async function({handlerArgs, configuration, intentHandler}){
@@ -24,7 +24,7 @@ let setLightBrightnessRelative = new Skill({
     title: "Brightness - Relative",
     description: "Increase or decrease current brightness",
     variables: {
-        lightId: Skill.variableTypes.STRING,
+        lightId: Skill.variableTypes.light,
         percentValue: Skill.variableTypes.PERCENT,
     },
     handler: async function({handlerArgs, configuration, intentHandler}){

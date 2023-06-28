@@ -9,7 +9,7 @@ import {refJSON} from "../helpers/utility.js";
 const IntentHandler = db.IntentHandler;
 import {VariableExpectation} from '../helpers/enums.js';
 
-import skills from "../skills/importer.js";
+import skillImporter from "../skills/importer.js";
 import ExecutionContext from "../classes/ExecutionContext.js";
 import IntentService from "./IntentService.js";
 import ClientService from "./ClientService.js";
@@ -34,7 +34,7 @@ class IntentHandlerService extends Service{
         let self = this;
         return new Promise(function(resolve, reject){
             //load skills
-            self.skills = skills;
+            self.skills = skillImporter.getSkills();
             self.skillArray = createSkillArray();
             resolve()
 
@@ -226,6 +226,34 @@ class IntentHandlerService extends Service{
 
     /**
      *
+     * @param identifier {String} intent unique identifier
+     */
+    getHandlersForIntent(identifier) {
+        let self = this;
+        const intent = IntentService.getIntent(identifier);
+        return IntentHandler.find({intent: intent.identifier});
+    }
+
+    /**
+     *
+      * @param intent {Intent}
+     */
+    async getMatchingHandlers(intent, slots) {
+        let handlers = await IntentHandler.find({intent: intent.identifier});
+        let qualified = []
+        if(!handlers) {
+            return []
+        }
+        else {
+            handlers.forEach(handler => {
+                if (handler.checkHandler(slots)) qualified.push(handler);
+            })
+            return qualified;
+        }
+    }
+
+    /**
+     *
      * @param identifier
      * @param data
      * @returns {Promise<*>}
@@ -274,6 +302,7 @@ class IntentHandlerService extends Service{
                 name: variable,
                 type: type,
                 mapping: {},
+                fallback: undefined,
             })
         })
 
@@ -338,7 +367,22 @@ class IntentHandlerService extends Service{
         }
     }
 
-    createExecutionContext(identifier){
+    createExecutionContext(intentHandler){
+        let self = this;
+        return new Promise(function(resolve, reject){
+            //validate
+            if(!intentHandler) {
+                reject("IntentHandler not found: " + identifier);
+            }
+            else {
+                //create new executionContext
+                let ec = new ExecutionContext(intentHandler);
+                resolve(ec);
+            }
+        })
+    }
+
+    createExecutionContextFromIdentifier(identifier){
         let self = this;
         return new Promise(function(resolve, reject){
             IntentHandler.findOne({identifier: identifier})
@@ -384,7 +428,7 @@ class IntentHandlerService extends Service{
         let rtClients = [];
         clientDbArray.forEach(function(clientId, index){
             //find client by id
-            const rtClient = ClientService.findOneById(clientId);
+            const rtClient = ClientService.findOneById(clientId).getJSON();
             rtClients.push(rtClient)
         })
         return rtClients;

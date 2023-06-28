@@ -2,11 +2,11 @@
     <div id="stage1--heading" class="mappingSelect-stage-heading">
         <span>Mapping type</span>
     </div>
-    <div id="stage1--content" class="mappingSelect-stage-content">
+    <div class="stage1--content mappingSelect-stage-content">
         <div class="dashboard-list-container">
             <ul class="dashboard-list">
                 <li class="dashboard-list-item dashboard-list-item--select variable-mapping">
-                    <select id="stage1--select" class="stage--select variable-select dashboard-list-item-entry dashboard-list-item-value">
+                    <select class="stage1--select stage--select variable-select dashboard-list-item-entry dashboard-list-item-value">
                         {{#each data.stage.options}}
                             <option class="selectStage--option" value="{{this.value}}">{{this.name}}</option>
                         {{/each}}

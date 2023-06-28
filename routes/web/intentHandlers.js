@@ -2,6 +2,7 @@ import express from 'express';
 import ClientService from "../../services/ClientService.js";
 import IntentService from "../../services/IntentService.js";
 import IntentHandlerService from "../../services/IntentHandlerService.js";
+import LightsService from "../../services/LightsService.js";
 var router = express.Router();
 
 const MODULES = {
@@ -68,7 +69,7 @@ function editIntentHandler(req, res, next){
     const id = req.params.id;
     IntentHandlerService.getByIdJSON(id)
         .then(intentHandlerJSON => {
-            ClientService.getAllClients()
+            ClientService.getAllClientsJSON()
                 .then(clients => {
                     const skills = IntentHandlerService.getSkills();
                     res.render("intenthandlers/details", {
@@ -100,19 +101,34 @@ function addAction(req, res, next){
     IntentHandlerService.getByIdJSON(id)
         .then(intentHandlerJSON => {
             const skills = IntentHandlerService.getSkills();
-            res.render("intenthandlers/addAction", {
-                intentHandler: intentHandlerJSON,
-                page: {
-                    modules: [
-                        MODULES.INTENTHANDLERS,  MODULES.IntentHandlerAction,
-                    ],
-                    nav: {
-                        currentEntry: "intenthandlers"
-                    },
-                    intentHandler: intentHandlerJSON,
-                    skills: skills,
-                }
-            })
+            const lightsP = LightsService.getLights();
+            const lightGroupsP = LightsService.getGroups();
+            const scenesP = LightsService.getScenes();
+            Promise.all([lightsP, lightGroupsP,scenesP])
+                .then(function([lights, lightGroups, scenes]) {
+                    const entities = {
+                        lights: lights,
+                        lightGroups: lightGroups,
+                        scenes: scenes,
+                    }
+                    res.render("intenthandlers/addAction", {
+                        intentHandler: intentHandlerJSON,
+                        page: {
+                            modules: [
+                                MODULES.INTENTHANDLERS, MODULES.IntentHandlerAction,
+                            ],
+                            nav: {
+                                currentEntry: "intenthandlers"
+                            },
+                            intentHandler: intentHandlerJSON,
+                            skills: skills,
+                            entities: entities,
+                        }
+                    })
+                })
+                .catch(err => {
+                    next(err);
+                })
         })
         .catch(err => {
             next(err);
@@ -132,23 +148,39 @@ function editAction(req, res, next){
             }
             const skills = IntentHandlerService.getSkills();
             const skill = IntentHandlerService.getSkillByIdentifier(action.skill.identifier);
-            res.render("intenthandlers/editAction", {
-                intentHandler: intentHandlerJSON,
-                action: action,
-                skill: skill,
-                page: {
-                    modules: [
-                        MODULES.INTENTHANDLERS, MODULES.IntentHandlerAction,
-                    ],
-                    nav: {
-                        currentEntry: "intenthandlers"
-                    },
-                    intentHandler: intentHandlerJSON,
-                    action: action,
-                    skills: skills,
-                    skill: skill,
-                }
-            })
+            const lightsP = LightsService.getLights();
+            const lightGroupsP = LightsService.getGroups();
+            const scenesP = LightsService.getScenes();
+            Promise.all([lightsP, lightGroupsP,scenesP])
+                .then(function([lights, lightGroups, scenes]) {
+                    const entities = {
+                        lights: lights,
+                        lightGroups: lightGroups,
+                        scenes: scenes,
+                    }
+                    res.render("intenthandlers/editAction", {
+                        intentHandler: intentHandlerJSON,
+                        action: action,
+                        skill: skill,
+                        page: {
+                            modules: [
+                                MODULES.INTENTHANDLERS, MODULES.IntentHandlerAction,
+                            ],
+                            nav: {
+                                currentEntry: "intenthandlers"
+                            },
+                            intentHandler: intentHandlerJSON,
+                            action: action,
+                            skills: skills,
+                            skill: skill,
+                            entities: entities,
+                        }
+                    })
+                })
+                .catch(err => {
+                    next(err);
+                })
+
         })
         .catch(err => {
             next(err);

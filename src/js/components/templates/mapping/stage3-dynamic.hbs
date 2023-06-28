@@ -1,12 +1,12 @@
-<div id="stage3" class="mappingSelect-stage">
-    <div id="stage3--heading" class="mappingSelect-stage-heading">
+<div  class="stage3 mappingSelect-stage">
+    <div  class="stage3--heading mappingSelect-stage-heading">
         <span>Select value</span>
     </div>
-    <div id="stage3--content" class="mappingSelect-stage-content">
+    <div  class="stage3--content mappingSelect-stage-content">
         <div class="dashboard-list-container">
             <ul class="dashboard-list">
                 {{#each data.stage.options}}
-                    <li class="dashboard-list-item dashboard-list-item--select variable-mapping" data-variable="{{this.name}}" data-type="{{this.type}}">
+                    <li class="dashboard-list-item dashboard-list-item--select variable-mapping stage3--option" data-variable="{{this.name}}" data-type="{{this.type}}">
                         <span id="variable-{{this}}" class="dashboard-list-item-entry dashboard-list-item-label">{{this.name}}</span>
                         <label class="replicator-form-element mdc-text-field mdc-text-field--filled">
                             <span class="mdc-text-field__ripple"></span>
@@ -14,6 +14,9 @@
                             <input class="mdc-text-field__input stage3--input" type="text" aria-labelledby="my-label-id" data-variable="{{this.name}}" value="{{this.value}}">
                             <span class="mdc-line-ripple"></span>
                         </label>
+                        <button class="stage3--entitySelect entitySelect--button" data-variable="{{this.name}}" data-type="{{this.type}}">
+                            <span class="material-icons">manage_search</span>
+                        </button>
                     </li>
                 {{/each}}
             </ul>

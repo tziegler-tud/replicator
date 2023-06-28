@@ -263,7 +263,13 @@ export default class Client {
             else {
                 //client found.
                 //forward to voiceCommandService
-                voiceCommandService.processClientCommand(self, commandData.command, emitter, {});
+                voiceCommandService.processClientCommand(self, commandData.command, emitter, {})
+                    .then(result => {
+                        resolve();
+                    })
+                    .catch(err => {
+                        reject(err);
+                    })
             }
         })
     }

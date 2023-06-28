@@ -41,6 +41,11 @@ $dashboard-section-bg: $tertiary;
           background-color: #752d38;
         }
       }
+      .dashboard-delete-button {
+        .mdc-fab {
+          background-color: #303862;
+        }
+      }
     }
 
     .dashboard-section {
@@ -56,6 +61,22 @@ $dashboard-section-bg: $tertiary;
         font-weight: lighter;
         font-family: "Open Sans Light", "Open Sans", serif;
         margin-bottom: 2em;
+      }
+
+      .dashboard-subsection {
+
+        width: 100%;
+        padding: 15px;
+        border-radius: 5px;
+
+        background-color: $dashboard-section-bg;
+
+        .dashboard-subsection-header {
+          font-size: 140%;
+          font-weight: lighter;
+          font-family: "Open Sans Light", "Open Sans", serif;
+          margin-bottom: 2em;
+        }
       }
 
       &.dashboard-section-cards {

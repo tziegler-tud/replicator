@@ -1,26 +1,44 @@
-{{#each skills}}
-    <h1>{{@key}}</h1>
-    {{#each this}}
-        <h2>{{@key}}</h2>
-        {{#each this}}
-            <h3>{{@key}}</h3>
+<div class="dashboard-container">
+    <div class="dashboard-inner">
+    {{#each skills}}
+        <div class="dashboard-section dashboard-section-cards">
+            <div class="dashboard-section-header">
+                    <span class="dashboard-section-header--title">
+                        {{@key}}
+                    </span>
+            </div>
             {{#each this}}
-                <div class="card-container">
-                    <div class="mdc-card element-card">
-                        <div class="mdc-card__primary-action ">
-                            <div class=" element-card--primary mdc-card__title element-card--title">{{this.identifier}}</div>
-                            <div class="element-card--secondary">
-                                <div class="element-card--secondary">{{this.description}}</div>
-                                <!-- ... additional primary action content ... -->
-                                <div class="mdc-card__ripple"></div>
-                            </div>
-                            <!-- ... additional primary action content ... -->
-                            <div class="mdc-card__ripple"></div>
-                        </div>
-
-                    </div>
+            <div class="dashboard-subsection dashboard-section-cards">
+                <div class="dashboard-subsection-header">
+                    <span class="dashboard-subsection-header--title">
+                        {{@key}}
+                    </span>
                 </div>
+                {{#each this}}
+                <div class="dashboard-cardSet">
+                    {{#each this}}
+                        <div class="dashboard-card card element-card intent-card" data-id="{{this.identifier}}">
+                            <div class="card-header">{{this.identifier}}</div>
+                            <div class="card-body">
+                                <div class="card-property-container">
+                                    {{this.description}}
+                                </div>
+<!--                                <div class="card-property-container">-->
+<!--                                    {{#each this._variables}}-->
+<!--                                        <div class="card-property">-->
+<!--                                            <span class="card-property--label">{{@key}}</span>-->
+<!--                                            <span class="card-property--value">{{this}}</span>-->
+<!--                                        </div>-->
+<!--                                    {{/each}}-->
+<!--                                </div>-->
+                            </div>
+                        </div>
+                    {{/each}}
+                </div>
+                {{/each}}
+            </div>
             {{/each}}
-        {{/each}}
+        </div>
     {{/each}}
-{{/each}}
+    </div>
+</div>

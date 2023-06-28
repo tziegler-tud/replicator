@@ -41,13 +41,14 @@ export default class Skill {
     run({handlerArgs, configuration, intentHandler}){
         let self = this;
         return new Promise(function(resolve, reject){
+            let err = undefined;
             //verify handler args
             for (const variableName in self.variables) {
-                if(!handlerArgs[variableName]){
+                if(handlerArgs[variableName] === undefined){
                     //handlerArgs is missing variable!
                     const msg = "Failed to run skill: Missing argument " + variableName
-                    const err = new Error(msg);
-                    reject(err)
+                    err = new Error(msg);
+                    break;
                 }
                 else {
                     //assert type
@@ -56,19 +57,24 @@ export default class Skill {
                     }
                 }
             }
-            self.handler({
-                handlerArgs: handlerArgs,
-                configuration: configuration,
-                intentHandler: intentHandler
-            })
-                .then(result => {
-                    resolve(result);
+            if(err){
+                reject(err)
+            }
+            else {
+                self.handler({
+                    handlerArgs: handlerArgs,
+                    configuration: configuration,
+                    intentHandler: intentHandler
                 })
-                .catch(err => {
-                    const msg = "Failed to run skill: An error occured: " + err;
-                    const e = new Error(msg);
-                    reject(e);
-                })
+                    .then(result => {
+                        resolve(result);
+                    })
+                    .catch(err => {
+                        const msg = "Failed to run skill: An error occured: " + err;
+                        const e = new Error(msg);
+                        reject(e);
+                    })
+            }
         })
     }
 }

@@ -1,14 +1,14 @@
-<div id="stage2" class="mappingSelect-stage">
-    <div id="stage2--heading" class="mappingSelect-stage-heading">
+<div class="stage2 mappingSelect-stage">
+    <div class="stage2--heading mappingSelect-stage-heading">
         <span>Select variable</span>
     </div>
-    <div id="stage2--content" class="mappingSelect-stage-content">
+    <div class="stage2--content mappingSelect-stage-content">
         <div class="dashboard-list-container">
             <ul class="dashboard-list">
                 <li class="dashboard-list-item dashboard-list-item--select variable-mapping" data-variable="{{@key}}" data-type="{{this}}" data-requirement="required">
-                    <select id="stage2--select" class="stage--select variable-select dashboard-list-item-entry dashboard-list-item-value" data-variable="{{@key}}" data-variableType="{{this}}">
+                    <select class="stage2--select stage--select variable-select dashboard-list-item-entry dashboard-list-item-value" data-variable="{{@key}}" data-variableType="{{this}}">
                         {{#each data.stage.options}}
-                            <option class="selectStage--option" value="{{this.value}}">{{this.name}}</option>
+                            <option class="selectStage--option" value="{{this.value}}" data-type="{{this.type}}">{{this.name}}</option>
                         {{/each}}
                     </select>
                 </li>

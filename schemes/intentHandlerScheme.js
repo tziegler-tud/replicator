@@ -51,9 +51,11 @@ var IntentHandlerScheme = new Schema({
                     },
                     value: {
 
-                    }
-                }
+                    },
+                    fallback: {
 
+                    }
+                },
             }],
             config: {
                 arguments: {
@@ -105,20 +107,24 @@ var IntentHandlerScheme = new Schema({
             let match = false;
             let requiredMatch = true;
             let forbiddenMatch = true;
-            Object.keys(self.variables.required).forEach(function(variable, index, array){
-                //key must be contained in variables
-                if(variables[variable] === undefined) {
-                    //one missing, handler disqualified
-                    requiredMatch = false;
-                }
-            })
-            Object.keys(self.variables.forbidden).forEach(function(variable, index, array){
-                //if a forbidden variable is set, the handler disqualifies
-                if(variables[variable] !== undefined ) {
-                    //it's a match!
-                    forbiddenMatch = false;
-                }
-            })
+            if(self.variables.required) {
+                Object.keys(self.variables.required).forEach(function(variable, index, array){
+                    //key must be contained in variables
+                    if(variables[variable] === undefined) {
+                        //one missing, handler disqualified
+                        requiredMatch = false;
+                    }
+                })
+            }
+            if(self.variables.forbidden) {
+                Object.keys(self.variables.forbidden).forEach(function(variable, index, array){
+                    //if a forbidden variable is set, the handler disqualifies
+                    if(variables[variable] !== undefined ) {
+                        //it's a match!
+                        forbiddenMatch = false;
+                    }
+                })
+            }
             return (requiredMatch && forbiddenMatch);
         },
         addAction(action){

@@ -595,7 +595,21 @@ class BridgeApiV2 {
     }
 
     getGroupedLightState(lightId) {
-        return this.get("resource/grouped_light/"+lightId);
+        let self = this;
+        return new Promise(function(resolve, reject){
+            self.get("resource/grouped_light/"+lightId)
+                .then(response => {
+                    if(response.errors.length > 0) {
+                        reject(response.errors)
+                    }
+                    else {
+                        resolve(response.data[0]);
+                    }
+                })
+                .catch(err => {
+                    reject(err)
+                })
+        })
     }
 
     setGroupedLightState(lightId, state) {

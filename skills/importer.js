@@ -8,24 +8,63 @@ import lightGroupState from "./Light/lightGroup/state.js";
 
 import lightSceneState from "./Light/lightScene/state.js";
 
-let skills = {
-    Light: {
-        light: {
-            brightness: lightBrightness,
-            color: lightColor,
-            state: lightState,
-        },
-        lightGroup: {
-            brightness: lightGroupBrightness,
-            color: lightGroupColor,
-            state: lightGroupState,
-        },
-        lightScene: {
-            state: lightSceneState,
+class SkillImporter {
+    constructor(){
+        this.skills = this.importSkills();
+
+    }
+
+    importSkills(){
+        let skills = {
+            Light: {
+                light: {
+                    brightness: importSkill(lightBrightness),
+                    color: importSkill(lightColor),
+                    state: importSkill(lightState),
+                },
+                lightGroup: {
+                    brightness: importSkill(lightGroupBrightness),
+                    color: importSkill(lightGroupColor),
+                    state: importSkill(lightGroupState),
+                },
+                lightScene: {
+                    state: importSkill(lightSceneState),
+                }
+            },
+            Music: {},
+            Sound: {},
+            Voice: {}
         }
-    },
-    Music: {},
-    Sound: {},
-    Voice: {}
+
+        return skills;
+
+        /**
+         * @typedef skillObject
+         * An Object containing skills.
+         */
+
+        /**
+         *
+         * @param skillObject
+         */
+        function importSkill(skillObject){
+            //check for duplicate identifier
+            let identifiers = [];
+            for (const [key, skill] of Object.entries(skillObject)){
+                if(identifiers.includes(skill.identifier)){
+                    console.warn("Skillimporter | Warning: Duplicate identifier found: " + skill.identifier + ". Element not imported");
+                    delete skillObject[key]
+                }
+                else {
+                    identifiers.push(skill.identifier);
+                }
+            }
+            return skillObject;
+        }
+    }
+
+    getSkills(){
+        return this.skills;
+    }
 }
-export default skills;
+export default new SkillImporter();

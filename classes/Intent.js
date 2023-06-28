@@ -124,21 +124,12 @@ export default class Intent {
     }
 
     addHandler(handler){
-        this.handlers.push(handler);
+        this._handlers.push(handler);
     }
 
     addHandlerArray(handlerArray){
         handlerArray.forEach(handler =>{
-            this.handlers.push(handler)
+            this._handlers.push(handler)
         });
     }
-
-    checkHandlers(variables) {
-        let qualified = [];
-        this.handlers.forEach(function(handler){
-            if (handler.checkHandler(variables)) qualified.push(handler);
-        })
-        return qualified;
-    }
-
 }

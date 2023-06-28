@@ -1,0 +1,65 @@
+@import "./../variables.scss";
+
+.entitySelect--button {
+
+}
+
+.entitySelectDialog-stage {
+
+  display: none;
+
+  &.entitySelectDialog-stage-active {
+    display: block;
+    .entitySelectDialog-stage-heading {
+      color: $font-content-secondary;
+    }
+  }
+  &.stage-finished {
+    .entitySelectDialog-stage-item {
+
+    }
+  }
+}
+
+.entitySelectDialog-stage-heading {
+  font-size: 140%;
+  color: #AAA;
+
+
+  .entitySelectDialog-stage-step {
+    margin-right: 1em;
+    padding: .25em;
+    border-radius: 3px;
+  }
+}
+
+.entitySelectDialog-stage-content {
+}
+
+.entitySelectDialog-stage-item {
+  background-color: $content;
+  cursor: pointer;
+  position: relative;
+
+  &.disabled {
+    cursor: not-allowed;
+    display: none;
+  }
+
+  &.selected {
+
+  }
+
+  .stage-item--icon {
+    img {
+      width: 1em;
+      height: 1em;
+    }
+  }
+
+  .stage-item--title {
+    font-size: 130%;
+    color: $primary;
+  }
+
+}

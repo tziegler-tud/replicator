@@ -35,6 +35,7 @@ import webIndexRouter from './routes/web/index.js';
 import webClientRouter from './routes/web/clients.js';
 import webIntentRouter from './routes/web/intents.js';
 import webIntentHandlerRouter from './routes/web/intentHandlers.js';
+import webEntitiesRouter from './routes/web/entities.js';
 
 
 
@@ -85,6 +86,7 @@ app.use('/', webIndexRouter);
 app.use('/clients', webClientRouter);
 app.use('/intents', webIntentRouter);
 app.use('/intenthandlers', webIntentHandlerRouter);
+app.use('/entities', webEntitiesRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

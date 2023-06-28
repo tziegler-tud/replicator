@@ -23,7 +23,13 @@ export default new Module({
         const intentHandler = window.page.intentHandler;
         const skills = window.page.skills;
         const action = window.page.action;
+        const entities = window.page.entities;
         const skill = window.page.skill;
+
+        const backButton = document.getElementById("dashboard-back-button");
+        backButton.addEventListener("click", function(){
+            window.location.href = "../"
+        })
 
         const saveButton = document.getElementById("dashboard-save-button");
         saveButton.addEventListener("click", function(){
@@ -59,14 +65,13 @@ export default new Module({
             //find in variable array
             const variable = action.variables.find(e => e._id.toString() === variableId.toString());
             if(variable) {
-                const mappingSelect = new MappingSelect({element: element}, {variable: variable, intentHandler: intentHandler});
+                const mappingSelect = new MappingSelect({element: element}, {variable: variable, intentHandler: intentHandler, entities: entities});
                 mappingSelect.render()
                     .then(()=>{
                         //create new observer
                         const mappingSelectObserver = new ComponentObserver(["finished","changed"], function(event, data) {
                             console.log("MappingSelect finished.");
-                            let mappingData = mappingSelect.getMapping();
-                            variable.mapping = mappingData;
+                            variable.mapping = mappingSelect.getMapping();
                         })
                         mappingSelect.addObserver(mappingSelectObserver)
                     })
@@ -74,7 +79,6 @@ export default new Module({
             else {
                 console.warn("Failed to update variable: variable with ID: " + variableId + " not found in array.");
             }
-
         })
 
         function save({data, reload=false}){

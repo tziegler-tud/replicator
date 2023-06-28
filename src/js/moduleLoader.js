@@ -5,10 +5,11 @@ import IntentHandlers from "./modules/intentHandler/intentHandlers.js"
 import IntentHandlerAdd from "./modules/intentHandler/intentHandlerAdd.js"
 import IntentHandlerDetails from "./modules/intentHandler/intentHandlerDetails.js"
 import IntentHandlerAction from "./modules/intentHandler/intentHandlerAction";
+import Entities from "./modules/entities";
 
 export default class ModuleLoader {
     constructor(){
-        this.modules = [Dashboard, Clients, Intents, IntentHandlers, IntentHandlerAdd, IntentHandlerDetails, IntentHandlerAction];
+        this.modules = [Dashboard, Clients, Intents, IntentHandlers, IntentHandlerAdd, IntentHandlerDetails, IntentHandlerAction, Entities];
 
     }
 

@@ -1,15 +1,22 @@
-<div id="stage3" class="mappingSelect-stage">
-    <div id="stage3--heading" class="mappingSelect-stage-heading">
+<div class="stage3 mappingSelect-stage">
+    <div class="stage3--heading mappingSelect-stage-heading">
         <span>Select value</span>
     </div>
-    <div id="stage3--content" class="mappingSelect-stage-content">
+    <div  class="stage3--content mappingSelect-stage-content">
         <div class="dashboard-list-container">
-            <label class="replicator-form-element mdc-text-field mdc-text-field--filled">
-                <span class="mdc-text-field__ripple"></span>
-                <span class="mdc-floating-label" id="my-label-id">Identifier</span>
-                <input id="stage3--input" class="mdc-text-field__input stage3--input" type="text" aria-labelledby="my-label-id">
-                <span class="mdc-line-ripple"></span>
-            </label>
+            <ul class="dashboard-list">
+                <li class="dashboard-list-item dashboard-list-item--select variable-mapping stage3--option">
+                    <label class="replicator-form-element mdc-text-field mdc-text-field--filled">
+                        <span class="mdc-text-field__ripple"></span>
+                        <span class="mdc-floating-label" id="my-label-id">Identifier</span>
+                        <input class="stage3--input mdc-text-field__input stage3--input" type="text" aria-labelledby="my-label-id">
+                        <span class="mdc-line-ripple"></span>
+                    </label>
+                    <button class="stage3--entitySelect entitySelect--button">
+                        <span class="material-icons">manage_search</span>
+                    </button>
+                </li>
+            </ul>
         </div>
     </div>
 </div>
