@@ -10,6 +10,12 @@ export default class Skill {
         light: "Light",
         lightGroup: "LightGroup",
         lightScene: "LightScene",
+
+        connections: {
+            http: {
+                request_method: "request_method",
+            }
+        }
     };
 
     /**

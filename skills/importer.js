@@ -7,6 +7,7 @@ import lightGroupColor from "./Light/lightGroup/color.js";
 import lightGroupState from "./Light/lightGroup/state.js";
 
 import lightSceneState from "./Light/lightScene/state.js";
+import httpRequest from "./Connections/http/httpRequest.js";
 
 class SkillImporter {
     constructor(){
@@ -33,7 +34,12 @@ class SkillImporter {
             },
             Music: {},
             Sound: {},
-            Voice: {}
+            Voice: {},
+            Connections: {
+                http: {
+                    httpRequest: importSkill(httpRequest),
+                }
+            }
         }
 
         return skills;
