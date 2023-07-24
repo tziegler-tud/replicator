@@ -130,13 +130,7 @@ const integrationService = new Promise(function(resolve, reject){
         .then(init => {
             let BridgeUrl = hueConfig.bridgeUrl;
             let BridgeUser = hueConfig.bridgeUserToken;
-            IntegrationService.loadIntegration(IntegrationService.integrations.HUE, {BridgeUrl: BridgeUrl, BridgeUser: BridgeUser})
-                .then(()=> {
-                    resolve();
-                })
-                .catch(err=> {
-                    reject(err);
-                })
+            const HueIntegration = IntegrationService.loadIntegration(IntegrationService.integrations.HUE, {BridgeUrl: BridgeUrl, BridgeUser: BridgeUser});
 
             // let deconzUrl = deconzConfig.bridgeUrl;
             // let deconzUser = deconzConfig.bridgeUrl;
@@ -147,7 +141,11 @@ const integrationService = new Promise(function(resolve, reject){
             //     .catch(err=> {
             //         reject(err);
             //     })
-        });
+            resolve();
+        })
+        .catch(e => {
+            console.log("Failed to start IntegrationService: " + e);
+        })
 });
 
 const intentHandlerService = IntentHandlerService.start();

@@ -18,18 +18,33 @@ export default class Skill {
         }
     };
 
+
+    /**
+     * @typedef SkillVariable
+     * @property {String} identifier descriptive name, should be unique inside configuration object
+     * @property {String} type Type of variable. can be "String" or "Number"
+     * @property {String|Number} default Default value
+     */
+
+    /**
+     * @typedef SkillConfigurationObject
+     * @property {SkillVariable[]} variables
+     */
+
     /**
      *
      * @param identifier {String} unique skill identifier
      * @param title {String} title displayed to humans
      * @param description {String} description displayed to humans
      * @param variables {Object} required variables and assigned type. Use static type enum
+     * @param configuration {SkillConfigurationObject} configuration object
      * @param handler {Function} handler function. Receives the following arguments: handlerArgs, configuration, intentHandler. Can be async
      */
-    constructor({identifier="Skill-"+Date.now(), title=identifier, description="No description available", variables={}, handler}={}) {
+    constructor({identifier="Skill-"+Date.now(), title=identifier, description="No description available", variables={}, configuration={}, handler}={}) {
         this.identifier = identifier;
         this.description = description;
         this.variables = variables;
+        this.configuration = configuration;
         if(handler) {
             this.handler = handler;
         }

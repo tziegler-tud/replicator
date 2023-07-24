@@ -306,6 +306,8 @@ class IntentHandlerService extends Service{
             })
         })
 
+        action.configuration = skill.configuration;
+
         result.actions.push(action);
         await result.save();
         return action;

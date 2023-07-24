@@ -109,11 +109,16 @@
             {{/each}}
         </div>
         <div id="dashboard-tab--03" class="dashboard-tab" data-tabid="2">
-            <div id="dashboard-tab1" class="dashboard-section dashboard-section-list">
+            <div id="dashboard-tab3" class="dashboard-section dashboard-section-list">
                 <div class="dashboard-section-header">
-                <span class="dashboard-section-header--title">
-                    Intent: {{intentHandler.intent._identifier}}
-                </span>
+                    <span class="dashboard-section-header--title">
+                        Variables:
+                    </span>
+                </div>
+                <div class="action-configuration-container">
+                    {{#each action.configuration.parameters}}
+                        <div class="action-configuration-entry" data-identifier="{{this.identifier}}" data-type="{{this.type}}" data-default="{{this.default}}"></div>
+                    {{/each}}
                 </div>
             </div>
         </div>

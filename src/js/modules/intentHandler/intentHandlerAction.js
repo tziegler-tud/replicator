@@ -81,6 +81,11 @@ export default new Module({
             }
         })
 
+        const configurationParameters = $(".action-configuration-entry");
+        configurationParameters.forEach(el => {
+            //TODO: create parameter component
+        })
+
         function save({data, reload=false}){
             //update action
             $.ajax({

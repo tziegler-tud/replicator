@@ -57,11 +57,19 @@ var IntentHandlerScheme = new Schema({
                     }
                 },
             }],
-            config: {
-                arguments: {
-                    type: Object,
+            configuration: {
+                parameters: [{
+                    identifier: {
+                        type: String
+                    },
+                    type: {
+                        type: String
+                    },
+                    value: {
+
+                    },
                     default: {},
-                }
+                }]
             }
         }
     ],

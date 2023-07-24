@@ -9,6 +9,12 @@ let HttpRequest = new Skill({
         method: Skill.variableTypes.connections.http.request_method,
         url: Skill.variableTypes.STRING,
     },
+    configuration: {
+        parameters: [
+            {identifier: "testString", type: "String", default: "test"},
+            {identifier: "testNumber", type: "Number", default: 1}
+        ]
+    },
     handler: async function({handlerArgs, configuration, intentHandler}){
         let config = {
             method: handlerArgs.method,
