@@ -1,0 +1,32 @@
+<div class="configurationParameter component-container {{componentName}}-component-container dashboard-list-container">
+    <ul class="dashboard-list">
+        <li class="dashboard-list-item {{#ifEquals data.type "select"}}dashboard-list-item--select{{/ifEquals}}">
+            <label class="configParamter-label dashboard-list-item-entry" for="configParamter-input--{{data.identifier}}">{{data.identifier}}</label>
+            {{#switch data.type}}
+                {{#case "text"}}
+                    <label class="replicator-form-element mdc-text-field mdc-text-field--filled">
+                        <span class="mdc-text-field__ripple"></span>
+                        <span class="mdc-floating-label" id="my-label-id">Value</span>
+                        <input id="configParamter-input--{{data.identifier}}" class="mdc-text-field__input configParamter-input" type="text" value="{{data.value}}">
+                        <span class="mdc-line-ripple"></span>
+                    </label>
+                {{/case}}
+                {{#case "number"}}
+                    <label class="replicator-form-element mdc-text-field mdc-text-field--filled">
+                        <span class="mdc-text-field__ripple"></span>
+                        <span class="mdc-floating-label" id="my-label-id">Value</span>
+                        <input id="configParamter-input--{{data.identifier}}" class="mdc-text-field__input configParamter-input" type="number" value="{{data.value}}">
+                        <span class="mdc-line-ripple"></span>
+                    </label>
+                {{/case}}
+                {{#case "select"}}
+                    <select id="configParamter-input--{{data.identifier}}" class="configParamter-input configParameter-select dashboard-list-item-entry dashboard-list-item-value">
+                        {{#each data.options}}
+                            <option value="{{this.value}}" {{#ifEquals this.value ../data.value}}selected{{/ifEquals}}>{{this.label}} </option>
+                        {{/each}}
+                    </select>
+                {{/case}}
+            {{/switch}}
+        </li>
+    </ul>
+</div>

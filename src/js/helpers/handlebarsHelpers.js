@@ -1,4 +1,5 @@
-const Handlebars = require("handlebars");
+
+import Handlebars from "handlebars";
 import {transformDateTimeString, dateRangeString} from "./helpers";
 
 Handlebars.registerHelper('hasRole', function(participant, roleString) {
@@ -186,6 +187,17 @@ Handlebars.registerHelper("checkVariable", function (key, map, value, options) {
 
     return options.fn(this);
     return options.inverse(this);
+});
+
+Handlebars.registerHelper("switch", function(value, options) {
+    this.switch_value = value;
+    return options.fn(this);
+});
+
+Handlebars.registerHelper("case", function(value, options) {
+    if (value === this.switch_value) {
+        return options.fn(this);
+    }
 });
 
 

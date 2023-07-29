@@ -68,6 +68,7 @@ var IntentHandlerScheme = new Schema({
                     value: {
 
                     },
+                    options: [],
                     default: {},
                 }]
             }

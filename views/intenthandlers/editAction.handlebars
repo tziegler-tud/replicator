@@ -112,12 +112,12 @@
             <div id="dashboard-tab3" class="dashboard-section dashboard-section-list">
                 <div class="dashboard-section-header">
                     <span class="dashboard-section-header--title">
-                        Variables:
+                        Parameters:
                     </span>
                 </div>
                 <div class="action-configuration-container">
                     {{#each action.configuration.parameters}}
-                        <div class="action-configuration-entry" data-identifier="{{this.identifier}}" data-type="{{this.type}}" data-default="{{this.default}}"></div>
+                        <div class="action-configuration-entry" data-identifier="{{this.identifier}}" data-type="{{this.type}}" data-default="{{this.default}}" data-value="{{this.value}}"></div>
                     {{/each}}
                 </div>
             </div>

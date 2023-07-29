@@ -116,5 +116,16 @@ helpers.keysToString = function(object) {
     return s;
 };
 
+helpers.switch = function(value, options) {
+    this.switch_value = value;
+    return options.fn(this);
+};
+
+helpers.case = function(value, options) {
+    if (value === this.switch_value) {
+        return options.fn(this);
+    }
+};
+
 
 export default helpers;

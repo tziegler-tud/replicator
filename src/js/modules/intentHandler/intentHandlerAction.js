@@ -7,8 +7,7 @@ import {MDCDialog} from '@material/dialog';
 import {MDCTextField} from '@material/textfield';
 import SkillSelectDialog from "../../components/skillSelectDialog";
 import MappingSelect from "../../components/mappingSelect";
-
-
+import ConfigurationParameterComponent from "../../components/configurationParameterComponent";
 
 
 export default new Module({
@@ -82,8 +81,32 @@ export default new Module({
         })
 
         const configurationParameters = $(".action-configuration-entry");
-        configurationParameters.forEach(el => {
-            //TODO: create parameter component
+        configurationParameters.each(function(index, element) {
+            const identifier = this.dataset.identifier;
+            if(action.configuration.parameters) {
+                const index = action.configuration.parameters.findIndex(param => param.identifier === identifier);
+                if(index >= 0){
+                    const parameter = action.configuration.parameters[index];
+                    const type = parameter.type;
+                    const defaultValue = parameter.default;
+                    const value = parameter.value;
+                    const options = parameter.options;
+                    const comp = new ConfigurationParameterComponent({element: this, config: {}, data: {type: type, identifier: identifier, default: defaultValue, value: value, options: options}});
+                    comp.render()
+                        .then(()=>{
+                            //create new observer
+                            const configurationParameterObserver = new ComponentObserver(["finished","changed"], function(event, data) {
+                                //update action
+                                action.configuration.parameters[index].value = data.value;
+                            })
+                            comp.addObserver(configurationParameterObserver)
+                        })
+                        .catch(err => {
+                            console.error("Failed to render configurationParameterComponent on element " + this + ": " + err);
+                        })
+                }
+            }
+
         })
 
         function save({data, reload=false}){

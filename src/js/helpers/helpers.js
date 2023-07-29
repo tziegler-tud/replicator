@@ -1,4 +1,4 @@
-var moment = require('moment');
+import moment from 'moment';
 moment().format();
 
 
@@ -274,4 +274,4 @@ Date.prototype.toTimeInputValue = (function() {
 
 
 
-export {transformDateTimeString, dateRangeString, Counter, dateFromNow, getDataFromServer, getMatchingQualifications, escapeSelector, refJSON, stringToBoolean, common}
+export {transformDateTimeString, dateRangeString, Counter, dateFromNow, getDataFromServer, escapeSelector, refJSON, stringToBoolean, common}
