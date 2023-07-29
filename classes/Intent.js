@@ -1,12 +1,20 @@
 import db from '../schemes/mongo.js';
 const dbIntent = db.Intent;
 
+/**
+ * Intent
+ * @class
+ */
 export default class Intent {
+    /**
+     *
+     * @param args
+     */
     constructor(args){
         if(args === undefined) args = {};
         this._identifier = args.identifier ? args.identifier : "";
         this._variables = args.variables? args.variables : {};
-        this._lines = [];
+        this._lines = args.lines? args.lines : [];
         this._handlers = [];
         this._groups = {
             macros: [],
@@ -14,6 +22,7 @@ export default class Intent {
             slots: [],
             slotsOptional: [],
         };
+        this._groups = Object.assign(this._groups, args.groups)
         this.dbObject = undefined;
 
         if(args._id) {
@@ -25,7 +34,7 @@ export default class Intent {
     saveToDb(){
         //check if dbObject exists
         if(this.dbObject){
-            this.dbObject = Object.assign(this.dbObject, this);
+            this.dbObject = Object.assign(this.dbObject, this.parseToDb());
         }
         else {
             this.dbObject = new dbIntent(this.parseToDb());
@@ -115,21 +124,12 @@ export default class Intent {
     }
 
     addHandler(handler){
-        this.handlers.push(handler);
+        this._handlers.push(handler);
     }
 
     addHandlerArray(handlerArray){
         handlerArray.forEach(handler =>{
-            this.handlers.push(handler)
+            this._handlers.push(handler)
         });
     }
-
-    checkHandlers(variables) {
-        let qualified = [];
-        this.handlers.forEach(function(handler){
-            if (handler.checkHandler(variables)) qualified.push(handler);
-        })
-        return qualified;
-    }
-
 }

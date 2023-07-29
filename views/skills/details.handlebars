@@ -1,0 +1,28 @@
+<div class="dashboard-container">
+    <div class="dashboard-inner">
+        <div class="dashboard-header">
+            <div class="dashboard-header-inner">
+                <span>{{client.identifier}}</span>
+            </div>
+        </div>
+        {{#each clientDetails}}
+            <div class="dashboard-section dashboard-section-list">
+                <div class="dashboard-section-header">
+                <span class="dashboard-section-header--title">
+                    {{@key}}
+                </span>
+                </div>
+                <div class="dashboard-list-container">
+                    <ul class="dashboard-list">
+                        {{#each this}}
+                            <li class="dashboard-list-item dashboard-list-item--{{this.type}}">
+                                <span class="dashboard-list-item-entry dashboard-list-item-label">{{this.label}}</span>
+                                <span class="dashboard-list-item-entry dashboard-list-item-value">{{this.value}}</span>
+                            </li>
+                        {{/each}}
+                    </ul>
+                </div>
+            </div>
+        {{/each}}
+    </div>
+</div>

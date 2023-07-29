@@ -1,0 +1,62 @@
+<div class="dashboard-container">
+    <div class="dashboard-inner">
+        <div class="dashboard-header">
+            <div class="dashboard-header-inner">
+                <span>{{intent._identifier}}</span>
+            </div>
+        </div>
+        <div class="dashboard-section dashboard-section-list">
+            <div class="dashboard-section-header">
+            <span class="dashboard-section-header--title">
+                Variables
+            </span>
+            </div>
+            <div class="dashboard-list-container">
+                <ul class="dashboard-list">
+                    {{#each intent._variables}}
+                        <li class="dashboard-list-item dashboard-list-item--{{this}}">
+                            <span class="dashboard-list-item-entry dashboard-list-item-label">{{@key}}</span>
+                            <span class="dashboard-list-item-entry dashboard-list-item-value">{{this}}</span>
+                        </li>
+                    {{/each}}
+                </ul>
+            </div>
+        </div>
+        <div class="dashboard-section dashboard-section-list">
+            <div class="dashboard-section-header">
+            <span class="dashboard-section-header--title">
+                Groups
+            </span>
+            </div>
+            <div class="dashboard-list-container">
+                {{#each intent._groups}}
+                    <span class="dashboard-list-header">{{@key}}</span>
+                    <ul class="dashboard-list">
+                        {{#each this}}
+                            <li class="dashboard-list-item dashboard-list-item--{{this}}">
+                                <span class="dashboard-list-item-entry dashboard-list-item-label">{{@key}}</span>
+                                <span class="dashboard-list-item-entry dashboard-list-item-value">{{this}}</span>
+                            </li>
+                        {{/each}}
+                    </ul>
+                {{/each}}
+            </div>
+        </div>
+        <div class="dashboard-section dashboard-section-list">
+            <div class="dashboard-section-header">
+            <span class="dashboard-section-header--title">
+                Lines
+            </span>
+            </div>
+            <div class="dashboard-list-container">
+                <ul class="dashboard-list">
+                    {{#each intent._lines}}
+                        <li class="dashboard-list-item dashboard-list-item--text">
+                            <span class="dashboard-list-item-entry dashboard-list-item-value">{{this.raw}}</span>
+                        </li>
+                    {{/each}}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

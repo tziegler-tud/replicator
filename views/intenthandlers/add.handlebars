@@ -1,0 +1,48 @@
+<div class="dashboard-container">
+    <div class="dashboard-inner">
+        <div class="dashboard-section dashboard-section-list">
+            <div class="dashboard-section-header">
+                <span class="dashboard-section-header--title">
+                    Add IntentHandler
+                </span>
+            </div>
+            <div class="dashboard-list-container">
+                <div class="dashboard-list-header">
+                    <span>Intent</span>
+                </div>
+                <div class="dashboard-list">
+                    <div class="dashboard-list-item dashboard-list-item--select">
+                        <span class="dashboard-list-item-entry dashboard-list-item-label">Select intent to handle:</span>
+                        <select id="intent-select" class="replicator-select variable-select dashboard-list-item-entry dashboard-list-item-value">
+                            {{#each data.intents}}
+                                <option value="{{this._identifier}}" {{#ifEquals this._identifier ../data.currentIntent._identifier}}selected{{/ifEquals}}>{{this._identifier}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                    <div class="dashboard-list-item dashboard-list-item--text">
+                        <span class="dashboard-list-item-entry dashboard-list-item-label">Identifier</span>
+                        <label class="replicator-form-element mdc-text-field mdc-text-field--filled">
+                            <span class="mdc-text-field__ripple"></span>
+                            <span class="mdc-floating-label" id="my-label-id">Identifier</span>
+                            <input id="intentHandler-identifier" class="mdc-text-field__input" type="text" aria-labelledby="my-label-id">
+                            <span class="mdc-line-ripple"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="replicator-form-container">
+                <div class="replicator-form">
+                    <div class="replicator-form-element button-container">
+                        <a id="dashboard-add-button" class="button dashboard-add-button">
+                            <button class="mdc-button mdc-button--outlined mdc-button--icon-leading">
+                                <span class="mdc-button__ripple"></span>
+                                <i class="material-icons mdc-button__icon" aria-hidden="true">hub</i>
+                                <span class="mdc-button__label">Continue</span>
+                            </button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

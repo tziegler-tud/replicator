@@ -14,10 +14,6 @@ export default class Integration {
             type: "Abstract",
             data: {},
         }
-        this.init = new Promise(function (resolve, reject) {
-            self.resolveInit = resolve;
-            self.rejectInit = reject;
-        })
     }
 
     /**
@@ -31,13 +27,11 @@ export default class Integration {
             self.initFunc(args)
                 .then(result => {
                     self.status = self.statusEnum.LOADED;
-                    self.resolveInit();
                     resolve();
                 })
                 .catch(err => {
                     self.status = self.statusEnum.NOTLOADED;
-                    self.rejectInit();
-                    reject();
+                    reject("test");
                 });
         });
     }

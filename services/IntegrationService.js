@@ -29,9 +29,16 @@ class IntegrationService extends Service{
 
     async loadIntegration(integrationClass, args){
         const integration = new integrationClass(args);
-        const loader = await integration.load(args);
+        try {
+            const loader = await integration.load(args);
+        }
+        catch(e){
+            //failed to load integration.
+            console.warn("Failed to load integration: " + integration.readableName);
+            return integration;
+        }
         this.loaded.push(integration)
-        return true;
+        return integration;
 
     }
 

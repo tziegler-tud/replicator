@@ -33,18 +33,22 @@ export default class Service {
     start(args){
         let self = this;
         this.initStarted = true;
-        SettingsService.getSettings().then(settings => {
-            self.globalSettings = settings;
-            this.initFunc(args)
-                .then(result => {
-                    self.status = self.statusEnum.RUNNING;
-                    self.resolveInit();
-                })
-                .catch(err => {
-                    self.status = self.statusEnum.FAILED;
-                    self.rejectInit();
-                });
-        })
+        SettingsService.getSettings()
+            .then(settings => {
+                self.globalSettings = settings;
+                this.initFunc(args)
+                    .then(result => {
+                        self.status = self.statusEnum.RUNNING;
+                        self.resolveInit();
+                    })
+                    .catch(err => {
+                        self.status = self.statusEnum.FAILED;
+                        self.rejectInit();
+                    });
+            })
+            .catch(e => {
+                self.rejectInit();
+            })
         return this.init;
 
     }

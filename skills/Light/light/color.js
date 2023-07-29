@@ -11,7 +11,7 @@ let setLightColor = new Skill({
     title: "Color",
     description: "Set the color of the light",
     variables: {
-        lightId: Skill.variableTypes.STRING,
+        lightId: Skill.variableTypes.light,
         color: Skill.variableTypes.OBJECT,
     },
     handler: async function({handlerArgs, configuration, intentHandler}){

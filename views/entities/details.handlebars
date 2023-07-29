@@ -1,0 +1,66 @@
+<div class="dashboard-container">
+    <div class="dashboard-inner">
+        <div class="dashboard-header">
+            <div class="dashboard-header-inner">
+                <span>{{entity.identifier}}</span>
+            </div>
+        </div>
+        <div class="dashboard-section dashboard-section-list">
+            <div class="dashboard-section-header">
+            <span class="dashboard-section-header--title">
+                information
+            </span>
+            </div>
+            <div class="dashboard-list-container">
+                <ul class="dashboard-list">
+                    <li class="dashboard-list-item dashboard-list-item--identifier">
+                        <span class="dashboard-list-item-entry dashboard-list-item-label">identifier</span>
+                        <span class="dashboard-list-item-entry dashboard-list-item-value">{{entity.identifier}}</span>
+                    </li>
+                    <li class="dashboard-list-item dashboard-list-item--identifier">
+                        <span class="dashboard-list-item-entry dashboard-list-item-label">id</span>
+                        <span class="dashboard-list-item-entry dashboard-list-item-value">{{entity.id}}</span>
+                    </li>
+                    <li class="dashboard-list-item dashboard-list-item--identifier">
+                        <span class="dashboard-list-item-entry dashboard-list-item-label">unique id</span>
+                        <span class="dashboard-list-item-entry dashboard-list-item-value">{{entity.uniqueId}}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="dashboard-section dashboard-section-list">
+            <div class="dashboard-section-header">
+            <span class="dashboard-section-header--title">
+                state
+            </span>
+            </div>
+            <div class="dashboard-list-container">
+                <ul class="dashboard-list">
+                    {{#each entity.state}}
+                        <li class="dashboard-list-item dashboard-list-item--{{this}}">
+                            <span class="dashboard-list-item-entry dashboard-list-item-label">{{@key}}</span>
+                            <span class="dashboard-list-item-entry dashboard-list-item-value">{{this}}</span>
+                        </li>
+                    {{/each}}
+                </ul>
+            </div>
+        </div>
+        <div class="dashboard-section dashboard-section-list">
+            <div class="dashboard-section-header">
+            <span class="dashboard-section-header--title">
+                properties
+            </span>
+            </div>
+            <div class="dashboard-list-container">
+                <ul class="dashboard-list">
+                    {{#each entity}}
+                        <li class="dashboard-list-item dashboard-list-item--{{this}}">
+                            <span class="dashboard-list-item-entry dashboard-list-item-label">{{@key}}</span>
+                            <span class="dashboard-list-item-entry dashboard-list-item-value">{{this}}</span>
+                        </li>
+                    {{/each}}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

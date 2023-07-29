@@ -17,7 +17,12 @@ export default class ExecutionContext {
         this.state = ExecutionContext.STATE.INITIALIZED;
     }
 
-    run(args){
+    /**
+     *
+     * @param command {VoiceCommandObject}
+     * @returns {Promise<unknown>}
+     */
+    run({command}){
         let self = this;
         this.state = ExecutionContext.STATE.RUNNING;
         this.currentAction = undefined;
@@ -28,10 +33,50 @@ export default class ExecutionContext {
                 const skillIdentifier = action.skill.identifier;
                 const config = action.config;
 
+                //apply variable mappings
+                const variables = action.variables;
+
+                let handlerArgs = {};
+
+                variables.forEach(function(variable) {
+                    let result = undefined;
+                    let slot = undefined;
+                    switch(variable.mapping.mappingType) {
+                        case "constant":
+                            if(variable.mapping.value.CONSTANT) {
+                                result = variable.mapping.value.CONSTANT;
+                            }
+                            else {
+                                result = undefined
+                            }
+                            break;
+
+                        case "variable":
+                            slot = command.slots[variable.mapping.variable];
+                            if(slot) {
+                                result = slot
+                            }
+                            break;
+                        case "dynamicVariable":
+                            slot = command.slots[variable.mapping.variable];
+                            if(slot) {
+                                result = variable.mapping.value[slot];
+                            }
+                            else {
+
+                            }
+                    }
+                    if (!result) {
+                        //check if fallback is defined
+                        result = variable.mapping.fallback;
+                    }
+                    handlerArgs[variable.name] = result;
+                })
+
                 //find skill
                 let skill = IntentHandlerService.getSkillByIdentifier(skillIdentifier);
                 let runner = skill.run({
-                    handlerArgs: args,
+                    handlerArgs: handlerArgs,
                     configuration: config,
                     intentHandler: self.intentHandler,
                 })

@@ -1,0 +1,68 @@
+<div class="dashboard-container">
+    <div class="dashboard-inner">
+        <div class="dashboard-section dashboard-section-cards">
+            <div class="dashboard-section-header">
+                <span class="dashboard-section-header--title">
+                    Lights
+                </span>
+            </div>
+            <div class="dashboard-cardSet">
+                {{#each entities.lights}}
+                    <div class="dashboard-card card element-card entity-card light-card" data-id="{{this.id}}">
+                        <div class="card-header">{{this.identifier}}</div>
+                        <div class="card-body">
+                            <div class="card-property-container">
+                                {{#each this.state}}
+                                    <div class="card-property">
+                                        <span class="card-property--label">{{@key}}</span>
+                                        <span class="card-property--value">{{this}}</span>
+                                    </div>
+                                {{/each}}
+                            </div>
+                        </div>
+                    </div>
+                {{/each}}
+            </div>
+        </div>
+        <div class="dashboard-section dashboard-section-cards">
+            <div class="dashboard-section-header">
+                <span class="dashboard-section-header--title">
+                    LightGroups
+                </span>
+            </div>
+            <div class="dashboard-cardSet">
+                {{#each entities.lightGroups}}
+                    <div class="dashboard-card card element-card entity-card group-card" data-id="{{this.id}}">
+                        <div class="card-header">{{this.identifier}}</div>
+                        <div class="card-body">
+                            <div class="card-property-container">
+                                {{#each this.state}}
+                                    <div class="card-property">
+                                        <span class="card-property--label">{{@key}}</span>
+                                        <span class="card-property--value">{{this}}</span>
+                                    </div>
+                                {{/each}}
+                            </div>
+                        </div>
+                    </div>
+                {{/each}}
+            </div>
+        </div>
+        <div class="dashboard-section dashboard-section-cards">
+            <div class="dashboard-section-header">
+                <span class="dashboard-section-header--title">
+                    Scenes
+                </span>
+            </div>
+            <div class="dashboard-cardSet">
+                {{#each entities.scenes}}
+                    <div class="dashboard-card card element-card entity-card scene-card" data-id="{{this.id}}">
+                        <div class="card-header">{{this.identifier}}</div>
+                        <div class="card-body">
+                        </div>
+                    </div>
+                {{/each}}
+            </div>
+        </div>
+    </div>
+</div>

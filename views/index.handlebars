@@ -14,25 +14,27 @@
                     <div class="card-title card-text--primary">connected</div>
                 </div>
             {{#each clients.clients}}
-                <div class="dashboard-card card element-card client-card client-card--reduced">
-                    <div class="card-header">{{this.identifier}}</div>
-                    <div class="card-body">
-                        <div class="card-property-container">
-                            <div class="card-property">
-                                <span class="card-property--label">versionData</span>
-                                <span class="card-property--value">{{this.versionData}}</span>
-                            </div>
-                            <div class="card-property">
-                                <span class="card-property--label">lastConnection</span>
-                                <span class="card-property--value">{{this.lastConnection}}</span>
-                            </div>
-                            <div class="card-property">
-                                <span class="card-property--label">state</span>
-                                <span class="card-property--value">{{this.connection.state}}</span>
+                {{#if this.connection.connected}}
+                    <div class="dashboard-card card element-card client-card client-card--reduced" data-id="{{this.dbId}}">
+                        <div class="card-header">{{this.identifier}}</div>
+                        <div class="card-body">
+                            <div class="card-property-container">
+                                <div class="card-property">
+                                    <span class="card-property--label">versionData</span>
+                                    <span class="card-property--value">{{this.versionData}}</span>
+                                </div>
+                                <div class="card-property">
+                                    <span class="card-property--label">lastConnection</span>
+                                    <span class="card-property--value">{{transformDateTimeString this.lastConnection}}</span>
+                                </div>
+                                <div class="card-property">
+                                    <span class="card-property--label">state</span>
+                                    <span class="card-property--value">{{#if this.connection.connected}}connected{{else}}disconnected{{/if}}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                {{/if}}
             {{/each}}
             </div>
         </div>

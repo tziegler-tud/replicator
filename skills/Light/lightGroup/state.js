@@ -9,7 +9,7 @@ let LightGroupStateOn = new Skill({
     identifier: "LightGroupStateOn",
     description: "Turn a LightGroup on",
     variables: {
-        groupId: Skill.variableTypes.STRING,
+        groupId: Skill.variableTypes.lightGroup,
     },
     handler: async function({handlerArgs, configuration, intentHandler}){
         let light = await LightsService.getGroupByUniqueId(handlerArgs.groupId);
@@ -21,7 +21,7 @@ let LightGroupStateOff = new Skill({
     identifier: "LightGroupStateOff",
     description: "Turn a LightGroup off",
     variables: {
-        groupId: Skill.variableTypes.STRING,
+        groupId: Skill.variableTypes.lightGroup,
     },
     handler: async function({handlerArgs, configuration, intentHandler}){
         let light = await LightsService.getGroupByUniqueId(handlerArgs.groupId);
@@ -33,7 +33,7 @@ let LightGroupStateToggle = new Skill({
     identifier: "LightGroupStateToggle",
     description: "Toggle the state of a light.",
     variables: {
-        groupId: Skill.variableTypes.STRING,
+        groupId: Skill.variableTypes.lightGroup,
     },
     handler: async function({handlerArgs, configuration, intentHandler}){
         let light = await LightsService.getGroupByUniqueId(handlerArgs.groupId);
@@ -41,4 +41,24 @@ let LightGroupStateToggle = new Skill({
     }
 })
 
-export default {LightGroupStateOn, LightGroupStateOff, LightGroupStateToggle}
+let LightGroupStateSet = new Skill({
+    identifier: "LightGroupStateSet",
+    description: "Explicitly set the state of a lightgroup, or use to toggle.",
+    variables: {
+        groupId: Skill.variableTypes.lightGroup,
+        state: Skill.variableTypes.STRING,
+    },
+    handler: async function({handlerArgs, configuration, intentHandler}){
+        let light = await LightsService.getGroupByUniqueId(handlerArgs.groupId);
+        switch(handlerArgs.state) {
+            case "on":
+                return await light.on();
+            case "off":
+                return await light.off();
+            default:
+                return await light.toggle();
+        }
+    }
+})
+
+export default {LightGroupStateOn, LightGroupStateOff, LightGroupStateToggle, LightGroupStateSet}

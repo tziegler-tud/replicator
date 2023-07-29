@@ -3,6 +3,7 @@ import db from '../schemes/mongo.js';
 import tcpResponse from "../helpers/tcpResponseGenerator.js";
 import voiceCommandService from "../services/voiceCommandService.js";
 import LocationManager from "../managers/LocationManager.js"
+import {transformDateTimeString} from "../helpers/utility.js";
 const DbClient = db.Client;
 
 /**
@@ -36,6 +37,51 @@ export default class Client {
             connected: false,
             url: this.url,
             socket: undefined,
+        }
+    }
+
+    getClientDetails(){
+        return {
+            information: {
+                identifier: {
+                    type: "text",
+                    label: "Identifier",
+                    value: this.identifier
+                },
+                clientId: {
+                    type: "text",
+                    label: "database ID",
+                    value: this.clientId,
+                },
+                versionData: {
+                    type: "text",
+                    label: "version",
+                    value: this.versionData,
+                }
+            },
+            connection: {
+                connected: {
+                    type: "Boolean",
+                    label: "connected",
+                    value: this.connection.connected,
+                },
+                url: {
+                    type: "text",
+                    label: "url",
+                    value: this.connection.url,
+                },
+                lastConnection: {
+                    type: "Date",
+                    label: "last connection",
+                    value: transformDateTimeString(this.lastConnection).dateTime,
+                },
+            },
+            state: {
+
+            },
+            skills: this.skills,
+            settings: this.settings,
+
         }
     }
 
@@ -180,9 +226,15 @@ export default class Client {
             self.send({path: path, method: "POST", data: data})
                 .then(response => {
                     if(response.ok){
-                        resolve(response);
+                        response.json()
+                            .then(data => {
+                                resolve(data);
+
+                            })
                     }
-                    reject(response);
+                    else {
+                        reject(response);
+                    }
                 })
                 .catch(err => reject(err))
         });
@@ -211,7 +263,13 @@ export default class Client {
             else {
                 //client found.
                 //forward to voiceCommandService
-                voiceCommandService.processClientCommand(self, commandData.command, emitter, {});
+                voiceCommandService.processClientCommand(self, commandData.command, emitter, {})
+                    .then(result => {
+                        resolve();
+                    })
+                    .catch(err => {
+                        reject(err);
+                    })
             }
         })
     }
@@ -226,9 +284,11 @@ export default class Client {
             fetch(url, options)
                 .then(response => {
                     if(response.ok) {
-                        const data = response.json();
-                        self.state = data;
-                        resolve(data);
+                        const data = response.json()
+                            .then(data => {
+                                self.state = data;
+                                resolve(data);
+                            })
                     }
                     else reject(response);
                 })
@@ -311,7 +371,9 @@ export default class Client {
     }
 
     setConnected(){
+        this.lastConnection = Date.now();
         this.connection.connected = true;
+        this.saveToDb();
     }
 
     setSocket(socket){

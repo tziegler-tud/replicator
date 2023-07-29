@@ -1,0 +1,101 @@
+<div id="dashboard-container" class="dashboard-container dashboard-tabs">
+    <div class="dashboard-inner">
+        <div class="dashboard-header">
+            <div class="dashboard-header-inner">
+                <span id="intenthandler--title">{{intentHandler.identifier}}</span><span class="text--shy">:: {{intentHandler.intent._identifier}}</span>
+            </div>
+        </div>
+        <div class="dashboard-menu">
+            <div id="dashboard-save-button" class="dashboard-menu-button dashboard-save-button">
+                <button class="mdc-fab" aria-label="Favorite">
+                    <div class="mdc-fab__ripple"></div>
+                    <span class="mdc-fab__icon material-icons">save</span>
+                </button>
+            </div>
+        </div>
+        <div class="mdc-tab-bar" role="tablist">
+            <div class="mdc-tab-scroller">
+                <div class="mdc-tab-scroller__scroll-area">
+                    <div class="mdc-tab-scroller__scroll-content">
+                        <button class="mdc-tab mdc-tab--active" role="tab" aria-selected="true" tabindex="0">
+                            <span class="mdc-tab__content">
+                                <span class="mdc-tab__icon material-icons" aria-hidden="true">add</span>
+                                <span class="mdc-tab__text-label">Action</span>
+                            </span>
+                            <span class="mdc-tab-indicator mdc-tab-indicator--active">
+                                <span class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span>
+                            </span>
+                            <span class="mdc-tab__ripple"></span>
+                        </button>
+                        <button class="mdc-tab" role="tab" aria-selected="true" tabindex="1">
+                            <span class="mdc-tab__content">
+                                <span class="mdc-tab__icon material-icons" aria-hidden="true">add</span>
+                                <span class="mdc-tab__text-label">Variable mapping</span>
+                            </span>
+                            <span class="mdc-tab-indicator">
+                                <span class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span>
+                            </span>
+                            <span class="mdc-tab__ripple"></span>
+                        </button>
+                        <button class="mdc-tab" role="tab" aria-selected="true" tabindex="2">
+                            <span class="mdc-tab__content">
+                                <span class="mdc-tab__icon material-icons" aria-hidden="true">settings</span>
+                                <span class="mdc-tab__text-label">Configuration</span>
+                            </span>
+                            <span class="mdc-tab-indicator">
+                                <span class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span>
+                            </span>
+                            <span class="mdc-tab__ripple"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="dashboard-tab--01" class="dashboard-tab dashboard-tab--active" data-tabid="0">
+            <div class="dashboard-section dashboard-section-list">
+                <div class="dashboard-section dashboard-section-cards">
+                    <div class="dashboard-section-header">
+                        <span class="dashboard-section-header--title">
+                            Skill
+                        </span>
+                    </div>
+                    <div id="skillSelect-container" class="skillSelect-container"></div>
+                </div>
+            </div>
+        </div>
+        <div id="dashboard-tab--02" class="dashboard-tab" data-tabid="1">
+            <div id="dashboard-tab1" class="dashboard-section dashboard-section-list">
+                <div class="dashboard-section-header">
+                <span class="dashboard-section-header--title">
+                    Variable mappings
+                </span>
+                </div>
+                <div class="dashboard-list-container">
+                    <div class="dashboard-list-header">
+                        <span>Required variables</span>
+                    </div>
+                    <ul class="dashboard-list">
+                        {{#each intentHandler.variables.required}}
+                            <li class="variable-mapping" data-variable="{{@key}}" data-type="{{this}}" data-requirement="required">
+
+                            </li>
+                        {{/each}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="dashboard-tab--03" class="dashboard-tab" data-tabid="2">
+            <div id="dashboard-tab1" class="dashboard-section dashboard-section-list">
+                <div class="dashboard-section-header">
+                <span class="dashboard-section-header--title">
+                    Configuration
+                </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="skillSelect-dialog">
+
+</div>

@@ -1,0 +1,32 @@
+@use "@material/list";
+@use '@material/switch/styles';
+@import "./../variables.scss";
+
+@include list.deprecated-core-styles;
+
+.interactiveList {
+
+  .interactiveList-list {
+    .interactiveList-list-item {
+      .interactiveList-item-content {
+        display: flex;
+        flex-flow: row nowrap;
+
+        .interactiveList-item-label {
+          margin-right: 5em;
+        }
+
+        .interactiveList-item-interactionContainer {
+          display: flex;
+          flex-flow: row nowrap;
+
+          .interactiveList-interaction {
+            padding: 0 1em;
+          }
+
+
+        }
+      }
+    }
+  }
+}

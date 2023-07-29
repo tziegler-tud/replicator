@@ -90,10 +90,24 @@ class CommunicationService extends Service {
                     return;
                 }
                 console.log("Client connected: " + client.identifier);
-                socket.on("processCommand", (data) => self.processClientCommand(socket, data));
+                socket.on("processCommand", (data) => {
+                    self.processClientCommand(socket, data)
+                        .then((result)=> {
+                            console.log("Successfully processed command obtained from client");
+                            self.tcpMessage(socket, data)
+                        })
+                        .catch(err => {
+                            console.log("Failed to process client command: " + err);
+                            self.tcpMessage(socket, "Server failed to process command.")
+                        })
+                });
                 socket.on("message", (data) => self.tcpMessage(socket, data));
                 socket.on("disconnect", (reason)=> {
                     console.log("Client disconnected: " + client.identifier);
+                    clientService.disconnectClient(client)
+                        .then(result => {
+                            console.log("Client status set to disconnected: " + client.identifier);
+                        })
                 });
             });
 
@@ -219,11 +233,17 @@ class CommunicationService extends Service {
              * @type {Client|*}
              */
             const client = socket.attachedClient;
-            //we dont want to expose the socket to the client, in order to seperate responsibilities.
+            //we don't want to expose the socket to the client, in order to separate responsibilities.
             // Instead, we forward an emitter object, which acts as an adapter to the socket.
             //create new Emitter and forward to client
             const emitter = new Emitter(socket);
-            client.processCommand(commandData, emitter);
+            client.processCommand(commandData, emitter)
+                .then(result => {
+                    resolve();
+                })
+                .catch(err => {
+                    reject(err);
+                })
         })
     }
 
@@ -280,7 +300,7 @@ class CommunicationService extends Service {
             let tmp = new Client({identifier: "discovery-tmp-client", url: clientUrl, server: clientServerObject});
             tmp.requestAuthentication()
                 .then(result => {
-                    //successful
+                    //successful, check for details of what happened
                     resolve(result);
                 })
                 .catch(reason => {

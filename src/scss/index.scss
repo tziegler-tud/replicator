@@ -1,11 +1,11 @@
-//@use "@material/theme" with (
-//  $primary: #344955,
-//  $secondary: #3D5563,
-//  $on-primary: #FFF,
-//  $on-secondary: #AAA,
-//  $surface: #edf0f2,
-//  $on-surface: #344955,
-//);
+@use "@material/theme" with (
+  $primary: #344955,
+  $secondary: #3D5563,
+  $on-primary: #FFF,
+  $on-secondary: #FFF,
+  $surface: #edf0f2,
+  $on-surface: #344955,
+);
 @use "@material/drawer";
 @use "@material/list";
 @use "@material/button";
@@ -18,7 +18,15 @@
 @use "@material/line-ripple/mdc-line-ripple";
 @use "@material/notched-outline/mdc-notched-outline";
 @use "@material/textfield";
+@use "@material/tab-bar/mdc-tab-bar";
+@use "@material/tab-scroller/mdc-tab-scroller";
+@use "@material/tab-indicator/mdc-tab-indicator";
+@use "@material/tab/mdc-tab";
+@use "@material/fab";
+@use "@material/dialog";
 
+@include dialog.core-styles;
+@include fab.core-styles;
 @include textfield.core-styles;
 @include card.core-styles;
 @include icon-button.core-styles;
@@ -29,6 +37,7 @@
 
 @import "~@fontsource/open-sans/index.css";
 @import "./variables.scss";
+@import "./common.scss";
 
 .replicator-body {
   margin: 0;
@@ -67,11 +76,6 @@
     //  flex: 1 1 auto;
     //}
   }
-
-  .card-container {
-    display: flex;
-    flex-flow: row wrap;
-  }
 }
 
 /**
@@ -92,6 +96,11 @@ cards
   display: flex;
   flex-flow: column nowrap;
   margin: 10px 15px;
+  min-height: 100px;
+
+  background-color: $content;
+  box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+
   &.card-padding {
     padding: 15px 15px;
   }
@@ -108,15 +117,20 @@ cards
 
   .card-property-container {
     display: flex;
-    flex-flow: row wrap;
+    flex-flow: column nowrap;
     width: 100%;
     .card-property {
-      display: block;
+      flex: 1 1 auto;
+      display: flex;
+      flex-flow: row nowrap;
       .card-property--label {
+        flex: 0 0 auto;
+        min-width: 10rem;
 
       }
       .card-property--value {
-
+        flex: 1 1 auto;
+        min-width: 10rem;
       }
     }
   }
@@ -124,6 +138,49 @@ cards
     margin: 15px;
     padding: 0;
     flex: 1 1 auto;
+  }
+
+}
+
+/**
+lists
+ */
+
+
+
+
+/**
+special cards
+ */
+
+.card {
+  &.add-smt-card {
+    background-color: $tertiary;
+    box-shadow: unset;
+    border: 1px dashed $font-content-shy;
+    cursor: pointer;
+    border-radius: 10px;
+
+    .card-body {
+      height: 100%;
+      .add-smt-button {
+        display: flex;
+        flex-flow: column nowrap;
+        justify-content: center;
+        height: 100%;
+
+        .add-smt-button--icon {
+          font-size: 120%;
+          text-align: center;
+          color: $primary;
+        }
+        .add-smt-button--label {
+          text-align: center;
+          color: $font-content-shy;
+        }
+      }
+    }
+
   }
 }
 
@@ -151,5 +208,16 @@ forms
   }
 }
 
+/**
+selects
+ */
 
-
+.replicator-select {
+  max-width: 10rem;
+  display: block;
+  border-radius: 0;
+  border: 1px solid #BBB;
+  background-color: $content;
+  color: $font-content;
+  padding: 5px 10px;
+}

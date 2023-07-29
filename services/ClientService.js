@@ -24,6 +24,10 @@ class ClientService extends Service{
         super();
         let self = this;
 
+        /**
+         *
+         * @type {Client[]}
+         */
         this.clients = [];
         return this;
     }
@@ -76,12 +80,43 @@ class ClientService extends Service{
         })
     }
 
+
+    /**
+     *
+     * @param id {ObjectId | String}
+     * @returns {Promise<Client>}
+     */
+    async getById(id){
+        const client = this.findOneById(id);
+        if(!client) throw new Error("Client not found.");
+        return client;
+    }
+
+    getByIdSync(id){
+        return this.findOneById(id);
+    }
+
+    /**
+     *
+     * @param identifier {String}
+     * @returns {Promise<Client>}
+     */
+    async getByIdentifier(identifier){
+        const client = this.findOneByIdentifier(identifier);
+        if(!client) throw new Error("Client not found.");
+        return client;
+    }
+
+    getByIdentifierSync(identifier){
+        return this.findOneByIdentifier(identifier);
+    }
+
     /**
      *
      * @param id
-     * @returns {}
+     * @returns {Client}
      */
-    getById(id){
+    async getDbClientById(id){
         return DbClient.findById(id)
     }
 
@@ -90,7 +125,7 @@ class ClientService extends Service{
      * @param identifier
      * @returns {}
      */
-    getByIdentifier(identifier){
+    getDbClientByIdentifier(identifier){
         return DbClient.find({identifier: identifier})
     }
 
@@ -100,7 +135,7 @@ class ClientService extends Service{
 
         const identifier = clientInformation.identifier;
         const url = clientInformation.url ? clientInformation.url : clientInformation.requestUrl;
-        const versionData = clientInformation.versionData;
+        const versionData = clientInformation.version;
 
         const defaultSettings = {
             active: true,
@@ -156,6 +191,36 @@ class ClientService extends Service{
                 const response = {
                     clientId: client.clientId,
                     status: ClientService.STATUS.CONNECTED,
+                    client: client,
+                }
+                resolve(response);
+            }
+            else {
+                //client not found.
+                const reason = new ApiError("Client not known.", 401, "UnauthorizedError");
+                reject(reason)
+            }
+        })
+    }
+
+    disconnectClient(clientInformation) {
+        //disconnect a client that is already known
+        let self = this;
+
+        const identifier = clientInformation.identifier;
+        const clientId = clientInformation.clientId;
+        const url = clientInformation.url ? clientInformation.url : clientInformation.requestUrl;
+        const versionData = clientInformation.versionData;
+        const skills = clientInformation.skills;
+
+        return new Promise((resolve,reject) => {
+            //check known clients for identifier
+            let client = self.findOneById(clientId); //try id
+            if(client) {
+                client.setDisconnected(); //mark as connected
+                const response = {
+                    clientId: client.clientId,
+                    status: ClientService.STATUS.DISCONNECTED,
                     client: client,
                 }
                 resolve(response);
@@ -274,10 +339,20 @@ class ClientService extends Service{
             })
     }
 
-    findOneByIdentfier(identifier) {
+    /**
+     *
+     * @param identifier {String}
+     * @returns {Client}
+     */
+    findOneByIdentifier(identifier) {
         return this.clients.find(client => client.identifier.toString() === identifier.toString())
     }
 
+    /**
+     *
+     * @param id {String}
+     * @returns {Client}
+     */
     findOneById(id) {
         return this.clients.find(function(client){
             return client.clientId.toString() === id.toString()

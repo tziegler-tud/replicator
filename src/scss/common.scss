@@ -1,0 +1,27 @@
+@import "./variables";
+
+.text--primary {
+  color: $font-content-primary;
+}
+.text--secondary {
+  color: $font-content-secondary;
+}
+.text--shy {
+  color: $font-content-shy;
+}
+.text--good {
+  color: $font-content-good;
+}
+.text--neutral {
+  color: $font-content-neutral;
+}
+.text--bad {
+  color: $font-content-bad;
+}
+
+.button--primary {
+  color: $font-content-primary !important;
+}
+.button--shy {
+  color: $font-content-shy !important;
+}

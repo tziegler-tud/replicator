@@ -3,11 +3,11 @@ import { v4 as uuidv4 } from 'uuid';
 import "../../scss/components/component.scss";
 
 export default class Component {
-    constructor(name, element, config){
+    constructor({name, element, config={}, data={}}){
         this.componentName = name
         this.container = element;
         this.templateUrl = "./templates/default.hbs";
-        this.data = {};
+        this.data = data;
         this.id = name + "-"+ uuidv4();
 
         const defaultClassName = name + "-component-container"
@@ -17,6 +17,7 @@ export default class Component {
             }
         }
         this.config = Object.assign(defaultConfig, config);
+        this.observers = [];
     }
 
     getTemplateData(){
@@ -28,19 +29,41 @@ export default class Component {
         }
     }
 
-    render() {
+    setData(data){
+        this.data = data;
+    }
+
+    async render({pre=true, post=true}={}) {
         let self = this;
-        return new Promise((resolve, reject) => {
-            //load template
-            $.get(this.templateUrl, function (templateData) {
-                let template = Handlebars.compile(templateData);
-                let data = self.getTemplateData();
-                let html = template(data)
-                //append template to container
-                self.container.innerHTML = html;
-                //add class to container
-                self.container.classList.add(self.config.container.classes);
-            })
-        });
+        if(pre) await self.preRender();
+        //load template
+        let templateData = await $.get(this.templateUrl);
+
+        let template = Handlebars.compile(templateData);
+        let data = self.getTemplateData();
+        let html = template(data)
+        //append template to container
+        self.container.innerHTML = html;
+        //add class to container
+        self.container.classList.add(self.config.container.classes);
+        if(post)self.postRender();
+    }
+
+    preRender(){
+
+    }
+
+    postRender(){
+
+    }
+
+    addObserver(observer){
+        this.observers.push(observer);
+    }
+
+    emitEvent({event, data}){
+        this.observers.forEach(observer=>{
+            observer.inform({event: event, data: data})
+        })
     }
 }
