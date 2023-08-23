@@ -170,10 +170,11 @@ export default class Client {
             }
             else {
                 let dbClient = new DbClient(dbObject);
-                dbClient.clientId = dbClient.id;
+                dbClient.clientId = dbClient._id;
                 dbClient.save()
                     .then(dbClient => {
                         self.clientId = dbClient.clientId;
+                        self.dbId = dbClient._id;
                         resolve(self);
                     })
                     .catch(err => {

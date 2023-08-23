@@ -37,7 +37,7 @@ class CommunicationService extends Service {
         super();
         let self = this;
         this.tcpPort = 9000;
-        this.httpPort = 3000;
+        this.httpPort = 3100;
 
         this._tcpAddress = "127.0.0.1"; //fallback
         this._httpAddress = "127.0.0.1"; //fallback;
