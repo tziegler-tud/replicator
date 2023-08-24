@@ -136,6 +136,15 @@ var IntentHandlerScheme = new Schema({
             }
             return (requiredMatch && forbiddenMatch);
         },
+        checkClient(clientDbId){
+            //we receive the client issueing the command. The handler qualifies if :
+            //1) the client is in the clients array
+            let self = this;
+            if (this.allowAllClients) return true;
+
+            const client = this.clients.find(c => c.toString() === clientDbId);
+            return !!client
+        },
         addAction(action){
             this.actions.push(action);
         },

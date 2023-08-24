@@ -238,7 +238,7 @@ class IntentHandlerService extends Service{
      *
       * @param intent {Intent}
      */
-    async getMatchingHandlers(intent, slots) {
+    async getMatchingHandlers(intent, slots, client) {
         let handlers = await IntentHandler.find({intent: intent.identifier});
         let qualified = []
         if(!handlers) {
@@ -246,7 +246,7 @@ class IntentHandlerService extends Service{
         }
         else {
             handlers.forEach(handler => {
-                if (handler.checkHandler(slots)) qualified.push(handler);
+                if (handler.checkHandler(slots) && handler.checkClient(client.clientId)) qualified.push(handler);
             })
             return qualified;
         }

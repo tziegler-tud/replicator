@@ -55,7 +55,7 @@ class VoiceCommandService extends Service {
                     //these are the variables we can expect. now, lets check which ones we have:
                     let commandVariables = command.slots; //is an object, the keys are variable names
                     //now, let the intent check its handlers. It returns an array. If its empty, no handlers qualified
-                    IntentHandlerService.getMatchingHandlers(intent, command.slots)
+                    IntentHandlerService.getMatchingHandlers(intent, command.slots, client)
                         .then(matchingHandlers => {
                             if (matchingHandlers.length > 0) {
                                 //it's a match!
