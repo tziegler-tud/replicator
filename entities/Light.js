@@ -25,6 +25,7 @@ export default class Light {
         this.settings = {
             identifier: identifier,
         };
+        this.properties = {};
     }
 
     parseState(state){
