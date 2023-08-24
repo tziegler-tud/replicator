@@ -89,7 +89,7 @@ export default class HueLightGroup extends LightGroup {
         return this.setState({on: true})
     };
     async off(){
-        return this.setState({on: true})
+        return this.setState({on: false})
     };
     async toggle(){
         //get current state
