@@ -266,7 +266,7 @@ export default class Client {
                 //forward to voiceCommandService
                 voiceCommandService.processClientCommand(self, commandData.command, emitter, {})
                     .then(result => {
-                        resolve();
+                        resolve(result);
                     })
                     .catch(err => {
                         reject(err);

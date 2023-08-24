@@ -242,10 +242,10 @@ class ClientService extends Service{
         let self = this;
         return new Promise(function(resolve, reject){
             //find client in runtime object
-            let rtClientIndex = this.clients.findIndex(client=>client.clientId.toString() === id.toString());
+            let rtClientIndex = self.clients.findIndex(client=>client.clientId.toString() === id.toString());
             if(rtClientIndex > -1){
                 //remove from rt clients
-                this.clients.splice(rtClientIndex, 1);
+                self.clients.splice(rtClientIndex, 1);
                 //remove from db
                 DbClient.findByIdAndDelete(id)
                     .then(result => {

@@ -5,6 +5,20 @@
                 <span>{{client.identifier}}</span>
             </div>
         </div>
+        <div class="dashboard-menu">
+            <div id="dashboard-titleEdit-button" class="dashboard-menu-button dashboard-titleEdit-button">
+                <button class="mdc-fab" aria-label="Edit">
+                    <div class="mdc-fab__ripple"></div>
+                    <span class="mdc-fab__icon material-icons">edit_note</span>
+                </button>
+            </div>
+            <div id="dashboard-delete-button" class="dashboard-menu-button dashboard-delete-button" data-id="{{client.dbId}}">
+                <button class="mdc-fab" aria-label="Delete">
+                    <div class="mdc-fab__ripple"></div>
+                    <span class="mdc-fab__icon material-icons">delete</span>
+                </button>
+            </div>
+        </div>
         {{#each clientDetails}}
             <div class="dashboard-section dashboard-section-list">
                 <div class="dashboard-section-header">

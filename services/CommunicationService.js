@@ -94,11 +94,19 @@ class CommunicationService extends Service {
                     self.processClientCommand(socket, data)
                         .then((result)=> {
                             console.log("Successfully processed command obtained from client");
-                            self.tcpMessage(socket, data)
+                            data.result = {
+                                success: true,
+                                error: undefined,
+                            }
+                            self.tcpSend(socket, "commandSuccessful", data)
                         })
                         .catch(err => {
                             console.log("Failed to process client command: " + err);
-                            self.tcpMessage(socket, "Server failed to process command.")
+                            data.result = {
+                                success: false,
+                                error: err,
+                            }
+                            self.tcpSend(socket, "commandFailed", data)
                         })
                 });
                 socket.on("message", (data) => self.tcpMessage(socket, data));
@@ -168,6 +176,10 @@ class CommunicationService extends Service {
     tcpMessage(socket, data){
         console.log(data);
         socket.emit("message", data);
+    }
+
+    tcpSend(socket, command, data) {
+        socket.emit(command, data);
     }
 
     tcpClientAuthHandler(socket, next){
