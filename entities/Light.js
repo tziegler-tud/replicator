@@ -88,9 +88,9 @@ export default class Light {
     setBrightnessAbsolute(val){
         return this.setState({brightness: this.normalizeBrightness(val)});
     }
-    setBrightnessRelative(val){
+    setBrightnessRelative(percentVal){
         const current = this.getState().brightness;
-        const updatedVal = current + val;
+        const updatedVal = current + percentVal * this.configuration.brightness.max;
         return this.setState({brightness: this.normalizeBrightness(updatedVal)});
     }
 
