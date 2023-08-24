@@ -10,6 +10,7 @@ export default class LightScene {
         this.lights = [];
         this.scenes = [];
         this.settings = undefined;
+        this.properties = {};
     }
 
     get(){
@@ -17,6 +18,7 @@ export default class LightScene {
             id: this.id,
             uniqueId: this.uniqueId,
             identifier: this.identifier,
+            properties: this.properties,
         }
     }
 
@@ -33,5 +35,9 @@ export default class LightScene {
 
     saveToDb(){
         return this.settings.save();
+    }
+
+    assignProperty(propertyName, value){
+        this.properties[propertyName] = value;
     }
 }

@@ -55,26 +55,30 @@ export default class HueIntegration extends Integration {
                             let lightsPromise = self.BridgeApi.getLights();
                             let groupsPromise = self.BridgeApi.getGroups();
                             let roomsPromise = self.BridgeApi.getRooms();
+                            let zonesPromise = self.BridgeApi.getZones();
                             // let groupsArrayPromise = self.BridgeApi.getGroupsArray();
                             let scenesPromise = self.BridgeApi.getScenes();
                             let sensorsPromise = self.BridgeApi.getSensors();
 
-                            Promise.all([lightsPromise, groupsPromise, roomsPromise, scenesPromise, sensorsPromise])
+                            Promise.all([lightsPromise, groupsPromise, roomsPromise, zonesPromise, scenesPromise, sensorsPromise])
                                 .then(result => {
                                     const lights = result[0];
                                     const groups = result[1];
                                     const rooms = result[2];
-                                    const scenes = result[3];
-                                    const sensors = result[4];
+                                    const zones = result[3];
+                                    const scenes = result[4];
+                                    const sensors = result[5];
 
                                     self.lights = lights;
                                     self.grouped_lights = groups;
                                     self.rooms = rooms;
+                                    self.zones = zones;
                                     self.scenes = scenes;
                                     self.sensors = sensors;
 
                                     //add lights to runtime
                                     let lightsPromise = self.addLights(lights)
+                                    let zonesPromise = self.addZones(zones)
                                     let groupsPromise = self.addGroups(rooms);
                                     let scenesPromise = self.addScenes(scenes);
 
@@ -252,6 +256,67 @@ export default class HueIntegration extends Integration {
                 //find associated scenes
                 let scenes = self.scenes.filter(function(scene){
                     return scene.group.rtype === "room" && scene.group.rid === group.id;
+                })
+
+                let sceneIds = scenes.map(scene => scene.id);
+
+                let groupedLight = new GroupedLight({
+                    bridgeApi: self.BridgeApi,
+                    hueObject: groupedLightJSON,
+                    identifier: "HueGroupedLight_"+groupedLightJSON.id,
+                    lightId: groupedLightJSON.id,
+                    uniqueId: groupedLightJSON.id,
+                })
+                let hueGroup = new HueLightGroup({
+                    bridgeApi: self.BridgeApi,
+                    hueObject: group,
+                    identifier: group.metadata.name,
+                    groupId: group.id,
+                    uniqueId: uniqueId,
+                    groupedLight: groupedLight,
+                    hueScenes: sceneIds,
+                })
+                self.groupObjects.push(hueGroup)
+                LightsService.init.then(() => {
+                    promises.push(LightsService.addGroup(hueGroup))
+                })
+            })
+            LightsService.init.then(() => {
+                Promise.all(promises)
+                    .then(result => {
+                        resolve(self.groupObjects);
+                    })
+                    .catch(err => {
+                        reject(err);
+                    })
+            })
+        });
+    }
+
+    /**
+     * create lightGroup objects from hue zones
+     * Note: API v2 seperates rooms and light_groups into different entities. We will use rooms to create the lightGroup, but call the associated light_group service to handle states.
+     * @param zoneArray
+     * @returns {Promise<unknown>}
+     */
+    addZones(zoneArray){
+        let self = this;
+
+        return new Promise(function (resolve, reject) {
+
+            let promises = [];
+            zoneArray.forEach(function (group) {
+                //create unique id based on key and some other props that should not change
+                const uniqueId = group.id;
+                // find associated grouped_light
+                const groupedLightId = group.services.find(service => service.rtype === "grouped_light").rid;
+                const groupedLightJSON = self.grouped_lights.find(grouped_light => {
+                    return grouped_light.id === groupedLightId;
+                })
+
+                //find associated scenes
+                let scenes = self.scenes.filter(function(scene){
+                    return scene.group.rtype === "zone" && scene.group.rid === group.id;
                 })
 
                 let sceneIds = scenes.map(scene => scene.id);
@@ -513,6 +578,21 @@ class BridgeApiV2 {
         let self = this;
         return new Promise(function (resolve, reject){
             self.get("resource/room")
+                .then(result => {
+                    if(result.errors.length > 0) {
+                        reject(result.errors);
+                    }
+                    else {
+                        resolve(result.data);
+                    }
+                })
+        });
+    }
+
+    getZones(){
+        let self = this;
+        return new Promise(function (resolve, reject){
+            self.get("resource/zone")
                 .then(result => {
                     if(result.errors.length > 0) {
                         reject(result.errors);
