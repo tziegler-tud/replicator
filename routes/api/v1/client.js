@@ -16,6 +16,7 @@ router.get("/:clientId/locations", getClientLocations);
 router.post("/:clientId/locations", addClientLocation);
 router.delete("/:clientId/locations", removeClientLocation);
 router.get("/:clientId", getClientById);
+router.delete("/:clientId", removeClient);
 
 router.post(endpoints.clients.register, registerClient);
 router.post(endpoints.clients.connect, connectClient);
@@ -78,6 +79,17 @@ function discoverClient(req, res, next) {
         })
         .catch(err => {
             if(err.apiError) err = err.errorHandlerObject();
+            next(err);
+        })
+}
+
+function removeClient(req, res, next) {
+    const id = req.params.clientId;
+    clientService.removeClient(id, false)
+        .then(function(client){
+            res.json({status: 200, message: "Client deleted successfully."});
+        })
+        .catch(err => {
             next(err);
         })
 }

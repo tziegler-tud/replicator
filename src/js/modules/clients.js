@@ -37,5 +37,29 @@ export default new Module({
         $(".client-card").click(function(){
             window.location.href= "/clients/" + this.dataset.id;
         })
+
+        $(".dashboard-delete-button").click(function(){
+            const clientId = $(this).data("id");
+            if(!clientId) {
+                console.error("Failed to remove client: Invalid id given")
+            }
+            removeById(clientId);
+        });
+
+        function removeById(id){
+            const data = {
+            }
+
+            $.ajax({
+                method: "DELETE",
+                url: "/api/v1/clients/" + id,
+                data: JSON.stringify(data),
+                contentType: "application/json; charset=UTF-8",
+                dataType: "json",
+            })
+            .done(result => {
+                window.location.href= "/clients";
+            })
+        }
     }
 })

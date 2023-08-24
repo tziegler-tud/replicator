@@ -430,8 +430,10 @@ class IntentHandlerService extends Service{
         let rtClients = [];
         clientDbArray.forEach(function(clientId, index){
             //find client by id
-            const rtClient = ClientService.findOneById(clientId).getJSON();
-            rtClients.push(rtClient)
+            const rtClient = ClientService.findOneById(clientId);
+            if(rtClient) {
+                rtClients.push(rtClient.getJSON())
+            }
         })
         return rtClients;
     }

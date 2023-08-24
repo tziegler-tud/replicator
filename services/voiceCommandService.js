@@ -43,7 +43,7 @@ class VoiceCommandService extends Service {
                 if (!command.isUnderstood) {
                     //not understood. nothing we can do
                     //this should not even have been sent by the client, but you know how clients are. Just ignore it.
-                    return false;
+                    reject();
                 } else {
                     //get intent
                     let title = command.intent;
@@ -74,10 +74,12 @@ class VoiceCommandService extends Service {
                                 })
                             } else {
                                 //no handler found
-
+                                reject("No matching handler found.");
                             }
                         })
-
+                        .catch(err => {
+                            reject(err);
+                        })
                 }
             })
             .catch(err=> {
