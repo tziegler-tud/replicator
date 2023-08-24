@@ -23,6 +23,8 @@ export default class ExecutionContext {
      * @returns {Promise<unknown>}
      */
     run({command}){
+        console.log("Executing intentHandler: " + this.intentHandler.identifier);
+
         let self = this;
         this.state = ExecutionContext.STATE.RUNNING;
         this.currentAction = undefined;
@@ -37,6 +39,8 @@ export default class ExecutionContext {
                 const variables = action.variables;
 
                 let handlerArgs = {};
+
+                console.log("Running skill: " + skillIdentifier);
 
                 variables.forEach(function(variable) {
                     let result = undefined;
