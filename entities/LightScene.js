@@ -14,12 +14,7 @@ export default class LightScene {
     }
 
     get(){
-        return {
-            id: this.id,
-            uniqueId: this.uniqueId,
-            identifier: this.identifier,
-            properties: this.properties,
-        }
+        return this;
     }
 
     activate(){
