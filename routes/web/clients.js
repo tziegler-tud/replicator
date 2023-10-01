@@ -9,6 +9,7 @@ const MODULES = {
     INTENTHANDLERS: "IntentHandlerModule",
     SKILLS: "SkillModule",
     ENTITIES: "EntitiesModule",
+    INTEGRATIONS: "IntegrationsModule"
 }
 /**
  * hooked at /clients

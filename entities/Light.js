@@ -57,6 +57,13 @@ export default class Light {
         Object.assign(this.state, state);
     }
 
+    getInternalState(){
+        return this.state;
+    }
+    setInternalState(state){
+        Object.assign(this.state, state);
+    }
+
     /**
      * turns the light on or off
      * @param state {Boolean}

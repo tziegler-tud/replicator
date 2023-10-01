@@ -21,6 +21,24 @@ export default class LightScene {
         return true;
     }
 
+    getState(){
+
+    }
+
+    setState(){
+
+    }
+
+    getInternalState(){
+
+    }
+
+    setInternalState(){
+
+    }
+
+
+
 
     loadSettings(dbSettings){
         this.settings = dbSettings;

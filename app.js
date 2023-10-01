@@ -30,12 +30,14 @@ import intentRouter from './routes/api/v1/intents.js';
 import locationRouter from './routes/api/v1/location.js';
 import lightRouter from './routes/api/v1/lights.js';
 import intentHandlerRouter from './routes/api/v1/intentHandler.js';
+import integrationsRouter from './routes/api/v1/integrations.js';
 
 import webIndexRouter from './routes/web/index.js';
 import webClientRouter from './routes/web/clients.js';
 import webIntentRouter from './routes/web/intents.js';
 import webIntentHandlerRouter from './routes/web/intentHandlers.js';
 import webEntitiesRouter from './routes/web/entities.js';
+import webIntegrationsRouter from './routes/web/integrations.js';
 
 
 
@@ -80,6 +82,7 @@ app.use('/api/v1/intents', intentRouter);
 app.use('/api/v1/locations', locationRouter);
 app.use('/api/v1/lights', lightRouter);
 app.use('/api/v1/intentHandler', intentHandlerRouter);
+app.use('/api/v1/integrations', integrationsRouter);
 app.use("/api", apiErrorHandler);
 
 app.use('/', webIndexRouter);
@@ -87,6 +90,7 @@ app.use('/clients', webClientRouter);
 app.use('/intents', webIntentRouter);
 app.use('/intenthandlers', webIntentHandlerRouter);
 app.use('/entities', webEntitiesRouter);
+app.use('/integrations', webIntegrationsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

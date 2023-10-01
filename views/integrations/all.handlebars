@@ -1,0 +1,53 @@
+<div class="dashboard-container">
+    <div class="dashboard-inner">
+        <div class="dashboard-section dashboard-section-cards">
+            <div class="dashboard-section-header">
+                <span class="dashboard-section-header--title">
+                    Integrations
+                </span>
+            </div>
+            <div class="dashboard-cardSet">
+                {{#each integrations}}
+                    <div class="dashboard-card card element-card client-card client-card--reduced" data-name="{{this.uniqueName}}">
+                        <div class="card-header">{{this.readableName}}</div>
+                        <div class="card-body">
+                            <div class="card-property-container">
+                                <div class="card-property">
+                                    <span class="card-property--label">type</span>
+                                    <span class="card-property--value">{{this.integration.type}}</span>
+                                </div>
+                                <div class="card-property">
+                                    <span class="card-property--label">state</span>
+                                    <span class="card-property--value">{{#if this.status}}active{{else}}inactive{{/if}}</span>
+                                </div>
+                                <div class="card-property">
+                                    <span class="card-property--label">Entities</span>
+                                    <span class="card-property--value">{{getLength this.lights}} Lights, {{getLength this.grouped_lights}} Groups, {{getLength this.scenes}} Scenes</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {{/each}}
+            </div>
+        </div>
+
+        <div class="dashboard-section dashboard-section-cards">
+            <div class="dashboard-section-header">
+                <span class="dashboard-section-header--title">
+
+                </span>
+            </div>
+            <div class="page-section">
+                <div class="button-container">
+                    <a class="button" href="/clients/add">
+                        <button class="mdc-button mdc-button--outlined mdc-button--icon-leading">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon" aria-hidden="true">add</i>
+                            <span class="mdc-button__label">add Client</span>
+                        </button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
