@@ -21,6 +21,12 @@ export default class HueLight extends Light {
         }
     }
 
+    parseHueChangeToState(hueObject){
+        let stateChange = Object.assign(this.nativeObject, hueObject);
+        return this.parseHueToState(stateChange)
+
+    }
+
     parseStateChangeToHue(state){
         let oj = {}
         if(state.on !== undefined) oj.on = {on: state.on};
@@ -87,6 +93,15 @@ export default class HueLight extends Light {
         this.state = this.parseHueToState(this.nativeObject);
         return this.state;
     }
+
+
+    getInternalState(){
+        return this.state;
+    }
+    setInternalState(hueObject){
+        this.state = this.parseHueChangeToState(hueObject);
+    }
+
 
     async on(){
         return this.setState({on: true})

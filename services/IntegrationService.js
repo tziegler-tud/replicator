@@ -42,6 +42,15 @@ class IntegrationService extends Service{
 
     }
 
+    getActive(){
+        return this.loaded;
+    }
+
+    getDetails(uniqueName){
+        const integration = this.loaded.find(el => el.uniqueName === uniqueName);
+        return integration;
+    }
+
     integrations = {
         HUE: HueIntegration,
         DECONZ: DeconzIntegration,

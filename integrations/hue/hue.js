@@ -1,6 +1,7 @@
 import https from 'https';
 import http from 'http';
 import fetch from 'node-fetch';
+import EventSource from "eventsource";
 import Integration from "../Integration.js";
 import LightsService from "../../services/LightsService.js";
 
@@ -12,6 +13,7 @@ import HueLightScene from "./entities/HueLightScene.js"
 export default class HueIntegration extends Integration {
     constructor({BridgeUrl, BridgeUser}={}){
         super();
+        this.uniqueName = "hue";
         this.readableName = "Phillips Hue Integration";
         this.integration = {
             type: "Phillips Hue",
@@ -22,6 +24,7 @@ export default class HueIntegration extends Integration {
         this.locations = [];
         this.lights = [];
         this.groups = [];
+        this.grouped_lights = [];
         this.scenes = [];
         this.sensors = [];
 
@@ -36,6 +39,17 @@ export default class HueIntegration extends Integration {
     }
     initFunc({BridgeUrl, BridgeUser}){
         let self = this;
+        this.locations = [];
+        this.lights = [];
+        this.groups = [];
+        this.grouped_lights = [];
+        this.scenes = [];
+        this.sensors = [];
+
+        this.lightObjects = [];
+        this.groupObjects = [];
+        this.sceneObjects = [];
+
         if(BridgeUrl) this.BridgeUrl = BridgeUrl;
         if(BridgeUser) this.BridgeUser = BridgeUser;
         const errMsg = "Failed to load " + this.readableName;
@@ -90,6 +104,14 @@ export default class HueIntegration extends Integration {
                                                     self.addScenesToGroups(groups)
                                                         .then(result => {
                                                             console.log("Phillips Hue Integration initialized successfully. Bridge IP: " + self.BridgeUrl);
+                                                            //subscribe to eventstream
+                                                            const eventSource = self.BridgeApi.getEventSource();
+                                                            const eventStreamHandler = new EventStreamHandler(self);
+                                                            eventSource.addEventListener('update', (event)=>{eventStreamHandler.update(event)});
+                                                            eventSource.addEventListener('add', (event)=>{eventStreamHandler.add(event)});
+                                                            eventSource.addEventListener('delete', (event)=>{eventStreamHandler.delete(event)});
+                                                            eventSource.addEventListener('error', (event)=>{eventStreamHandler.error(event)});
+                                                            eventSource.addEventListener('message', (event)=>{eventStreamHandler.message(event)});
                                                             resolve(self);
                                                         })
                                                         .catch(err => {
@@ -201,6 +223,11 @@ export default class HueIntegration extends Integration {
 
     }
 
+    getResource(uniqueId){
+        //check lights
+        let resources = [...this.lightObjects, ...this.groupObjects, ...this.sceneObjects];
+        return resources.find(o => o.uniqueId === uniqueId);
+    }
     addLights(lightsArray) {
         let self = this;
         return new Promise(function (resolve, reject) {
@@ -702,6 +729,107 @@ class BridgeApiV2 {
                 action: "active",
             }
         })
+    }
+
+    getEventSource(){
+        let headers = {
+            'hue-application-key': this.headers["hue-application-key"],
+            'Accept': "text/event-stream",
+        }
+        let url = "https://" + this.url + "/eventstream/clip/v2";
+        var eventSourceInitDict = {headers: headers};
+        var es = new EventSource(url, eventSourceInitDict);
+        return es;
+    }
+}
+
+class EventStreamHandler {
+    constructor(integration){
+        this.integration = integration;
+    }
+    add(event){
+        this.log(event)
+    }
+    update(event){
+        this.log(event)
+    }
+    delete(event){
+        this.log(event)
+    }
+    error(event){
+        this.log(event)
+    }
+    message(event){
+        // this.log(event);
+        const data = JSON.parse(event.data);
+        data.forEach(event => {
+            let hueEvent = new HueEvent(event);
+            switch(hueEvent.type){
+                case "add":
+                    return this.addEvent(hueEvent);
+                case "update":
+                    return this.updateEvent(hueEvent);
+                case "delete":
+                    return this.deleteEvent(hueEvent);
+                case "error":
+                default:
+                    return this.errorEvent(hueEvent);
+            }
+        })
+    }
+    log(event){
+        console.log("HueIntegration: Received event: Type: " + event.type + " data: " + event.data.toString());
+    }
+
+    addEvent(hueEvent){
+        console.log("HueIntegration: something was added!");
+    }
+    updateEvent(hueEvent){
+        const self = this;
+        console.log("HueIntegration: something was updated!")
+        //identify updated resources
+        const modifiedResources = hueEvent.getModifiedResources();
+        //get resources
+        modifiedResources.forEach(resource => {
+            let entity = self.integration.getResource(resource.uniqueId);
+            if(entity) entity.setInternalState(resource.data)
+
+
+        })
+
+
+
+
+    }
+    deleteEvent(hueEvent){
+        console.log("HueIntegration: something was deleted!")
+        // return this.integration.reload();
+    }
+    errorEvent(hueEvent){
+        console.log("HueIntegration: Error received:");
+        this.log(hueEvent);
+
+    }
+}
+
+class HueEvent{
+    constructor(eventData){
+        this.id = eventData.id;
+        this.type = eventData.type;
+        this.data = eventData.data;
+        this.creationTime = eventData.creationTime;
+    }
+
+    getModifiedResources(){
+        let resources = [];
+        this.data.forEach(dataset => {
+            resources.push({
+                type: dataset.type,
+                uniqueId: dataset.id,
+                data: dataset,
+            });
+        })
+        return resources;
     }
 }
 

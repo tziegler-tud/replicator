@@ -63,7 +63,7 @@ export default class Snackbar {
      * shows the snackbar with given content
      *
      * @param message {String} snackbar message
-     * @param options {Object}
+     * @param options {Object?}
      * @param options.timeout {Number} timeout in ms
      * @param options.closeOnEscape {Boolean} true to close sidebar if action button is clicked
      * @param options.actionButton {Object}
@@ -110,7 +110,7 @@ export default class Snackbar {
      * @param jqxhr {Object} jqxhr object
      * @param textstatus {String} string containing status message
      * @param error {Error} error Object
-     * @param options {Object}
+     * @param options {Object?}
      * @param options.timeout {Number} timeout in ms
      * @param options.closeOnEscape {Boolean} true to close sidebar if action button is clicked
      * @param options.actionButton {Object}
