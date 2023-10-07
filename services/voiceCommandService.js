@@ -61,7 +61,7 @@ class VoiceCommandService extends Service {
                                 //it's a match!
                                 matchingHandlers.forEach(handler => {
                                     //create execution context
-                                    IntentHandlerService.createExecutionContext(handler)
+                                    IntentHandlerService.createExecutionContext(handler, {client: client})
                                         .then(ec => {
                                             ec.run({command: command})
                                                 .then(result => {

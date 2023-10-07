@@ -786,20 +786,18 @@ class EventStreamHandler {
     }
     updateEvent(hueEvent){
         const self = this;
-        console.log("HueIntegration: something was updated!")
         //identify updated resources
         const modifiedResources = hueEvent.getModifiedResources();
         //get resources
-        modifiedResources.forEach(resource => {
-            let entity = self.integration.getResource(resource.uniqueId);
-            if(entity) entity.setInternalState(resource.data)
-
-
-        })
-
-
-
-
+        if(modifiedResources.length > 0){
+            console.log("HueIntegration: "+ modifiedResources.length + " resources were updated!")
+            modifiedResources.forEach(resource => {
+                let entity = self.integration.getResource(resource.uniqueId);
+                if(entity) {
+                    entity.setInternalState(resource.data)
+                }
+            })
+        }
     }
     deleteEvent(hueEvent){
         console.log("HueIntegration: something was deleted!")

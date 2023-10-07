@@ -113,7 +113,7 @@ app.use(function(err, req, res, next) {
 const settingsService = SettingsService.start({})
 
 // IntentService.start();
-const intentService = IntentService.start({config: "/rhinoModels/0_3_1/replicator_v0_3_1.yml"});
+const intentService = IntentService.start({config: "/rhinoModels/v4/replicator_v0_4_0.yml"});
 
 //init voice command service
 const voiceCommandService =VoiceCommandService.start({});

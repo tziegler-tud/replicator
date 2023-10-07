@@ -24,6 +24,27 @@ import ClientService from "./ClientService.js";
  */
 
 class IntentHandlerService extends Service{
+
+    static properties = {
+        CLIENTS: "clients",
+        SETTINGS: "settings",
+    }
+
+    static propertyResolvers = (function(){
+        const o = {}
+        o[IntentHandlerService.properties.CLIENTS] = {
+            resolve: function({intentHandler, client}){
+                return client.clientId;
+            }
+        };
+        o[IntentHandlerService.properties.SETTINGS] = {
+            resolve: function({intentHandler, client}){
+                return SettingsService.getSettingsSync();
+            }
+        };
+        return o;
+    })()
+
     constructor(){
         super();
         this.debugLabel = "IntentHandlerService: ";
@@ -151,6 +172,16 @@ class IntentHandlerService extends Service{
         const intent = IntentService.getIntent(data.intent);
         if(!intent) throw new Error("Intent not found.");
 
+        let defaultProperties = [
+            {
+                key: IntentHandlerService.properties.CLIENTS,
+                values: []
+            },
+            {
+                key: IntentHandlerService.properties.SETTINGS,
+                values: []
+            },
+        ]
         let defaultHandler = {
             identifier: undefined,
             clients: [],
@@ -163,6 +194,7 @@ class IntentHandlerService extends Service{
             },
             actions: [],
             finisher: {},
+            properties: defaultProperties
         }
 
         let handlerBlueprint = Object.assign(defaultHandler, data)
@@ -263,12 +295,15 @@ class IntentHandlerService extends Service{
         //check if clients were updated
         if(data.clients) {
             let clients = [];
+            let clientValues = [];
             data.clients.forEach(clientId => {
                 //find client
                 let client = ClientService.getByIdSync(clientId)
                 clients.push(client.clientId);
+                clientValues.push({name: client.identifier, value: client.clientId});
             })
             data.clients = clients;
+            result.setProperty({key: IntentHandlerService.properties.CLIENTS, values: clientValues})
         }
         Object.assign(result, data);
         return await result.save();
@@ -369,7 +404,9 @@ class IntentHandlerService extends Service{
         }
     }
 
-    createExecutionContext(intentHandler){
+
+
+    createExecutionContext(intentHandler, {client}){
         let self = this;
         return new Promise(function(resolve, reject){
             //validate
@@ -377,8 +414,13 @@ class IntentHandlerService extends Service{
                 reject("IntentHandler not found: " + identifier);
             }
             else {
+                const properties = []
+                intentHandler.properties.forEach(property => {
+                    const resolver = self.getPropertyResolver(property);
+                    properties.push({key: property.key, value: resolver.resolve({intentHandler, client})});
+                })
                 //create new executionContext
-                let ec = new ExecutionContext(intentHandler);
+                let ec = new ExecutionContext(intentHandler, client, properties);
                 resolve(ec);
             }
         })
@@ -402,6 +444,10 @@ class IntentHandlerService extends Service{
                     reject(err);
                 })
         })
+    }
+
+    getPropertyResolver(property){
+        return IntentHandlerService.propertyResolvers[property.key] ?? function(){return undefined};
     }
 
     /**

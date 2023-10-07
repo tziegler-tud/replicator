@@ -24,11 +24,18 @@ export default class InteractiveList extends Component{
         return new Promise(function(resolve, reject){
             //build interaction objects
             let outerPromises = [];
+            if(!Array.isArray(self.listEntries)) {
+                //try to extract keys
+                if(typeof(self.listEntries) === "object"){
+                    self.listEntries = Object.keys(self.listEntries);
+                }
+            }
             self.listEntries.forEach(listEntry => {
                 let entry = {}
                 outerPromises.push(new Promise(function(resolve, reject){
                     let promises = [];
                     self.interactionData.forEach(interactionData => {
+                        interactionData.listEntry = listEntry;
                         interactionData.value = interactionData.valueFunc(listEntry);
                         promises.push(self.buildInteraction(interactionData))
                     })
@@ -55,7 +62,7 @@ export default class InteractiveList extends Component{
 
     }
 
-    buildInteraction({type, identifier, value}){
+    buildInteraction({type, identifier, value, params, config, listEntry}){
         let self = this;
         let interaction;
         let templateUrl = "/js/components/templates/switchInteraction.hbs";
@@ -66,12 +73,18 @@ export default class InteractiveList extends Component{
             case "input":
                 templateUrl = "/js/components/templates/inputInteraction.hbs";
                 break;
+            case "number":
+                templateUrl = "/js/components/templates/numberInteraction.hbs";
+                break;
+            case "label":
+                templateUrl = "/webpack/components/templates/labelInteraction.hbs";
+                break;
         }
         const uid = this.getNewIdentifier(type);
         return new Promise(function(resolve, reject){
             $.get(templateUrl, function (templateData) {
                 let template = Handlebars.compile(templateData);
-                let interaction = new Interaction({type, uid, identifier, template, value});
+                let interaction = new Interaction({type, uid, identifier, template, templateData: {params: params}, value, config, listEntry});
                 resolve(interaction);
             })
         })
@@ -107,16 +120,18 @@ export default class InteractiveList extends Component{
 }
 
 class Interaction {
-    constructor({type, uid, identifier, template, templateData={}, value}={}){
+    constructor({type, uid, identifier, template, templateData={}, value, config={classes: []}, listEntry=undefined}={}){
         this.id = uid;
         this.type = type;
         this.identifier = identifier;
+        this.config = config;
         templateData.id = this.id;
         templateData.identifier = this.identifier;
         templateData.type = this.type;
         this.html = template(templateData);
         this.element = undefined;
         this.value = value
+        this.listEntry = listEntry;
         this.getValFunc = function(){return undefined;}
         this.setValFunc = function(){return undefined;}
         this.observers = [];
@@ -130,15 +145,30 @@ class Interaction {
             return false;
         }
         this.element = element;
+        this.applyConfig();
         return true;
+    }
+
+    applyConfig(){
+        if(this.config.classes){
+            if(Array.isArray(this.config.classes)){
+                this.config.classes.forEach(classEntry => {
+                    this.element.classList.add(classEntry)
+                })
+            }
+            else {
+                this.element.classList.add(this.config.classes)
+            }
+        }
     }
 
     init(){
         let self = this;
+        let input, mdcSwitch = undefined;
         switch(this.type){
             case "switch":
                 //get mdc container
-                let mdcSwitch = document.getElementById(this.id + "__switch");
+                mdcSwitch = document.getElementById(this.id + "__switch");
                 const switchControl = new MDCSwitch(mdcSwitch);
                 this.getValFunc = function(){
                     return switchControl.selected;
@@ -151,6 +181,45 @@ class Interaction {
                     self.hasChanged();
                 })
 
+                //set value if one was given
+                if(this.value) {
+                    this.setValue(this.value)
+                }
+                break;
+            case "number":
+            case "input":
+                input = document.getElementById(this.id + "__input");
+                this.getValFunc = function(){
+                    return input.value;
+                }
+                this.setValFunc = function(value){
+                    input.value = value;
+                    return value;
+                }
+                input.addEventListener("changed", function(){
+                    self.hasChanged();
+                })
+                self.element.addEventListener("click", function(){
+                    self.isClicked();
+                })
+                //set value if one was given
+                if(this.value) {
+                    this.setValue(this.value)
+                }
+                break;
+            case "label":
+                let label = document.getElementById(this.id + "__label");
+                this.getValFunc = function(){
+                    return label.dataset.value;
+                }
+                this.setValFunc = function(value){
+                    label.innerHTML = value
+                    label.dataset.value = value;
+                    return value;
+                }
+                self.element.addEventListener("click", function(){
+                    self.isClicked();
+                })
                 //set value if one was given
                 if(this.value) {
                     this.setValue(this.value)
@@ -175,6 +244,17 @@ class Interaction {
         //notify observers
         this.observers.forEach(observer => {
             observer.inform({event: "changed", data: data});
+        })
+    }
+
+    isClicked(){
+        const data = {
+            value: this.getValue(),
+            interaction: this,
+        }
+        //notify observers
+        this.observers.forEach(observer => {
+            observer.inform({event: "click", data: data});
         })
     }
 

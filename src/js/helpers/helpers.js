@@ -256,7 +256,7 @@ var stringToBoolean = function (string){
 var common = {
     escapeSelector: escapeSelector,
     refJSON: refJSON,
-    strinToBoolean: stringToBoolean,
+    stringToBoolean: stringToBoolean,
 }
 
 Date.prototype.toDateInputValue = (function() {

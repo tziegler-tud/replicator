@@ -2,7 +2,12 @@ import LightGroup from "../../../entities/LightGroup.js";
 
 export default class HueLightGroup extends LightGroup {
     constructor({bridgeApi, hueObject, uniqueId, groupId, identifier="MyHueLight", integration, groupedLight, hueScenes}={}){
-        super({uniqueId: uniqueId, identifier: identifier, nativeObject: hueObject, configuration: {}});
+        super({uniqueId: uniqueId, identifier: identifier, nativeObject: hueObject, configuration: {
+            brightness: {
+                    max: 100,
+                    min: 0,
+                }
+            }});
         this.uniqueId = uniqueId;
         this.groupId = groupId;
         this.bridgeApi = bridgeApi;
@@ -130,10 +135,13 @@ export default class HueLightGroup extends LightGroup {
 
     setBrightnessAbsolute(value=0){
         const bri = this.normalizeBrightness(value)
+        // return this.setState({
+        //     dimming: {
+        //         brightness: bri,
+        //     }
+        // })
         return this.setState({
-            dimming: {
-                brightness: bri,
-            }
+            brightness: bri,
         })
     }
 

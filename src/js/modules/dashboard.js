@@ -14,10 +14,5 @@ export default new Module({
             component.setValues({total: pageData.clients.stats.total, amount: pageData.clients.stats.connected})
             component.render();
         })
-
-        //get dashboard container
-        const dashboardContainer =
-        //check if tab dashboard
-        document.getElementById()
     }
 })
