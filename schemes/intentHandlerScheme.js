@@ -22,6 +22,23 @@ var IntentHandlerScheme = new Schema({
         type: String,
         required: true,
     },
+    properties: [
+        {
+            key: {
+                type: String
+            },
+            values: [
+                {
+                    name: {
+                        type: String
+                    },
+                    value: {
+
+                    }
+                }
+            ]
+        }
+    ],
     variables: {
         required: {},
         optional: {},
@@ -44,7 +61,7 @@ var IntentHandlerScheme = new Schema({
                 },
                 mapping: {
                     mappingType: {
-                        //one of "constant", "variable", "dynamic variable"
+                        //one of "constant", "variable", "dynamic variable", "property", "dynamic property"
                     },
                     variable: {
 
@@ -94,6 +111,19 @@ var IntentHandlerScheme = new Schema({
 },
 {
     methods: {
+        addProperty({key, values}){
+            if(!this.properties) this.properties = [];
+            this.properties.push({key: key, values: values});
+        },
+
+        setProperty({key, values}){
+            if(!this.properties) this.properties = [];
+            //find property
+            let index = this.properties.findIndex((property) => property.key === key);
+            if(index > -1) {this.properties[index] = {key: key, values: values}}
+            else this.addProperty({key: key, values: values});
+            return this.properties;
+        },
         addVariable(identifier, type, expectation=VariableExpectation.OPTIONAL) {
             let self = this;
             switch(expectation){
@@ -135,6 +165,15 @@ var IntentHandlerScheme = new Schema({
                 })
             }
             return (requiredMatch && forbiddenMatch);
+        },
+        checkClient(clientDbId){
+            //we receive the client issueing the command. The handler qualifies if :
+            //1) the client is in the clients array
+            let self = this;
+            if (this.allowAllClients) return true;
+
+            const client = this.clients.find(c => c.toString() === clientDbId);
+            return !!client
         },
         addAction(action){
             this.actions.push(action);

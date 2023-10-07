@@ -1,6 +1,7 @@
 import https from 'https';
 import http from 'http';
 import fetch from 'node-fetch';
+import EventSource from "eventsource";
 import Integration from "../Integration.js";
 import LightsService from "../../services/LightsService.js";
 
@@ -12,6 +13,7 @@ import HueLightScene from "./entities/HueLightScene.js"
 export default class HueIntegration extends Integration {
     constructor({BridgeUrl, BridgeUser}={}){
         super();
+        this.uniqueName = "hue";
         this.readableName = "Phillips Hue Integration";
         this.integration = {
             type: "Phillips Hue",
@@ -22,6 +24,7 @@ export default class HueIntegration extends Integration {
         this.locations = [];
         this.lights = [];
         this.groups = [];
+        this.grouped_lights = [];
         this.scenes = [];
         this.sensors = [];
 
@@ -36,6 +39,17 @@ export default class HueIntegration extends Integration {
     }
     initFunc({BridgeUrl, BridgeUser}){
         let self = this;
+        this.locations = [];
+        this.lights = [];
+        this.groups = [];
+        this.grouped_lights = [];
+        this.scenes = [];
+        this.sensors = [];
+
+        this.lightObjects = [];
+        this.groupObjects = [];
+        this.sceneObjects = [];
+
         if(BridgeUrl) this.BridgeUrl = BridgeUrl;
         if(BridgeUser) this.BridgeUser = BridgeUser;
         const errMsg = "Failed to load " + this.readableName;
@@ -55,26 +69,30 @@ export default class HueIntegration extends Integration {
                             let lightsPromise = self.BridgeApi.getLights();
                             let groupsPromise = self.BridgeApi.getGroups();
                             let roomsPromise = self.BridgeApi.getRooms();
+                            let zonesPromise = self.BridgeApi.getZones();
                             // let groupsArrayPromise = self.BridgeApi.getGroupsArray();
                             let scenesPromise = self.BridgeApi.getScenes();
                             let sensorsPromise = self.BridgeApi.getSensors();
 
-                            Promise.all([lightsPromise, groupsPromise, roomsPromise, scenesPromise, sensorsPromise])
+                            Promise.all([lightsPromise, groupsPromise, roomsPromise, zonesPromise, scenesPromise, sensorsPromise])
                                 .then(result => {
                                     const lights = result[0];
                                     const groups = result[1];
                                     const rooms = result[2];
-                                    const scenes = result[3];
-                                    const sensors = result[4];
+                                    const zones = result[3];
+                                    const scenes = result[4];
+                                    const sensors = result[5];
 
                                     self.lights = lights;
                                     self.grouped_lights = groups;
                                     self.rooms = rooms;
+                                    self.zones = zones;
                                     self.scenes = scenes;
                                     self.sensors = sensors;
 
                                     //add lights to runtime
                                     let lightsPromise = self.addLights(lights)
+                                    let zonesPromise = self.addZones(zones)
                                     let groupsPromise = self.addGroups(rooms);
                                     let scenesPromise = self.addScenes(scenes);
 
@@ -86,6 +104,14 @@ export default class HueIntegration extends Integration {
                                                     self.addScenesToGroups(groups)
                                                         .then(result => {
                                                             console.log("Phillips Hue Integration initialized successfully. Bridge IP: " + self.BridgeUrl);
+                                                            //subscribe to eventstream
+                                                            const eventSource = self.BridgeApi.getEventSource();
+                                                            const eventStreamHandler = new EventStreamHandler(self);
+                                                            eventSource.addEventListener('update', (event)=>{eventStreamHandler.update(event)});
+                                                            eventSource.addEventListener('add', (event)=>{eventStreamHandler.add(event)});
+                                                            eventSource.addEventListener('delete', (event)=>{eventStreamHandler.delete(event)});
+                                                            eventSource.addEventListener('error', (event)=>{eventStreamHandler.error(event)});
+                                                            eventSource.addEventListener('message', (event)=>{eventStreamHandler.message(event)});
                                                             resolve(self);
                                                         })
                                                         .catch(err => {
@@ -197,6 +223,11 @@ export default class HueIntegration extends Integration {
 
     }
 
+    getResource(uniqueId){
+        //check lights
+        let resources = [...this.lightObjects, ...this.groupObjects, ...this.sceneObjects];
+        return resources.find(o => o.uniqueId === uniqueId);
+    }
     addLights(lightsArray) {
         let self = this;
         return new Promise(function (resolve, reject) {
@@ -252,6 +283,67 @@ export default class HueIntegration extends Integration {
                 //find associated scenes
                 let scenes = self.scenes.filter(function(scene){
                     return scene.group.rtype === "room" && scene.group.rid === group.id;
+                })
+
+                let sceneIds = scenes.map(scene => scene.id);
+
+                let groupedLight = new GroupedLight({
+                    bridgeApi: self.BridgeApi,
+                    hueObject: groupedLightJSON,
+                    identifier: "HueGroupedLight_"+groupedLightJSON.id,
+                    lightId: groupedLightJSON.id,
+                    uniqueId: groupedLightJSON.id,
+                })
+                let hueGroup = new HueLightGroup({
+                    bridgeApi: self.BridgeApi,
+                    hueObject: group,
+                    identifier: group.metadata.name,
+                    groupId: group.id,
+                    uniqueId: uniqueId,
+                    groupedLight: groupedLight,
+                    hueScenes: sceneIds,
+                })
+                self.groupObjects.push(hueGroup)
+                LightsService.init.then(() => {
+                    promises.push(LightsService.addGroup(hueGroup))
+                })
+            })
+            LightsService.init.then(() => {
+                Promise.all(promises)
+                    .then(result => {
+                        resolve(self.groupObjects);
+                    })
+                    .catch(err => {
+                        reject(err);
+                    })
+            })
+        });
+    }
+
+    /**
+     * create lightGroup objects from hue zones
+     * Note: API v2 seperates rooms and light_groups into different entities. We will use rooms to create the lightGroup, but call the associated light_group service to handle states.
+     * @param zoneArray
+     * @returns {Promise<unknown>}
+     */
+    addZones(zoneArray){
+        let self = this;
+
+        return new Promise(function (resolve, reject) {
+
+            let promises = [];
+            zoneArray.forEach(function (group) {
+                //create unique id based on key and some other props that should not change
+                const uniqueId = group.id;
+                // find associated grouped_light
+                const groupedLightId = group.services.find(service => service.rtype === "grouped_light").rid;
+                const groupedLightJSON = self.grouped_lights.find(grouped_light => {
+                    return grouped_light.id === groupedLightId;
+                })
+
+                //find associated scenes
+                let scenes = self.scenes.filter(function(scene){
+                    return scene.group.rtype === "zone" && scene.group.rid === group.id;
                 })
 
                 let sceneIds = scenes.map(scene => scene.id);
@@ -524,6 +616,21 @@ class BridgeApiV2 {
         });
     }
 
+    getZones(){
+        let self = this;
+        return new Promise(function (resolve, reject){
+            self.get("resource/zone")
+                .then(result => {
+                    if(result.errors.length > 0) {
+                        reject(result.errors);
+                    }
+                    else {
+                        resolve(result.data);
+                    }
+                })
+        });
+    }
+
     getScenes(){
         let self = this;
         return new Promise(function (resolve, reject){
@@ -622,6 +729,105 @@ class BridgeApiV2 {
                 action: "active",
             }
         })
+    }
+
+    getEventSource(){
+        let headers = {
+            'hue-application-key': this.headers["hue-application-key"],
+            'Accept': "text/event-stream",
+        }
+        let url = "https://" + this.url + "/eventstream/clip/v2";
+        var eventSourceInitDict = {headers: headers};
+        var es = new EventSource(url, eventSourceInitDict);
+        return es;
+    }
+}
+
+class EventStreamHandler {
+    constructor(integration){
+        this.integration = integration;
+    }
+    add(event){
+        this.log(event)
+    }
+    update(event){
+        this.log(event)
+    }
+    delete(event){
+        this.log(event)
+    }
+    error(event){
+        this.log(event)
+    }
+    message(event){
+        // this.log(event);
+        const data = JSON.parse(event.data);
+        data.forEach(event => {
+            let hueEvent = new HueEvent(event);
+            switch(hueEvent.type){
+                case "add":
+                    return this.addEvent(hueEvent);
+                case "update":
+                    return this.updateEvent(hueEvent);
+                case "delete":
+                    return this.deleteEvent(hueEvent);
+                case "error":
+                default:
+                    return this.errorEvent(hueEvent);
+            }
+        })
+    }
+    log(event){
+        console.log("HueIntegration: Received event: Type: " + event.type + " data: " + event.data.toString());
+    }
+
+    addEvent(hueEvent){
+        console.log("HueIntegration: something was added!");
+    }
+    updateEvent(hueEvent){
+        const self = this;
+        //identify updated resources
+        const modifiedResources = hueEvent.getModifiedResources();
+        //get resources
+        if(modifiedResources.length > 0){
+            console.log("HueIntegration: "+ modifiedResources.length + " resources were updated!")
+            modifiedResources.forEach(resource => {
+                let entity = self.integration.getResource(resource.uniqueId);
+                if(entity) {
+                    entity.setInternalState(resource.data)
+                }
+            })
+        }
+    }
+    deleteEvent(hueEvent){
+        console.log("HueIntegration: something was deleted!")
+        // return this.integration.reload();
+    }
+    errorEvent(hueEvent){
+        console.log("HueIntegration: Error received:");
+        this.log(hueEvent);
+
+    }
+}
+
+class HueEvent{
+    constructor(eventData){
+        this.id = eventData.id;
+        this.type = eventData.type;
+        this.data = eventData.data;
+        this.creationTime = eventData.creationTime;
+    }
+
+    getModifiedResources(){
+        let resources = [];
+        this.data.forEach(dataset => {
+            resources.push({
+                type: dataset.type,
+                uniqueId: dataset.id,
+                data: dataset,
+            });
+        })
+        return resources;
     }
 }
 

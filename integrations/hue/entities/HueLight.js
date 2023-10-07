@@ -3,7 +3,12 @@ import ColorParser from "../../../helpers/colorParser.js";
 
 export default class HueLight extends Light {
     constructor({bridgeApi, hueObject, uniqueId, lightId, identifier="MyHueLight", integration}={}){
-        super({uniqueId: uniqueId, identifier: identifier, nativeObject: hueObject, configuration: {}});
+        super({uniqueId: uniqueId, identifier: identifier, nativeObject: hueObject, configuration: {
+                brightness: {
+                    max: 100,
+                    min: 0,
+                }
+            }});
         this.lightId = lightId;
         this.bridgeApi = bridgeApi;
         this.colorParser = new ColorParser({maxBrightness: 100});
@@ -21,11 +26,17 @@ export default class HueLight extends Light {
         }
     }
 
+    parseHueChangeToState(hueObject){
+        let stateChange = Object.assign(this.nativeObject, hueObject);
+        return this.parseHueToState(stateChange)
+
+    }
+
     parseStateChangeToHue(state){
         let oj = {}
         if(state.on !== undefined) oj.on = {on: state.on};
-        if(state.brightness) oj.dimming = {brightness: state.brightness}
-        if(state.hue && state.sat && state.brightness) {
+        if(state.brightness !== undefined) oj.dimming = {brightness: state.brightness}
+        if(state.hue !== undefined && state.sat !== undefined && state.brightness !== undefined) {
             const xyBri = this.colorParser.hsvToXYBri({h: state.hue, s: state.sat, v: state.brightness});
             oj.color = {
                 xy: {
@@ -87,6 +98,15 @@ export default class HueLight extends Light {
         this.state = this.parseHueToState(this.nativeObject);
         return this.state;
     }
+
+
+    getInternalState(){
+        return this.state;
+    }
+    setInternalState(hueObject){
+        this.state = this.parseHueChangeToState(hueObject);
+    }
+
 
     async on(){
         return this.setState({on: true})

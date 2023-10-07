@@ -5,9 +5,20 @@ export default class GroupedLight extends HueLight {
         super({bridgeApi, hueObject, uniqueId, lightId, identifier, integration});
     }
 
-    async setState(state){
-        this.state = Object.assign(this.state, state);
-        this.bridgeApi.setGroupedLightState(this.lightId, this.parseStateChangeToHue(state));
+    /**
+     *
+     * @param state
+     * @param disableParsing {Boolean} if set to true, the provided object is directly send to the bridge. Internal state is left unchanged.
+     * @returns {Promise<void>}
+     */
+    async setState(state, disableParsing=false){
+        if(disableParsing){
+            this.bridgeApi.setGroupedLightState(this.lightId, state);
+        }
+        else {
+            this.state = Object.assign(this.state, state);
+            this.bridgeApi.setGroupedLightState(this.lightId, this.parseStateChangeToHue(state));
+        }
     }
 
     async getState(){

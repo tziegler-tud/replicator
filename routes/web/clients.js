@@ -5,10 +5,12 @@ var router = express.Router();
 const MODULES = {
     DASHBOARD: "DashboardModule",
     CLIENTS: "ClientModule",
+    CLIENTDETAILS: "ClientDetailsModule",
     INTENTS: "IntentModule",
     INTENTHANDLERS: "IntentHandlerModule",
     SKILLS: "SkillModule",
     ENTITIES: "EntitiesModule",
+    INTEGRATIONS: "IntegrationsModule"
 }
 /**
  * hooked at /clients
@@ -34,7 +36,7 @@ function clients(req, res, next){
                     ],
                     nav: {
                         currentEntry: "clients"
-                    }
+                    },
                 }
             });
         });
@@ -53,27 +55,45 @@ function addClient(req, res, next){
     });
 }
 
-function clientDetails(req, res, next){
+async function clientDetails(req, res, next){
     //get clients
     const id = req.params.id;
-    ClientService.getById(id)
-        .then(client => {
-            res.render("clients/details", {
-                client: client,
+    let client = undefined;
+    try {
+        client = await ClientService.getById(id)
+    }
+    catch(e){
+        next(e);
+    }
+    try {
+        //get device settings via tcp
+        const deviceSettings = await client.getDeviceSettings()
+        const interfaces = await client.getInterfaces();
+        render(deviceSettings, interfaces, undefined);
+    }
+    catch(e){
+        render(undefined, undefined, e)
+    }
+
+    function render(deviceSettings, interfaces, error){
+        res.render("clients/details", {
+            client: client,
+            clientDetails: client.getClientDetails(),
+            page: {
+                modules: [
+                    MODULES.CLIENTDETAILS,
+                ],
+                nav: {
+                    currentEntry: "clients"
+                },
+                client: client.getJSON(),
                 clientDetails: client.getClientDetails(),
-                page: {
-                    modules: [
-                        MODULES.CLIENTS,
-                    ],
-                    nav: {
-                        currentEntry: "clients"
-                    }
-                }
-            })
+                deviceSettings: deviceSettings,
+                interfaces: interfaces,
+                error: error,
+            }
         })
-        .catch(err => {
-            next(err);
-        })
+    }
 
 }
 

@@ -1,8 +1,9 @@
 export default class Skill {
     static variableTypes = {
         STRING: "string",
-        NUMBER: "Number",
-        PERCENT: "string",
+        NUMBER: "number",
+        BOOLEAN: "boolean", //parses to bool. "false", "False" are interpreted as false, other values use js internal parsing
+        PERCENT: "number", //removes % if string and parses to int
         ID: "string",
         OBJECT: "object",
         FUNCTION: "function",
@@ -73,8 +74,10 @@ export default class Skill {
                 }
                 else {
                     //assert type
-                    if(!typeof(handlerArgs[variableName]) === self.variables[variableName]){
+                    if(!(typeof(handlerArgs[variableName]) === self.variables[variableName])){
                         console.warn("Skill runner: Warning: Type missmatch: Expected " + variableName + " to be " + self.variables[variableName] + ", but found " + typeof(handlerArgs[variableName]))
+                        //try parsing
+                        handlerArgs[variableName] = self.parseVar(handlerArgs[variableName], self.variables[variableName])
                     }
                 }
             }
@@ -97,5 +100,40 @@ export default class Skill {
                     })
             }
         })
+    }
+
+    parseVar(variable, targetType){
+        const type = typeof(variable);
+        let parsed = variable;
+        switch(targetType) {
+            case Skill.variableTypes.BOOLEAN:
+                parsed = !!variable;
+                if(type === "string") {
+                    parsed = (variable && variable !== "false" && variable !== "False");
+                }
+                break;
+            case Skill.variableTypes.NUMBER:
+                parsed = variable;
+                if(type === "string") {
+                    parsed = parseInt(variable);
+                }
+                break;
+            case Skill.variableTypes.STRING:
+                parsed = variable.toString();
+                break;
+
+            case Skill.variableTypes.PERCENT:
+                if(type === "string") {
+                    parsed = variable;
+                    parsed.replace("%", "");
+                    parsed = parseInt(parsed);
+                }
+                break;
+            default:
+                parsed = variable
+                break;
+        }
+
+        return parsed;
     }
 }

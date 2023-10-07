@@ -18,6 +18,10 @@ helpers.checklength= function (v1, v2, options) {
     return options.inverse(this);
 };
 
+helpers.getLength = function(v1, options) {
+    return v1.length;
+}
+
 
 helpers.stringNotEmpty= function (v1, options) {
     'use strict';

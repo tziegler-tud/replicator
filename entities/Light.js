@@ -25,6 +25,7 @@ export default class Light {
         this.settings = {
             identifier: identifier,
         };
+        this.properties = {};
     }
 
     parseState(state){
@@ -53,6 +54,13 @@ export default class Light {
     }
 
     setState(state){
+        Object.assign(this.state, state);
+    }
+
+    getInternalState(){
+        return this.state;
+    }
+    setInternalState(state){
         Object.assign(this.state, state);
     }
 
@@ -89,7 +97,7 @@ export default class Light {
     }
     setBrightnessRelative(val){
         const current = this.getState().brightness;
-        const updatedVal = updatedVal+ current;
+        const updatedVal = current + val;
         return this.setState({brightness: this.normalizeBrightness(updatedVal)});
     }
 

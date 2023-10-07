@@ -9,17 +9,59 @@ context:
         $location:location"
     changeLightState:
       - "@switch $state:state (all, the) ($location:location) @lights"
+      - "@switch $state:state (all, the) ($location:location) @lights in
+        $pv.TwoDigitInteger:minutes @minutes"
+      - "@switch $state:state (all, the) ($location:location) @lights in
+        $pv.TwoDigitInteger:hours @hours"
       - "@switch (all, the) ($location:location) @lights $state:state"
+      - "@switch (all, the) ($location:location) @lights $state:state in
+        $pv.TwoDigitInteger:minutes @minutes"
+      - "@switch (all, the) ($location:location) @lights $state:state in
+        $pv.TwoDigitInteger:hours @hours"
       - "@switch $state:state (the) @lights [at, in] (the) $location:location"
+      - "@switch $state:state (the) @lights [at, in] (the) $location:location in
+        $pv.TwoDigitInteger:minutes @minutes"
+      - "@switch $state:state (the) @lights [at, in] (the) $location:location in
+        $pv.TwoDigitInteger:hours @hours"
       - "@switch (the) @lights [in, at] the $location:location $state:state"
-      - "@lights"
-      - "@lights $state:state"
+      - "@switch (the) @lights [in, at] the $location:location $state:state in
+        $pv.TwoDigitInteger:minutes @minutes"
+      - "@switch (the) @lights [in, at] the $location:location $state:state in
+        $pv.TwoDigitInteger:hours @hours"
+      - (@switch) ($location:location) @lights ($state:state)
+      - (@switch) ($location:location) @lights ($state:state) in
+        $pv.TwoDigitInteger:minutes @minutes
+      - (@switch) ($location:location) @lights ($state:state) in
+        $pv.TwoDigitInteger:hours @hours
       - "@switch (the) @lights $state:state $location:location"
-      - "@lights $state:state $location:location"
+      - "@switch (the) @lights $state:state $location:location in
+        $pv.TwoDigitInteger:minutes @minutes"
+      - "@switch (the) @lights $state:state $location:location in
+        $pv.TwoDigitInteger:hours @hours"
+      - (@switch) @lights $state:state $location:location
+      - (@switch) @lights $state:state $location:location in
+        $pv.TwoDigitInteger:minutes @minutes
+      - (@switch) @lights $state:state $location:location in
+        $pv.TwoDigitInteger:hours @hours
+      - (@switch) @lights ($location:location) ($state:state)
+      - (@switch) @lights ($location:location) ($state:state) in
+        $pv.TwoDigitInteger:minutes @minutes
+      - (@switch) @lights ($location:location) ($state:state) in
+        $pv.TwoDigitInteger:hours @hours
+      - (@switch) ($location:location) $lightSelect:lightSelect ($state:state)
+      - (@switch) ($location:location) $lightSelect:lightSelect ($state:state)
+        in $pv.TwoDigitInteger:minutes @minutes
+      - (@switch) ($location:location) $lightSelect:lightSelect ($state:state)
+        in $pv.TwoDigitInteger:hours @hours
+      - (@switch) $lightSelect:lightSelect ($location:location) ($state:state)
+      - (@switch) $lightSelect:lightSelect ($location:location) ($state:state)
+        in $pv.TwoDigitInteger:minutes @minutes
+      - (@switch) $lightSelect:lightSelect ($location:location) ($state:state)
+        in $pv.TwoDigitInteger:hours @hours
     changeLightStateOff:
-      - shut off (all, the) ($location:location) @lights
+      - "@turnOff (all, the) ($location:location) @lights"
       - shut (all, the) ($location:location) @lights off
-      - shut off (the) @lights [at, in] (the) $location:location
+      - "@turnOff (the) @lights [at, in] (the) $location:location"
       - shut (the) @lights off [at, in] (the) $location:location
       - shut (the) @lights [at, in] (the) $location:location off
     LightBrightnessGroup:
@@ -45,34 +87,77 @@ context:
       - "@lights to $minmax:minmax"
       - $location:location @lights to $minmax:minmax
     LightBrightnessLight:
-      - $setValue:setValue (the) (@brightnessOfLights) (the)
+      - $setValue:setValue (the) (@brightness) (the) $lightSelect:lightSelect
+        (@lightLamp)
+      - ($setValue:setValue) (the) (@brightness) (the) $lightSelect:lightSelect
+        (@lightLamp) $absoluteRelative:toBy [$pv.Percent:percent,
+        $minmax:minmax]
+      - ($setValue:setValue) $lightSelect:lightSelect (@lightLamp) (@brightness)
+        $absoluteRelative:toBy [$pv.Percent:percent, $minmax:minmax]
+      - $setValue:setValue (the) (@brightness) (the) $location:location
         $lightSelect:lightSelect (@lightLamp)
-      - $setValue:setValue (the) (@brightnessOfLights) (the)
+      - ($setValue:setValue) (the) (@brightness) (the) $location:location
         $lightSelect:lightSelect (@lightLamp) $absoluteRelative:toBy
         [$pv.Percent:percent, $minmax:minmax]
-      - $lightSelect:lightSelect (@lightLamp) $absoluteRelative:toBy
-        [$pv.Percent:percent, $minmax:minmax]
     LightScenes:
-      - "@lightSceneSelect @lightSceneAlias to $lightScenes:lightScene"
+      - (@lightSceneSelect) ($location:location) @lightSceneAlias to
+        $lightScenes:lightScene
       - $lightScenes:lightScene
-    MusicControl:
-      - "@turn (@this) @musicAlias $state:musicState"
-      - $musicStartStop:musicStartStop ($thisNext:thisNext) [@musicAlias,
-        @musicSong]
-      - $musicStartStop:musicStartStop $pv.SingleDigitInteger:singleDigitAmount
-        @musicSong
+      - (@lightSceneSelect) @lightSceneAlias to $lightScenes:lightScene [in, at]
+        (the) $location:location
+      - (@adjust) ($location:location) @lightSceneAlias to @timeOfDay
     MusicSelect:
-      - "@startMusic (some) $musicArtist:musicArtist"
-      - "@startMusic something [by, from] $musicArtist:musicArtist"
-      - "@startMusic something $musicMood:musicMood"
-      - "@startMusic (some) $musicStyle:musicStyle"
-      - "@startMusic (some) $musicStyle:musicStyle [@musicAlias, @musicSong]"
-      - "@startMusic (some) $musicMood:musicMood [@musicAlias, @musicSong]"
+      - "@playMusic (some) $musicArtist:musicArtist"
+      - "@playMusic something [by, from] $musicArtist:musicArtist"
+      - "@playMusic something $musicMood:musicMood"
+      - "@playMusic (some) $musicStyle:musicStyle"
+      - "@playMusic (some) $musicStyle:musicStyle [@musicAlias, @musicSong]"
+      - "@playMusic (some) $musicMood:musicMood [@musicAlias, @musicSong]"
     MusicVolume:
       - $setValue:setValue (@musicAlias) @volume $absoluteRelative:toBy
         $pv.Percent:percent (percent)
       - $setValue:setValue (@musicAlias) @volume
       - $setValue:setValue (@musicAlias) @volume to $minmax:minmax
+    Ignore:
+      - Never mind
+      - Ignore
+    Alerts:
+      - $alertType:alertType alert
+    Reminder:
+      - Remind me in $pv.TwoDigitInteger:minutes minutes
+    StopAlert:
+      - Stand down $alertType:alertType
+    Insults:
+      - Shut up
+      - Whats a
+      - What the
+      - (Are you) stupid
+    MusicStart:
+      - "@playMusic @musicAlias"
+    MusicStop:
+      - "@turn (@this) @musicAlias off"
+      - "@stopMusic [@musicSong, @musicAlias]"
+    MusicNext:
+      - skip song
+      - next @musicSong
+    TemperatureState:
+      - "@request (the) (@this) (room) Temperature"
+    HumidityState: []
+    ClimateState:
+      - "@request (the) (@this) (room) climate"
+    startTransmission:
+      - start transmission
+      - Open a channel
+    EndTransmission:
+      - close channel
+      - end transmission
+    startRecording:
+      - (@start) new recording
+      - start recording
+    playRecording:
+      - play (last) recording
+    addLog: []
+    playLog: []
   slots:
     color:
       - blue
@@ -87,10 +172,7 @@ context:
       - off
       - on
     location:
-      - bathroom
       - bedroom
-      - hallway
-      - kitchen
       - living room
       - everywhere
     place: []
@@ -100,6 +182,7 @@ context:
       - set
       - raise
       - lower
+      - reduce
     lightSelect:
       - main light
       - floor light
@@ -110,18 +193,20 @@ context:
       - bed light left
       - bed light right
       - light bar
+      - reading light
+      - reading lamp
     absoluteRelative:
       - to
       - by
     lightScenes:
+      - Morning
+      - Sleep
       - Sunrise
       - Sunset
       - Daylight
       - Evening
-      - Night
-      - Maximum
-      - Minimum
-      - Focus
+      - Slowed
+      - Movie
     musicMood:
       - romantic
       - slow
@@ -186,6 +271,11 @@ context:
       - recent
       - next
       - upcoming
+    alertType:
+      - Nutrition
+      - Intruder
+      - Yellow
+      - Red
   macros:
     lights:
       - lights
@@ -233,10 +323,7 @@ context:
       - scene
       - setting
       - mood
-    startMusic:
-      - start
-      - play
-      - resume
+      - lights
     musicAlias:
       - music
       - noise
@@ -267,6 +354,7 @@ context:
       - volume
       - loudness
     playMusic:
+      - turn on
       - play
       - resume
       - continue
@@ -274,3 +362,32 @@ context:
     next:
       - next
       - upcoming
+    turnOff:
+      - shut
+      - shut off
+      - turn off
+      - switch off
+      - kill
+    adjust:
+      - adjust
+      - set
+    timeOfDay:
+      - time of day
+      - time
+      - outside
+      - outside brightness
+    hours:
+      - hour
+      - hours
+    minutes:
+      - minute
+      - minutes
+    request:
+      - How much is
+      - State
+      - What is
+    start:
+      - open
+      - commence
+      - begin
+      - start

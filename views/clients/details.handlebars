@@ -1,4 +1,4 @@
-<div class="dashboard-container">
+<div id="dashboard-container" class="dashboard-container dashboard-tabs">
     <div class="dashboard-inner">
         <div class="dashboard-header">
             <div class="dashboard-header-inner">
@@ -12,6 +12,12 @@
                     <span class="mdc-fab__icon material-icons">edit_note</span>
                 </button>
             </div>
+            <div id="dashboard-save-button" class="dashboard-menu-button dashboard-save-button" data-id="{{client.dbId}}">
+                <button class="mdc-fab" aria-label="Save">
+                    <div class="mdc-fab__ripple"></div>
+                    <span class="mdc-fab__icon material-icons">save</span>
+                </button>
+            </div>
             <div id="dashboard-delete-button" class="dashboard-menu-button dashboard-delete-button" data-id="{{client.dbId}}">
                 <button class="mdc-fab" aria-label="Delete">
                     <div class="mdc-fab__ripple"></div>
@@ -19,24 +25,79 @@
                 </button>
             </div>
         </div>
-        {{#each clientDetails}}
-            <div class="dashboard-section dashboard-section-list">
-                <div class="dashboard-section-header">
+        <div class="mdc-tab-bar" role="tablist">
+            <div class="mdc-tab-scroller">
+                <div class="mdc-tab-scroller__scroll-area">
+                    <div class="mdc-tab-scroller__scroll-content">
+                        <button class="mdc-tab mdc-tab--active" role="tab" aria-selected="true" tabindex="0">
+                            <span class="mdc-tab__content">
+                                <span class="mdc-tab__icon material-icons" aria-hidden="true">info</span>
+                                <span class="mdc-tab__text-label">Details</span>
+                            </span>
+                            <span class="mdc-tab-indicator mdc-tab-indicator--active">
+                                <span class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span>
+                            </span>
+                            <span class="mdc-tab__ripple"></span>
+                        </button>
+                        <button class="mdc-tab" role="tab" aria-selected="true" tabindex="1">
+                            <span class="mdc-tab__content">
+                                <span class="mdc-tab__icon material-icons" aria-hidden="true">settings</span>
+                                <span class="mdc-tab__text-label">Settings</span>
+                            </span>
+                            <span class="mdc-tab-indicator">
+                                <span class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span>
+                            </span>
+                            <span class="mdc-tab__ripple"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="dashboard-tab--01" class="dashboard-tab dashboard-tab--active" data-tabid="0">
+            {{#each clientDetails}}
+                <div class="dashboard-section dashboard-section-list">
+                    <div class="dashboard-section-header">
                 <span class="dashboard-section-header--title">
                     {{@key}}
                 </span>
+                    </div>
+                    <div class="dashboard-list-container">
+                        <ul class="dashboard-list">
+                            {{#each this}}
+                                <li class="dashboard-list-item dashboard-list-item--{{this.type}}">
+                                    <span class="dashboard-list-item-entry dashboard-list-item-label">{{this.label}}</span>
+                                    <span class="dashboard-list-item-entry dashboard-list-item-value">{{this.value}}</span>
+                                </li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                </div>
+            {{/each}}
+        </div>
+        <div id="dashboard-tab--02" class="dashboard-tab" data-tabid="1">
+            <div id="dashboard-tab1" class="dashboard-section dashboard-section-list">
+                <div class="dashboard-section-header">
+                    <span class="dashboard-section-header--title">
+                        On-Device settings
+                    </span>
                 </div>
                 <div class="dashboard-list-container">
-                    <ul class="dashboard-list">
-                        {{#each this}}
-                            <li class="dashboard-list-item dashboard-list-item--{{this.type}}">
-                                <span class="dashboard-list-item-entry dashboard-list-item-label">{{this.label}}</span>
-                                <span class="dashboard-list-item-entry dashboard-list-item-value">{{this.value}}</span>
-                            </li>
-                        {{/each}}
-                    </ul>
+                    <div class="dashboard-list-header">
+                        <span>Recorder Settings</span>
+                    </div>
+                    <div id="recordingSettingsList">
+
+                    </div>
+                </div>
+                <div class="dashboard-list-container">
+                    <div class="dashboard-list-header">
+                        <span>Interfaces</span>
+                    </div>
+                    <div id="interfacesList">
+
+                    </div>
                 </div>
             </div>
-        {{/each}}
+        </div>
     </div>
 </div>

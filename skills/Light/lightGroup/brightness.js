@@ -26,11 +26,30 @@ let setLightGroupBrightnessRelative = new Skill({
     variables: {
         groupId: Skill.variableTypes.lightGroup,
         percentValue: Skill.variableTypes.PERCENT,
+        negative: Skill.variableTypes.BOOLEAN,
     },
     handler: async function({handlerArgs, configuration, intentHandler}){
         let light = await LightsService.getGroupByUniqueId(handlerArgs.groupId);
-        light.setBrightness({percentValue: handlerArgs.percentValue, isRelative: true})
+        let percentVal = handlerArgs.negative ? handlerArgs.percentValue.toInt() : (-1) * handlerArgs.percentValue.toInt();
+        light.setBrightness({percentValue: percentVal, isRelative: true})
     }
 })
 
-export default {setLightGroupBrightnessAbsolute, setLightGroupBrightnessRelative}
+let setLightGroupBrightnessVariable = new Skill({
+    identifier: "setLightGroupBrightnessVariable",
+    title: "Brightness - Variable",
+    description: "Absolute or relative brightness change",
+    variables: {
+        groupId: Skill.variableTypes.lightGroup,
+        percentValue: Skill.variableTypes.PERCENT,
+        absolute: Skill.variableTypes.BOOLEAN,
+        negative: Skill.variableTypes.BOOLEAN,
+    },
+    handler: async function({handlerArgs, configuration, intentHandler}){
+        let light = await LightsService.getGroupByUniqueId(handlerArgs.groupId);
+        let percentVal = handlerArgs.negative ? (-1) * handlerArgs.percentValue : handlerArgs.percentValue;
+        light.setBrightness({percentValue: percentVal, isRelative: !handlerArgs.absolute})
+    }
+})
+
+export default {setLightGroupBrightnessAbsolute, setLightGroupBrightnessRelative, setLightGroupBrightnessVariable}

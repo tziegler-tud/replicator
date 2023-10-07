@@ -115,9 +115,10 @@ export default class EntitySelectDialog extends DialogComponent{
         let stage2Options = this.entities[stage1Selected.value];
         //add stage items
         stage2Options.forEach(entity=> {
+            const text = (entity.properties.groupName ? entity.properties.groupName + " | " : "") + entity.uniqueId
             const item = new StageItem({
                 title: entity.identifier,
-                text: entity.uniqueId,
+                text: text,
                 value: entity.uniqueId,
             }, this.itemCounter++, {showIcon: false});
             stage2.addItem(item);

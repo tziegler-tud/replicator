@@ -22,6 +22,8 @@ export default class MappingSelect extends Component{
             CONSTANT: "constant",
             VARIABLE: "variable",
             DYNAMIC: "dynamicVariable",
+            PROPERTY: "property",
+            DYNAMICPROPERTY: "dynamicProperty",
         }
 
         const defaultMapping = {
@@ -30,6 +32,7 @@ export default class MappingSelect extends Component{
             value: {},
             fallback: undefined,
         }
+
         this.mappingData = Object.assign(defaultMapping, data.variable.mapping);
         //augment descriptions
         this.descriptions = {
@@ -37,6 +40,8 @@ export default class MappingSelect extends Component{
                 Constant: {text: "Always use a constant value", icon: "/icons/lightbulb.png"},
                 Variable: {text: "Use the value of a intent variable", icon: "/icons/audioFile.png"},
                 DynamicVariable: {text: "Assign a constant to all variable options", icon: "/icons/tts.png"},
+                Property: {text: "Use a context variable", icon: "/icons/audioFile.png"},
+                DynamicProperty: {text: "Assign a constant to context variable assignments", icon: "/icons/tts.png"},
             },
             stage2: {
                 light: {text: "Control individual lights", icon: "/icons/floorLamp.png"},
@@ -77,7 +82,7 @@ export default class MappingSelect extends Component{
         // self.loadStage2();
         // // self.loadStage3();
 
-        this.fallbackContainer = document.querySelector(".fallback--container");
+        this.fallbackContainer = this.container.querySelector(".fallback--container");
         this.fallback = new Fallback({
             container: this.fallbackContainer,
             entitySelect: {
@@ -145,6 +150,8 @@ export default class MappingSelect extends Component{
                 {name: "constant", value: "constant"},
                 {name: "variable", value: "variable"},
                 {name: "dynamic Variable", value: "dynamicVariable"},
+                {name: "property", value: "property"},
+                {name: "dynamic property", value: "dynamicProperty"},
             ]
             stage1.setOptions(options);
             stage1.finishFunc = function(args){
@@ -173,18 +180,37 @@ export default class MappingSelect extends Component{
             //create stage 2 - another simple select
             const stage2Container = self.container.querySelector(".stage2--container");
             let stage2 = new SelectStage({element: stage2Container, level: 2, template: "/js/components/templates/mapping/stage2.hbs"})
-            //create options
-            //options here are variables not forbidden on the intentHandler
-            const required = self.intentHandler.variables.required;
-            const optional = self.intentHandler.variables.optional;
+
+            let stage1Value = self.stages.stage1.getValue();
+
             let options = [
             ]
-            if(required) Object.keys(required).forEach(function(variable){
-                options.push({name: variable, value: variable, type: required[variable], required: true})
-            });
-            if(optional) Object.keys(optional).forEach(function(variable){
-                options.push({name: variable, value: variable, type: optional[variable], required: false})
-            });
+
+            switch(stage1Value){
+                case self.types.CONSTANT:
+                case self.types.VARIABLE:
+                case self.types.DYNAMIC:
+                    //create options
+                    //options here are variables not forbidden on the intentHandler
+                    const required = self.intentHandler.variables.required;
+                    const optional = self.intentHandler.variables.optional;
+
+                    if(required) Object.keys(required).forEach(function(variable){
+                        options.push({name: variable, value: variable, type: required[variable], required: true})
+                    });
+                    if(optional) Object.keys(optional).forEach(function(variable){
+                        options.push({name: variable, value: variable, type: optional[variable], required: false})
+                    });
+
+                    break;
+                case self.types.PROPERTY:
+                case self.types.DYNAMICPROPERTY:
+                    self.intentHandler.properties.forEach(property => {
+                        options.push({name: property.key, value: property.key, type: "property", required: false})
+                    })
+                    break;
+            }
+
             stage2.setOptions(options);
 
             stage2.finishFunc = function(args){
@@ -245,6 +271,14 @@ export default class MappingSelect extends Component{
                     template = "/js/components/templates/mapping/stage3-dynamic.hbs";
                     selectedVariable = stage2Value;
                     break;
+                case self.types.PROPERTY:
+                    template = "/js/components/templates/mapping/stage3-property.hbs";
+                    selectedVariable = stage2Value;
+                    break;
+                case self.types.DYNAMICPROPERTY:
+                    template = "/js/components/templates/mapping/stage3-dynamicProperty.hbs";
+                    selectedVariable = stage2Value;
+                    break;
             }
             let stage3 = new InputStage({element: stage3Container, level: 3, template: template})
             //create options
@@ -257,50 +291,104 @@ export default class MappingSelect extends Component{
             stage3.changeFunc = function(){
                 self.change();
             }
-            if(type === self.types.DYNAMIC){
-                let slotTitle = self.stages.stage2.getType();
-                $.ajax({
-                    method: "GET",
-                    url: "/api/v1/intents/slots/" + slotTitle,
-                    contentType: "application/json; charset=UTF-8",
-                    dataType: "json",
-                })
-                    .done(result => {
-                        // const slotOptions =
-                        let options = [];
-                        result.values.forEach(function(value){
-                            //try to find some values in the current mapping
-                            let content = self.mappingData.value[value] ?? "";
-                            options.push({name: value, type: "notImplemented", value: content});
-                        })
-                        stage3.setOptions(options);
-                        stage3.render()
-                            .then(result => {
-                                //setup event listener
-                                $(".stage3--option").each(function(index, option) {
-                                    //find associated input
-                                    const input = $(this).find(".stage3--input");
-                                    input.on("change", function(){
-                                        stage3.change();
-                                    })
-                                    const entitySelectButton = $(this).find(".stage3--entitySelect").first();
-                                    entitySelectButton.on("click", function(){
-                                        const container = document.getElementById("entitySelect-dialog");
-                                        const entitySelect = new EntitySelectDialog({element: container}, {entities: self.data.entities});
-                                        entitySelect.render()
-                                            .then(()=>{
-                                                //create new observer
-                                                const entitySelectObserver = new ComponentObserver("confirmed", function(event, data){
-                                                    console.log("EntitySelect finished:");
-                                                    console.log(JSON.stringify(data));
-                                                    input.val(data.entity);
-                                                    input.change();
+            let options = [];
+
+            switch (type){
+                case self.types.DYNAMIC:
+                    options = [];
+                    let slotTitle = self.stages.stage2.getType();
+                    $.ajax({
+                        method: "GET",
+                        url: "/api/v1/intents/slots/" + slotTitle,
+                        contentType: "application/json; charset=UTF-8",
+                        dataType: "json",
+                    })
+                        .done(result => {
+                            // const slotOptions =
+                            result.values.forEach(function(value){
+                                //try to find some values in the current mapping
+                                let content = self.mappingData.value[value] ?? "";
+                                options.push({name: value, type: "notImplemented", value: content});
+                            })
+                            stage3.setOptions(options);
+                            stage3.render()
+                                .then(result => {
+                                    //setup event listener
+                                    $(".stage3--option").each(function(index, option) {
+                                        //find associated input
+                                        const input = $(this).find(".stage3--input");
+                                        input.on("change", function(){
+                                            stage3.change();
+                                        })
+                                        const entitySelectButton = $(this).find(".stage3--entitySelect").first();
+                                        entitySelectButton.on("click", function(){
+                                            const container = document.getElementById("entitySelect-dialog");
+                                            const entitySelect = new EntitySelectDialog({element: container}, {entities: self.data.entities});
+                                            entitySelect.render()
+                                                .then(()=>{
+                                                    //create new observer
+                                                    const entitySelectObserver = new ComponentObserver("confirmed", function(event, data){
+                                                        console.log("EntitySelect finished:");
+                                                        console.log(JSON.stringify(data));
+                                                        input.val(data.entity);
+                                                        input.change();
+                                                    })
+                                                    entitySelect.addObserver(entitySelectObserver)
+                                                    entitySelect.open();
                                                 })
-                                                entitySelect.addObserver(entitySelectObserver)
-                                                entitySelect.open();
-                                            })
+                                        })
+
                                     })
 
+                                    stage3.getValue = function(){
+                                        let data = {}
+                                        $(".stage3--option").each(function(element, index) {
+                                            const input = $(this).find(".stage3--input");
+                                            data[input.data("variable")] = input.val();
+                                        });
+                                        return data;
+                                    }
+                                    resolve(stage3);
+                                    stage3.finish();
+                                })
+                        })
+                    break;
+                case self.types.DYNAMICPROPERTY:
+                    options = [];
+                    let propertyKey = self.stages.stage2.getValue();
+                    const property = self.intentHandler.properties.find(property => property.key === propertyKey);
+                    if(property) {
+                        property.values.forEach(propertyValue => {
+                            let content = self.mappingData.value[propertyValue.value] ?? "";
+                            options.push({name: propertyValue.name, variable: propertyValue.value, type: "notImplemented", value: content});
+                        })
+                    }
+                    stage3.setOptions(options);
+                    stage3.render()
+                        .then(result => {
+                            //setup event listener
+                            $(".stage3--option").each(function(index, option) {
+                                //find associated input
+                                const input = $(this).find(".stage3--input");
+                                input.on("change", function(){
+                                    stage3.change();
+                                })
+                                const entitySelectButton = $(this).find(".stage3--entitySelect").first();
+                                entitySelectButton.on("click", function(){
+                                    const container = document.getElementById("entitySelect-dialog");
+                                    const entitySelect = new EntitySelectDialog({element: container}, {entities: self.data.entities});
+                                    entitySelect.render()
+                                        .then(()=>{
+                                            //create new observer
+                                            const entitySelectObserver = new ComponentObserver("confirmed", function(event, data){
+                                                console.log("EntitySelect finished:");
+                                                console.log(JSON.stringify(data));
+                                                input.val(data.entity);
+                                                input.change();
+                                            })
+                                            entitySelect.addObserver(entitySelectObserver)
+                                            entitySelect.open();
+                                        })
                                 })
 
                                 stage3.getValue = function(){
@@ -314,44 +402,47 @@ export default class MappingSelect extends Component{
                                 resolve(stage3);
                                 stage3.finish();
                             })
-                    })
-            }
-            else {
-                stage3.render()
-                    .then(result => {
-                        //setup event listener
-                        const input = self.container.querySelector(".stage3--input");
-                        if(type === self.types.CONSTANT) {
-                            input.value = self.mappingData.value["CONSTANT"] ?? "";
-                        }
-                        input.addEventListener("change", function(){
-                            stage3.change();
                         })
-                        const entitySelectButton = $(stage3Container).find(".stage3--entitySelect").first();
-                        entitySelectButton.on("click", function(){
-                            const container = document.getElementById("entitySelect-dialog");
-                            const entitySelect = new EntitySelectDialog({element: container}, {entities: self.data.entities});
-                            entitySelect.render()
-                                .then(()=>{
-                                    //create new observer
-                                    const entitySelectObserver = new ComponentObserver("confirmed", function(event, data){
-                                        console.log("EntitySelect finished:");
-                                        console.log(JSON.stringify(data));
-                                        input.val(data.entity);
-                                        input.change();
+                    break;
+                case self.types.PROPERTY:
+                default:
+                    stage3.render()
+                        .then(result => {
+                            //setup event listener
+                            const input = self.container.querySelector(".stage3--input");
+                            if(type === self.types.CONSTANT) {
+                                input.value = self.mappingData.value["CONSTANT"] ?? "";
+                            }
+                            input.addEventListener("change", function(){
+                                stage3.change();
+                            })
+                            const entitySelectButton = $(stage3Container).find(".stage3--entitySelect").first();
+                            entitySelectButton.on("click", function(){
+                                const container = document.getElementById("entitySelect-dialog");
+                                const entitySelect = new EntitySelectDialog({element: container}, {entities: self.data.entities});
+                                entitySelect.render()
+                                    .then(()=>{
+                                        //create new observer
+                                        const entitySelectObserver = new ComponentObserver("confirmed", function(event, data){
+                                            console.log("EntitySelect finished:");
+                                            console.log(JSON.stringify(data));
+                                            input.val(data.entity);
+                                            input.change();
+                                        })
+                                        entitySelect.addObserver(entitySelectObserver)
+                                        entitySelect.open();
                                     })
-                                    entitySelect.addObserver(entitySelectObserver)
-                                    entitySelect.open();
-                                })
+                            })
+                            stage3.getValue = function(){
+                                let data = {};
+                                data[selectedVariable] = input.value;
+                                return data;
+                            }
+                            resolve(stage3);
+                            stage3.finish();
                         })
-                        stage3.getValue = function(){
-                            let data = {};
-                            data[selectedVariable] = input.value;
-                            return data;
-                        }
-                        resolve(stage3);
-                        stage3.finish();
-                    })
+                    break;
+
             }
             self.stages.stage3 = stage3;
         })
@@ -451,7 +542,7 @@ class Fallback {
     constructor({container, entitySelect={enabled: true, entities: {}}, inputSelector=".fallback--input", value}){
         let self = this;
         this.container = container;
-        this.input = document.querySelector(inputSelector);
+        this.input = this.container.querySelector(inputSelector);
         if(!this.container) {
             console.error("Failed to initialize fallback container: invalid container.");
             return;

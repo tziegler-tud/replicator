@@ -182,6 +182,10 @@ class CommunicationService extends Service {
         socket.emit(command, data);
     }
 
+    tcpSendWithResponse(socket, command, data) {
+        return socket.emitWithAck(command, data);
+    }
+
     tcpClientAuthHandler(socket, next){
 
         const clientId = socket.handshake.auth.clientId;

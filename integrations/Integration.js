@@ -9,11 +9,17 @@ export default class Integration {
     constructor(){
         let self = this;
         this.initStarted = false;
+        this.uniqueName = "abstract";
+        this.readableName = "AbstractIntegration";
         this.status = this.statusEnum.NOTLOADED;
         this.integration = {
             type: "Abstract",
             data: {},
         }
+
+        this.lights = [];
+        this.grouped_lights = [];
+        this.scenes = [];
     }
 
     /**
@@ -31,7 +37,7 @@ export default class Integration {
                 })
                 .catch(err => {
                     self.status = self.statusEnum.NOTLOADED;
-                    reject("test");
+                    reject("Integration failed to load.");
                 });
         });
     }
@@ -39,6 +45,12 @@ export default class Integration {
     async initFunc(){
         //implemented by child classes
         return true;
+    }
+
+    async reload(args={}){
+        console.log("Reloading integration: " + this.uniqueName);
+        this.status = this.statusEnum.NOTLOADED;
+        return this.load(args);
     }
 
     getIntegration(data) {

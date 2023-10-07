@@ -53,7 +53,7 @@
             </div>
             <div class="dashboard-list-container">
                 <ul class="dashboard-list">
-                    {{#each entity}}
+                    {{#each entity.properties}}
                         <li class="dashboard-list-item dashboard-list-item--{{this}}">
                             <span class="dashboard-list-item-entry dashboard-list-item-label">{{@key}}</span>
                             <span class="dashboard-list-item-entry dashboard-list-item-value">{{this}}</span>

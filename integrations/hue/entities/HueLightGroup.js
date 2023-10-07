@@ -2,7 +2,12 @@ import LightGroup from "../../../entities/LightGroup.js";
 
 export default class HueLightGroup extends LightGroup {
     constructor({bridgeApi, hueObject, uniqueId, groupId, identifier="MyHueLight", integration, groupedLight, hueScenes}={}){
-        super({uniqueId: uniqueId, identifier: identifier, nativeObject: hueObject, configuration: {}});
+        super({uniqueId: uniqueId, identifier: identifier, nativeObject: hueObject, configuration: {
+            brightness: {
+                    max: 100,
+                    min: 0,
+                }
+            }});
         this.uniqueId = uniqueId;
         this.groupId = groupId;
         this.bridgeApi = bridgeApi;
@@ -71,11 +76,17 @@ export default class HueLightGroup extends LightGroup {
         else return undefined;
     }
 
-    async setState(state){
+    /**
+     *
+     * @param state
+     * @param disableParsing {Boolean} if set to true, the provided object is directly send to the bridge. Internal state is left unchanged.
+     * @returns {Promise<*>}
+     */
+    async setState(state, disableParsing=false){
         // this.state = Object.assign(this.state, state);
         // // we use rooms service to set state of lights in this room
 
-        return this.grouped_light.setState(state);
+        return this.grouped_light.setState(state, disableParsing);
         // this.bridgeApi.setGroupedLightState(this.grouped_light, this.parseStateChangeToHue(state));
     }
 
@@ -89,7 +100,7 @@ export default class HueLightGroup extends LightGroup {
         return this.setState({on: true})
     };
     async off(){
-        return this.setState({on: true})
+        return this.setState({on: false})
     };
     async toggle(){
         //get current state
@@ -119,15 +130,18 @@ export default class HueLightGroup extends LightGroup {
                 action: action,
                 brightness_delta: absVal,
             }
-        })
+        }, true)
     }
 
     setBrightnessAbsolute(value=0){
         const bri = this.normalizeBrightness(value)
+        // return this.setState({
+        //     dimming: {
+        //         brightness: bri,
+        //     }
+        // })
         return this.setState({
-            dimming: {
-                brightness: bri,
-            }
+            brightness: bri,
         })
     }
 
