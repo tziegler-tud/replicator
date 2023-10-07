@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import IntentHandlerService from "../services/IntentHandlerService.js";
 import Debug from "../helpers/debug.js"
+import SettingsService from "../services/SettingsService.js";
 
 export default class ExecutionContext {
     static STATE = {
@@ -12,10 +13,14 @@ export default class ExecutionContext {
         STOPPED: 5,
         FAILED: 6,
     }
-    constructor(intentHandler){
+    constructor(intentHandler, client, properties){
         this.id = uuidv4();
         this.intentHandler = intentHandler;
+        this.client = client;
         this.state = ExecutionContext.STATE.INITIALIZED;
+
+        //generate runtime properties to be used by dynamicProperty assignments
+        this.properties = properties;
     }
 
     /**
@@ -69,6 +74,27 @@ export default class ExecutionContext {
                             else {
 
                             }
+                            break;
+                        case "property":
+                            if(variable.mapping.variable === undefined) {
+                                result = undefined;
+                            }
+                            else {
+                                let property = self.properties.find(property => property.key === variable.mapping.variable);
+                                result = property ? property.value : undefined;
+                            }
+                            break;
+                        case "dynamicProperty":
+                            if(variable.mapping.variable === undefined) {
+                                result = undefined;
+                            }
+                            else {
+                                let property = self.properties.find(property => property.key === variable.mapping.variable);
+                                if(property) {
+                                    result = variable.mapping.value[property.value];
+                                }
+                            }
+                            break;
                     }
                     if (!result) {
                         //check if fallback is defined

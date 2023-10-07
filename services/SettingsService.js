@@ -106,6 +106,11 @@ class SettingsService {
         return this.settingsObject;
     }
 
+    getSettingsSync(){
+        if(this.status !== this.statusEnum.RUNNING) return {};
+        return this.settingsObject;
+    }
+
     async set({key, value}={}){
         if(!key) return false;
         this.settings[key] = value;

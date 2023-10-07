@@ -4,6 +4,8 @@ import tcpResponse from "../helpers/tcpResponseGenerator.js";
 import voiceCommandService from "../services/voiceCommandService.js";
 import LocationManager from "../managers/LocationManager.js"
 import {transformDateTimeString} from "../helpers/utility.js";
+import VoiceCommandService from "../services/voiceCommandService.js";
+import CommunicationService from "../services/CommunicationService.js";
 const DbClient = db.Client;
 
 /**
@@ -11,6 +13,14 @@ const DbClient = db.Client;
  * Client class.
  */
 export default class Client {
+
+    static interfaceTypes = {
+        LED: "LedInterface",
+        SOUND: "SoundInterface",
+        DISPLAY: "DisplayInterface",
+        GENERIC: "GenericInterface",
+    }
+
     /**
      * creates a new client
      * @param clientInformation
@@ -27,6 +37,7 @@ export default class Client {
             active: true,
             muted: false,
         }
+        this.httpPort = clientInformation.httpPort ?? 4000;
         clientInformation.settings = clientInformation.settings ? clientInformation.settings : {};
         this.settings = Object.assign(this.defaultSettings, clientInformation.settings);
         this.skills = clientInformation.skills;
@@ -224,7 +235,7 @@ export default class Client {
             endpoints: this.server.endpoints,
         }
         return new Promise(function(resolve, reject){
-            self.send({path: path, method: "POST", data: data})
+            self.sendHttp({path: path, method: "POST", data: data, port: ""})
                 .then(response => {
                     if(response.ok){
                         response.json()
@@ -239,6 +250,18 @@ export default class Client {
                 })
                 .catch(err => reject(err))
         });
+    }
+
+    sendTcp(command, payload){
+        if(this.connection.connected){
+            return CommunicationService.tcpSend(this.connection.socket, command, payload)
+        }
+    }
+
+    sendTcpWithResponse(command, payload){
+        if(this.connection.connected){
+            return CommunicationService.tcpSendWithResponse(this.connection.socket, command, payload)
+        }
     }
 
     /**
@@ -277,12 +300,9 @@ export default class Client {
 
     getStatus(){
         let self = this;
-        const url = this.url + "/state";
+        const path = "/state";
         return new Promise((resolve, reject)=> {
-            const options = {
-                method: "GET",
-            }
-            fetch(url, options)
+            self.sendHttp({path: path, method: "GET"})
                 .then(response => {
                     if(response.ok) {
                         const data = response.json()
@@ -298,12 +318,9 @@ export default class Client {
 
     getSkills(){
         let self = this;
-        const url = this.url + "/skills";
+        const path = "/skills";
         return new Promise((resolve, reject)=> {
-            const options = {
-                method: "GET",
-            }
-            fetch(url, options)
+            self.sendHttp({path: path, method: "GET"})
                 .then(response => {
                     if(response.ok) {
                         const data = response.json();
@@ -321,10 +338,12 @@ export default class Client {
      * @param method
      * @param data
      * @param options
+     * @param protocol
+     * @param port
      * @returns {Promise<Response>}
      */
-    send({path="/", method="GET", data={}, options={}}){
-        const url = "http://" + this.url + path;
+    sendHttp({path="/", method="GET", data={}, options={}, protocol="http://", port=this.httpPort}){
+        const url = protocol + this.url + port ? ":"+port: "" + path;
         let fetchOptions = options;
         fetchOptions.method = method;
         fetchOptions.body = JSON.stringify(data);
@@ -333,13 +352,14 @@ export default class Client {
     }
 
     setState(state){
-        const url = this.url + "/state";
+        let self = this;
+        const path = "/state";
         return new Promise((resolve, reject)=> {
             const options = {
                 method: "POST",
                 body: state,
             }
-            fetch(url, options)
+            self.sendHttp({path: path, method: options.method, data: options.body})
                 .then(response => {
                     if(response.ok) {
                         console.log("State update successful: " + this.identifier + " at " + this.url)
@@ -350,17 +370,13 @@ export default class Client {
         })
     }
     mute(){
-        const url = this.url + "/mute";
+        let self = this;
+        const path = "/mute";
         return new Promise((resolve, reject)=> {
-            const options = {
-                method: "POST",
-                body: {},
-
-            }
-            fetch(url, options)
+            self.sendHttp({path: path, method: "POST"})
                 .then(response => {
                     if(response.ok) {
-                        console.log("Client muted: " + this.identifier + " at " + this.url)
+                        console.log("Client muted: " + self.identifier + " at " + self.url)
                         resolve(true);
                     }
                     else reject(response);
@@ -422,6 +438,74 @@ export default class Client {
                 reject("Location " + locationId + " not assigned to client.")
             }
 
+        })
+    }
+
+    getDeviceSettings(){
+        let self = this;
+        return new Promise((resolve, reject)=> {
+            self.sendTcpWithResponse("settings", {})
+                .then(response => {
+                    resolve(response);
+                })
+                .catch(err => {
+                    console.error("Failed to send tcp request: " + err)
+                })
+        })
+    }
+    setDeviceSettings(settings){
+        let self = this;
+        return new Promise((resolve, reject)=> {
+            self.sendTcpWithResponse("updateSettings", settings)
+                .then(response => {
+                    resolve(response);
+                })
+                .catch(err => {
+                    console.error("Failed to send tcp request: " + err)
+                })
+        })
+    }
+
+    getInterfaces(){
+        let self = this;
+        return new Promise((resolve, reject)=> {
+            self.sendTcpWithResponse("interfaces", {})
+                .then(response => {
+                    resolve(response);
+                })
+                .catch(err => {
+                    console.error("Failed to send tcp request: " + err)
+                })
+        })
+    }
+
+    setInterface(type, state){
+        let self = this;
+        let command;
+        switch(type){
+            case Client.interfaceTypes.SOUND:
+                command = state ? "enableAudio" : "disableAudio";
+                break;
+            case Client.interfaceTypes.LED:
+                command = state ? "enableLed" : "disableLed";
+                break;
+            case Client.interfaceTypes.DISPLAY:
+                command = state ? "enableDisplay" : "disableDisplay";
+                break;
+        }
+
+        const data = {
+            command: command,
+            args: {}
+        }
+        return new Promise((resolve, reject)=> {
+            self.sendTcpWithResponse("command", data)
+                .then(response => {
+                    resolve(response);
+                })
+                .catch(err => {
+                    console.error("Failed to send tcp request: " + err)
+                })
         })
     }
 }

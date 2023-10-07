@@ -15,6 +15,8 @@ router.get("/", getClients);
 router.get("/:clientId/locations", getClientLocations);
 router.post("/:clientId/locations", addClientLocation);
 router.delete("/:clientId/locations", removeClientLocation);
+router.post("/:clientId/settings", setClientDeviceSettings);
+router.post("/:clientId/interface", setClientInterface);
 router.get("/:clientId", getClientById);
 router.delete("/:clientId", removeClient);
 
@@ -137,6 +139,43 @@ function removeClientLocation(req, res, next) {
             })
     }
     else next("Client not found.")
+}
+
+function setClientDeviceSettings(req, res, next) {
+    const id = req.params.clientId;
+    const settings = req.body;
+    clientService.getById(id)
+        .then(function(client){
+            client.setDeviceSettings(settings)
+                .then(result => {
+                    res.json(result);
+                })
+                .catch(err => {
+                    next(err);
+                })
+        })
+        .catch(err => {
+            next(err);
+        })
+}
+
+function setClientInterface(req, res, next) {
+    const id = req.params.clientId;
+    const type = req.body.type;
+    const state = req.body.state;
+    clientService.getById(id)
+        .then(function(client){
+            client.setInterface(type, state)
+                .then(result => {
+                    res.json(result);
+                })
+                .catch(err => {
+                    next(err);
+                })
+        })
+        .catch(err => {
+            next(err);
+        })
 }
 
 export default router
