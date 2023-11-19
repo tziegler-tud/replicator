@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import IntentHandlerService from "../services/IntentHandlerService.js";
 import Debug from "../helpers/debug.js"
 import SettingsService from "../services/SettingsService.js";
+import SkillService from "../services/SkillService.js";
 
 export default class ExecutionContext {
     static STATE = {
@@ -104,11 +105,10 @@ export default class ExecutionContext {
                 })
 
                 //find skill
-                let skill = IntentHandlerService.getSkillByIdentifier(skillIdentifier);
+                let skill = SkillService.getSkillByIdentifier(skillIdentifier);
                 let runner = skill.run({
                     handlerArgs: handlerArgs,
                     configuration: config,
-                    intentHandler: self.intentHandler,
                 })
                 skillRunners.push(runner);
             })
@@ -120,11 +120,10 @@ export default class ExecutionContext {
                     self.state = ExecutionContext.STATE.FINISHING;
                     let finisherPromise = new Promise(function(resolve, reject){
                         if(self.intentHandler.finisher.active){
-                            let finisherSkill = IntentHandlerService.getSkillByIdentifier(self.intentHandler.finisher.skill);
+                            let finisherSkill = SkillService.getSkillByIdentifier(self.intentHandler.finisher.skill);
                             finisherSkill.run({
                                 handlerArgs: args,
                                 configuration: self.intentHandler.finisher.skill,
-                                intentHandler: self.intentHandler,
                             })
                                 .then(result => {
                                     resolve(result);

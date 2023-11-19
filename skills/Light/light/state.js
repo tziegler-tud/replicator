@@ -11,7 +11,7 @@ let LightStateOn = new Skill({
     variables: {
         lightId: Skill.variableTypes.light,
     },
-    handler: async function({handlerArgs, configuration, intentHandler}){
+    handler: async function({handlerArgs, configuration}){
         let light = await LightsService.getLightByUniqueId(handlerArgs.lightId);
         light.on();
     }
@@ -23,7 +23,7 @@ let LightStateOff = new Skill({
     variables: {
         lightId: Skill.variableTypes.light,
     },
-    handler: async function({handlerArgs, configuration, intentHandler}){
+    handler: async function({handlerArgs, configuration}){
         let light = await LightsService.getLightByUniqueId(handlerArgs.lightId);
         light.off();
     }
@@ -35,7 +35,7 @@ let LightStateToggle = new Skill({
     variables: {
         lightId: Skill.variableTypes.light,
     },
-    handler: async function({handlerArgs, configuration, intentHandler}){
+    handler: async function({handlerArgs, configuration}){
         let light = await LightsService.getLightByUniqueId(handlerArgs.lightId);
         return await light.toggle();
     }
@@ -49,7 +49,7 @@ let LightStateSet = new Skill({
         lightId: Skill.variableTypes.light,
         state: Skill.variableTypes.STRING,
     },
-    handler: async function({handlerArgs, configuration, intentHandler}){
+    handler: async function({handlerArgs, configuration}){
         let light = await LightsService.getLightByUniqueId(handlerArgs.lightId);
         switch(handlerArgs.state) {
             case "on":

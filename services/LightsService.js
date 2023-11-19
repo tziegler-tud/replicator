@@ -248,11 +248,13 @@ class LightsService extends Service {
                     return s.toString() === scene.id.toString();
                 });
                 if (inGroup){
+                    scene.setGroups([group]);
                     scene.assignProperty("groupID", group.uniqueId)
                     scene.assignProperty("groupName", group.identifier);
                 }
                 else {
                     changed = true;
+                    scene.setGroups([group]);
                     scene.assignProperty("groupID", group.uniqueId)
                     scene.assignProperty("groupName", group.identifier);
                     group.scenes.push(scene.id);

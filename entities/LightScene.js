@@ -9,12 +9,21 @@ export default class LightScene {
         this.nativeObject = nativeObject;
         this.lights = [];
         this.scenes = [];
+        this.groups = [];
         this.settings = undefined;
         this.properties = {};
     }
 
     get(){
         return this;
+    }
+
+    getGroups(){
+        return this.groups;
+    }
+
+    setGroups(groups){
+        this.groups = groups;
     }
 
     activate(){

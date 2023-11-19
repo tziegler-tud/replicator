@@ -3,19 +3,10 @@ import ClientService from "../../services/ClientService.js";
 import IntentService from "../../services/IntentService.js";
 import IntentHandlerService from "../../services/IntentHandlerService.js";
 import LightsService from "../../services/LightsService.js";
+import SkillService from "../../services/SkillService.js";
 var router = express.Router();
+import MODULES from "./modules.js";
 
-const MODULES = {
-    DASHBOARD: "DashboardModule",
-    CLIENTS: "ClientModule",
-    INTENTS: "IntentModule",
-    INTENTHANDLERS: "IntentHandlerModule",
-    IntentHandlerDetails: "IntentHandlerDetailsModule",
-    IntentHandlerAction: "IntentHandlerActionModule",
-    IntentHandlerAdd: "IntentHandlerAddModule",
-    SKILLS: "SkillModule",
-    ENTITIES: "EntitiesModule",
-}
 /**
  * hooked at /intenthandlers
  */
@@ -71,7 +62,7 @@ function editIntentHandler(req, res, next){
         .then(intentHandlerJSON => {
             ClientService.getAllClientsJSON()
                 .then(clients => {
-                    const skills = IntentHandlerService.getSkills();
+                    const skills = SkillService.getAll();
                     res.render("intenthandlers/details", {
                         intentHandler: intentHandlerJSON,
                         page: {
@@ -100,7 +91,7 @@ function addAction(req, res, next){
     const id = req.params.id;
     IntentHandlerService.getByIdJSON(id)
         .then(intentHandlerJSON => {
-            const skills = IntentHandlerService.getSkills();
+            const skills = SkillService.getAll();
             const lightsP = LightsService.getLights();
             const lightGroupsP = LightsService.getGroups();
             const scenesP = LightsService.getScenes();
@@ -146,8 +137,8 @@ function editAction(req, res, next){
             if(!action) {
                 throw new Error("Action id missmatch.")
             }
-            const skills = IntentHandlerService.getSkills();
-            const skill = IntentHandlerService.getSkillByIdentifier(action.skill.identifier);
+            const skills = SkillService.getAll();
+            const skill = SkillService.getSkillByIdentifier(action.skill.identifier);
             const lightsP = LightsService.getLights();
             const lightGroupsP = LightsService.getGroups();
             const scenesP = LightsService.getScenes();

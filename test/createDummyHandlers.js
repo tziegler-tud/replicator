@@ -2,6 +2,7 @@ import IntentHandlerService from "../services/IntentHandlerService.js";
 import ClientService from "../services/ClientService.js";
 import IntentService from "../services/IntentService.js";
 import {VariableExpectation} from "../helpers/enums.js";
+import SkillService from "../services/SkillService.js";
 
 
 export default async function createIntentHandlers(amount){
@@ -54,8 +55,8 @@ export default async function createIntentHandlers(amount){
         let result = await IntentHandlerService.create(ih1);
         await result.addVariable("requiredVar2", "String", VariableExpectation.REQUIRED);
 
-        const skills = IntentHandlerService.getSkills();
-        const skillArray = IntentHandlerService.getSkillArray();
+        const skills = SkillService.getAll();
+        const skillArray = SkillService.getSkillArray();
 
         const skill = getRandomElement(skillArray);
 

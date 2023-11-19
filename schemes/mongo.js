@@ -21,6 +21,7 @@ import LightScene from "./lightSceneScheme.js"
 import Settings from "./settingsScheme.js"
 import Intent from "./intentScheme.js"
 import IntentHandler from "./intentHandlerScheme.js"
+import Alert from "./alertScheme.js"
 let db = {
     Client: Client,
     Location: Location,
@@ -30,5 +31,6 @@ let db = {
     Settings: Settings,
     Intent: Intent,
     IntentHandler: IntentHandler,
+    Alert: Alert,
 }
 export default db;

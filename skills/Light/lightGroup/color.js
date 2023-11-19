@@ -14,7 +14,7 @@ let setLightGroupColor = new Skill({
         groupId: Skill.variableTypes.lightGroup,
         color: Skill.variableTypes.OBJECT,
     },
-    handler: async function({handlerArgs, configuration, intentHandler}){
+    handler: async function({handlerArgs, configuration}){
         let light = await LightsService.getGroupByUniqueId(handlerArgs.groupId);
         light.setColor(handlerArgs.color)
     }

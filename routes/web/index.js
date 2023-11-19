@@ -2,17 +2,10 @@ import express from 'express';
 import ClientService from "../../services/ClientService.js";
 import IntentService from "../../services/IntentService.js";
 import IntentHandlerService from "../../services/IntentHandlerService.js";
+import SkillService from "../../services/SkillService.js";
 var router = express.Router();
+import MODULES from "./modules.js";
 
-const MODULES = {
-    DASHBOARD: "DashboardModule",
-    CLIENTS: "ClientModule",
-    INTENTS: "IntentModule",
-    INTENTHANDLERS: "IntentHandlerModule",
-    SKILLS: "SkillModule",
-    ENTITIES: "EntitiesModule",
-    INTEGRATIONS: "IntegrationsModule"
-}
 /**
  * hooked at /
  */
@@ -47,7 +40,7 @@ function index(req, res, next){
 function skills(req, res, next){
 
     //get clients
-    const skills = IntentHandlerService.getSkills()
+    const skills = SkillService.getAll()
     res.render("skills/all", {
         skills: skills,
         page: {

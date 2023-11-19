@@ -13,7 +13,7 @@ let setLightBrightnessAbsolute = new Skill({
         lightId: Skill.variableTypes.light,
         percentValue: Skill.variableTypes.PERCENT,
     },
-    handler: async function({handlerArgs, configuration, intentHandler}){
+    handler: async function({handlerArgs, configuration}){
         let light = await LightsService.getLightByUniqueId(handlerArgs.lightId);
         light.setBrightness({percentValue: handlerArgs.percentValue, isRelative: false})
     }
@@ -27,7 +27,7 @@ let setLightBrightnessRelative = new Skill({
         lightId: Skill.variableTypes.light,
         percentValue: Skill.variableTypes.PERCENT,
     },
-    handler: async function({handlerArgs, configuration, intentHandler}){
+    handler: async function({handlerArgs, configuration}){
         let light = await LightsService.getLightByUniqueId(handlerArgs.lightId);
         light.setBrightness({percentValue: handlerArgs.percentValue, isRelative: true})
     }

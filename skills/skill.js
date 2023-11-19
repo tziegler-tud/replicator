@@ -12,6 +12,11 @@ export default class Skill {
         lightGroup: "LightGroup",
         lightScene: "LightScene",
 
+        Alerts: {
+            Alerts: {
+                alert_type: "alert_type",
+            }
+        },
         connections: {
             http: {
                 request_method: "request_method",

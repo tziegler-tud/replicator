@@ -13,6 +13,7 @@ export default class MappingSelect extends Component{
 
         this.intentHandler = data.intentHandler;
         this.variable = data.variable;
+        this.config.enableFallback = true;
 
         this.stages = {stage1: {}, stage2: {}, stage3: {}};
         this.templateUrl = "/js/components/templates/mappingSelect.hbs";
@@ -330,8 +331,8 @@ export default class MappingSelect extends Component{
                                                     const entitySelectObserver = new ComponentObserver("confirmed", function(event, data){
                                                         console.log("EntitySelect finished:");
                                                         console.log(JSON.stringify(data));
-                                                        input.val(data.entity);
-                                                        input.change();
+                                                        input.value = data.entity;
+                                                        stage3.change();
                                                     })
                                                     entitySelect.addObserver(entitySelectObserver)
                                                     entitySelect.open();
@@ -426,8 +427,8 @@ export default class MappingSelect extends Component{
                                         const entitySelectObserver = new ComponentObserver("confirmed", function(event, data){
                                             console.log("EntitySelect finished:");
                                             console.log(JSON.stringify(data));
-                                            input.val(data.entity);
-                                            input.change();
+                                            input.value = data.entity;
+                                            stage3.change();
                                         })
                                         entitySelect.addObserver(entitySelectObserver)
                                         entitySelect.open();

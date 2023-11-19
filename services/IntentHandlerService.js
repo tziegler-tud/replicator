@@ -13,6 +13,7 @@ import skillImporter from "../skills/importer.js";
 import ExecutionContext from "../classes/ExecutionContext.js";
 import IntentService from "./IntentService.js";
 import ClientService from "./ClientService.js";
+import SkillService from "./SkillService.js";
 
 
 
@@ -54,58 +55,8 @@ class IntentHandlerService extends Service{
     initFunc(){
         let self = this;
         return new Promise(function(resolve, reject){
-            //load skills
-            self.skills = skillImporter.getSkills();
-            self.skillArray = createSkillArray();
             resolve()
-
-            /**
-             *
-             * @returns {Skill[]}
-             */
-            function createSkillArray(){
-                let array = [];
-                for (let group in self.skills){
-                    for (let entity in self.skills[group]){
-                        for (let skillSet in self.skills[group][entity]) {
-                            for (let skill in self.skills[group][entity][skillSet]) {
-                                //check for unique identifier
-                                let skillObject = self.skills[group][entity][skillSet][skill];
-                                if(array.find(s => s.identifier === skillObject.identifier)){
-                                    //skill identifier not unique
-                                    self.debug("Failed to load skills: Identifier not unique: " + skillObject.identifier);
-                                    self.skills[group][entity][skillSet][skill] = undefined;
-                                    continue;
-                                }
-                                array.push(skillObject);
-                            }
-                        }
-                    }
-                }
-                return array;
-            }
         })
-    }
-
-    getSkillByIdentifier(skillIdentifier){
-        let found = this.skillArray.find(skill => {
-            return skill.identifier === skillIdentifier;
-        })
-        if(!found) {
-            console.log("Skill not found: " + skillIdentifier);
-            return undefined;
-        }
-        else {
-            return found;
-        }
-    }
-
-    getSkills() {
-        return this.skills;
-    };
-
-    getSkillArray() {
-        return this.skillArray;
     }
 
     async getAll(){
@@ -326,7 +277,7 @@ class IntentHandlerService extends Service{
         action._id = actionId;
 
         //create variables from skill
-        const skill = this.getSkillByIdentifier(action.skill.identifier);
+        const skill = SkillService.getSkillByIdentifier(action.skill.identifier);
         if(!skill) throw new Error("Skill not found: " + action.skill.identifier);
 
         action.variables = [];
