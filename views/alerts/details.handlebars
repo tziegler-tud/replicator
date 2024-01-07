@@ -1,0 +1,148 @@
+<div class="dashboard-container">
+    <div class="dashboard-inner">
+        <div class="dashboard-header">
+            <div class="dashboard-header-inner">
+                <span>{{alert.name}}</span>
+            </div>
+        </div>
+        <div class="dashboard-menu">
+            <div id="dashboard-save-button" class="dashboard-menu-button dashboard-save-button" data-id="{{alert.type}}">
+                <button class="mdc-fab" aria-label="Save">
+                    <div class="mdc-fab__ripple"></div>
+                    <span class="mdc-fab__icon material-icons">save</span>
+                </button>
+            </div>
+            <div id="dashboard-start-button" class="dashboard-menu-button dashboard-start-button" data-id="{{alert.type}}">
+                <button class="mdc-fab" aria-label="Activate">
+                    <div class="mdc-fab__ripple"></div>
+                    <span class="mdc-fab__icon material-icons">play_arrow</span>
+                </button>
+            </div>
+            <div id="dashboard-stop-button" class="dashboard-menu-button dashboard-stop-button" data-id="{{alert.type}}">
+                <button class="mdc-fab" aria-label="Stop">
+                    <div class="mdc-fab__ripple"></div>
+                    <span class="mdc-fab__icon material-icons">stop</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="dashboard-section dashboard-section-list">
+            <div class="dashboard-section-header">
+                <span class="dashboard-section-header--title">
+                    data
+                </span>
+            </div>
+            <div class="dashboard-list-container">
+                <ul class="dashboard-list" data-id="{{alert.type}}">
+                    <li class="dashboard-list-item">
+                        <span class="dashboard-list-item-entry dashboard-list-item-label">identifier</span>
+                        <span class="dashboard-list-item-entry dashboard-list-item-value">{{alert.identifier}}</span>
+                    </li>
+                    <li class="dashboard-list-item">
+                        <span class="dashboard-list-item-entry dashboard-list-item-label">name</span>
+                        <span class="dashboard-list-item-entry dashboard-list-item-value">{{alert.name}}</span>
+                    </li>
+                    <li class="dashboard-list-item">
+                        <span class="dashboard-list-item-entry dashboard-list-item-label">type</span>
+                        <span class="dashboard-list-item-entry dashboard-list-item-value">{{alert.type}}</span>
+                    </li>
+
+                    <li class="dashboard-list-item">
+                        <span class="dashboard-list-item-entry dashboard-list-item-label">active</span>
+                        <span class="dashboard-list-item-entry dashboard-list-item-value">{{alert.active}}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="dashboard-section dashboard-section-list">
+            <div class="dashboard-section-header">
+                <span class="dashboard-section-header--title">
+                    Properties
+                </span>
+            </div>
+            <div class="dashboard-list-container">
+                <ul class="dashboard-list" data-id="{{alert.type}}">
+                    <li class="dashboard-list-item dashboard-list-item--input">
+                        <span class="dashboard-list-item-entry dashboard-list-item-label">priority</span>
+                        <input type="number" id="alert-input--priority" class="dashboard-list-item-entry dashboard-list-item-value" value="{{alert.priority}}"></input>
+                    </li>
+                    <li class="dashboard-list-item dashboard-list-item--input">
+                        <span class="dashboard-list-item-entry dashboard-list-item-label">maximum duration (sek)</span>
+                        <input type="number" id="alert-input--maxDuration" class="dashboard-list-item-entry dashboard-list-item-value" value="{{alert.maxDuration}}"></input>
+                    </li>
+                </ul>
+                <ul class="dashboard-list" data-id="{{alert.type}}">
+                    {{#each alert.properties}}
+                        <li class="dashboard-list-item">
+                            <span class="dashboard-list-item-entry dashboard-list-item-label">{{@key}}</span>
+                            <span class="dashboard-list-item-entry dashboard-list-item-value">{{this}}</span>
+                        </li>
+                    {{/each}}
+                </ul>
+            </div>
+        </div>
+        {{#each alert.phases}}
+            <div class="dashboard-section  dashboard-section-list">
+                <div class="dashboard-section-header">
+                    <span class="dashboard-section-header--title">
+                        Phase {{this.index}}
+                    </span>
+                </div>
+                <div class="dashboard-list-container">
+                    <div class="phaseSettingsList" id="phaseSettingsList--{{this.index}}" data-index="{{this.index}}" data-id="{{this._id}}">
+                    </div>
+                </div>
+                <div class="dashboard-list-container">
+                    <div class="dashboard-list-header">
+                        <span>Actions</span>
+                    </div>
+                    <ul class="dashboard-list dashboard-actions-list">
+                        {{#each this.actions}}
+                            <li class="dashboard-list-item dashboard-action-item" data-actionId="{{this._id}}">
+                                <div class="action-title">{{this.skill.identifier}}</div>
+                                <div class="action-content"></div>
+                            </li>
+                        {{/each}}
+                    </ul>
+                    <div class="button-container">
+                        <a class="button button-addAction" data-phase="{{this.index}}">
+                            <button class="mdc-button mdc-button--outlined mdc-button--icon-leading">
+                                <span class="mdc-button__ripple"></span>
+                                <i class="material-icons mdc-button__icon" aria-hidden="true">add</i>
+                                <span class="mdc-button__label">add Action</span>
+                            </button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {{/each}}
+        <div class="dashboard-section  dashboard-section-list">
+            <div class="button-container">
+                <a class="button button-addPhase">
+                    <button class="mdc-button mdc-button--outlined mdc-button--icon-leading">
+                        <span class="mdc-button__ripple"></span>
+                        <i class="material-icons mdc-button__icon" aria-hidden="true">add</i>
+                        <span class="mdc-button__label">add Phase</span>
+                    </button>
+                </a>
+            </div>
+            <div class="button-container button-container--padding button-container--danger">
+                <a class="button button-removePhase">
+                    <button class="mdc-button mdc-button--outlined mdc-button--icon-leading">
+                        <span class="mdc-button__ripple"></span>
+                        <i class="material-icons mdc-button__icon" aria-hidden="true">delete</i>
+                        <span class="mdc-button__label">remove last Phase</span>
+                    </button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="skillSelect-dialog">
+
+</div>
+<div id="entitySelect-dialog">
+
+</div>

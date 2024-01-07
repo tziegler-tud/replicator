@@ -11,7 +11,7 @@ let LightGroupStateOn = new Skill({
     variables: {
         groupId: Skill.variableTypes.lightGroup,
     },
-    handler: async function({handlerArgs, configuration, intentHandler}){
+    handler: async function({handlerArgs, configuration}){
         let light = await LightsService.getGroupByUniqueId(handlerArgs.groupId);
         light.on();
     }
@@ -23,7 +23,7 @@ let LightGroupStateOff = new Skill({
     variables: {
         groupId: Skill.variableTypes.lightGroup,
     },
-    handler: async function({handlerArgs, configuration, intentHandler}){
+    handler: async function({handlerArgs, configuration}){
         let light = await LightsService.getGroupByUniqueId(handlerArgs.groupId);
         light.off();
     }
@@ -35,7 +35,7 @@ let LightGroupStateToggle = new Skill({
     variables: {
         groupId: Skill.variableTypes.lightGroup,
     },
-    handler: async function({handlerArgs, configuration, intentHandler}){
+    handler: async function({handlerArgs, configuration}){
         let light = await LightsService.getGroupByUniqueId(handlerArgs.groupId);
         light.toggle();
     }
@@ -48,7 +48,7 @@ let LightGroupStateSet = new Skill({
         groupId: Skill.variableTypes.lightGroup,
         state: Skill.variableTypes.STRING,
     },
-    handler: async function({handlerArgs, configuration, intentHandler}){
+    handler: async function({handlerArgs, configuration}){
         let light = await LightsService.getGroupByUniqueId(handlerArgs.groupId);
         switch(handlerArgs.state) {
             case "on":

@@ -159,6 +159,23 @@ $dashboard-section-bg: $tertiary;
                   }
                 }
               }
+              &.dashboard-list-item--input {
+                .dashboard-list-item-entry {
+                  &.dashboard-list-item-label {
+
+                  }
+
+                  &.dashboard-list-item-value {
+                    max-width: 12rem;
+                    display: block;
+                    border-radius: 0;
+                    border: 1px solid #BBB;
+                    background-color: $content;
+                    color: $font-content;
+                    padding: 5px 10px;
+                  }
+                }
+              }
               &.dashboard-list-item--select {
                 .dashboard-list-item-entry {
 

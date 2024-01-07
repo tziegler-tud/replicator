@@ -16,7 +16,7 @@ export function webErrorHandler(err, req, res, next) {
 
     if (err.name === 'ForbiddenError' || err.status === 403) {
         // trying to access protected resource
-        return res.status(403).render("unisams/error/403", {
+        return res.status(403).render("error", {
             title: "403 - Forbidden.",
             error: err,
             status: err.status,
@@ -26,7 +26,7 @@ export function webErrorHandler(err, req, res, next) {
 
     if (err.name === 'NotFoundError' || err.status === 404) {
         // trying to access protected resource
-        return res.status(404).render("unisams/error/404", {
+        return res.status(404).render("error", {
             title: "404 - Page not found.",
             error: err,
             message: "Error 404: Page not found."
@@ -37,7 +37,7 @@ export function webErrorHandler(err, req, res, next) {
     res.status(err.status || 500);
 
     // // render the error page
-    res.render('unisams/error/error', {
+    res.render('error', {
         title: "500 - Internal Server error",
         error: err,
     });

@@ -2,16 +2,8 @@ import express from 'express';
 import ClientService from "../../services/ClientService.js";
 import IntentService from "../../services/IntentService.js";
 var router = express.Router();
+import MODULES from "./modules.js";
 
-const MODULES = {
-    DASHBOARD: "DashboardModule",
-    CLIENTS: "ClientModule",
-    INTENTS: "IntentModule",
-    INTENTHANDLERS: "IntentHandlerModule",
-    SKILLS: "SkillModule",
-    ENTITIES: "EntitiesModule",
-    INTEGRATIONS: "IntegrationsModule"
-}
 /**
  * hooked at /intents
  */

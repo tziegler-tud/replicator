@@ -84,7 +84,7 @@ export default class InteractiveList extends Component{
         return new Promise(function(resolve, reject){
             $.get(templateUrl, function (templateData) {
                 let template = Handlebars.compile(templateData);
-                let interaction = new Interaction({type, uid, identifier, template, templateData: {params: params}, value, config, listEntry});
+                let interaction = new Interaction({type, uid, identifier, template, templateData: {params: params}, value, config, listEntry, componentContainer: self.container});
                 resolve(interaction);
             })
         })
@@ -120,11 +120,12 @@ export default class InteractiveList extends Component{
 }
 
 class Interaction {
-    constructor({type, uid, identifier, template, templateData={}, value, config={classes: []}, listEntry=undefined}={}){
+    constructor({type, uid, identifier, template, templateData={}, value, config={classes: []}, listEntry=undefined, componentContainer}={}){
         this.id = uid;
         this.type = type;
         this.identifier = identifier;
         this.config = config;
+        this.componentContainer = componentContainer;
         templateData.id = this.id;
         templateData.identifier = this.identifier;
         templateData.type = this.type;
@@ -139,7 +140,7 @@ class Interaction {
 
     connectDom(){
         //find uid
-        let element = document.getElementById(this.id);
+        let element = this.componentContainer.querySelector("#"+this.id);
         if(!element){
             console.error("Failed to obtain DOM element for interaction: Element not found.");
             return false;
@@ -168,7 +169,7 @@ class Interaction {
         switch(this.type){
             case "switch":
                 //get mdc container
-                mdcSwitch = document.getElementById(this.id + "__switch");
+                mdcSwitch = this.componentContainer.querySelector("#"+this.id + "__switch");
                 const switchControl = new MDCSwitch(mdcSwitch);
                 this.getValFunc = function(){
                     return switchControl.selected;
@@ -188,7 +189,7 @@ class Interaction {
                 break;
             case "number":
             case "input":
-                input = document.getElementById(this.id + "__input");
+                input = this.componentContainer.querySelector("#"+this.id + "__input");
                 this.getValFunc = function(){
                     return input.value;
                 }
@@ -208,7 +209,7 @@ class Interaction {
                 }
                 break;
             case "label":
-                let label = document.getElementById(this.id + "__label");
+                let label = this.componentContainer.querySelector("#"+this.id + "__label");
                 this.getValFunc = function(){
                     return label.dataset.value;
                 }

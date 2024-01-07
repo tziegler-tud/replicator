@@ -2,6 +2,7 @@ import IntentHandlerService from "../services/IntentHandlerService.js";
 import ClientService from "../services/ClientService.js";
 import IntentService from "../services/IntentService.js";
 import {VariableExpectation} from "../helpers/enums.js";
+import SkillService from "../services/SkillService.js";
 
 
 export default async function createIntentHandler(){
@@ -47,7 +48,7 @@ export default async function createIntentHandler(){
     let result = await IntentHandlerService.create(ih1);
     await result.addVariable("requiredVar2", "String", VariableExpectation.REQUIRED);
 
-    const skills = IntentHandlerService.getSkills();
+    const skills = SkillService.getAll();
 
     let action = {
         skill: {

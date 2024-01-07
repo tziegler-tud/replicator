@@ -18,7 +18,7 @@ let HttpRequest = new Skill({
             {identifier: "testSelect", type: "select", default: "GET", options: [{label: "GET", value: "GET"}, {label: "Post", value:"POST"}]}
         ]
     },
-    handler: async function({handlerArgs, configuration, intentHandler}){
+    handler: async function({handlerArgs, configuration}){
         let config = {
             method: handlerArgs.method,
         }

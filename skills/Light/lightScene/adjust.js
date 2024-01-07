@@ -5,8 +5,8 @@ import LightsService from "../../../services/LightsService.js";
  * changes the state of a single Light
  */
 
-let LightSceneActivate = new Skill({
-    identifier: "LightsceneActivate",
+let LightSceneAdjust = new Skill({
+    identifier: "LightsceneAdjust",
     description: "Activate a scene",
     variables: {
         sceneId: Skill.variableTypes.lightScene,
@@ -17,4 +17,4 @@ let LightSceneActivate = new Skill({
     }
 })
 
-export default {LightSceneActivate}
+export default {LightSceneAdjust}

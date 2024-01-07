@@ -7,7 +7,10 @@ import lightGroupColor from "./Light/lightGroup/color.js";
 import lightGroupState from "./Light/lightGroup/state.js";
 
 import lightSceneState from "./Light/lightScene/state.js";
+import lightSceneAdjust from "./Light/lightScene/adjust.js";
 import httpRequest from "./Connections/http/httpRequest.js";
+import debugMessage from "./Debug/Debug/debug.js";
+import alertState from "./Alerts/Alerts/state.js";
 
 class SkillImporter {
     constructor(){
@@ -30,6 +33,12 @@ class SkillImporter {
                 },
                 lightScene: {
                     state: importSkill(lightSceneState),
+                    adjust: importSkill(lightSceneAdjust)
+                }
+            },
+            Alerts: {
+                Alerts: {
+                    state: importSkill(alertState)
                 }
             },
             Music: {},
@@ -38,6 +47,11 @@ class SkillImporter {
             Connections: {
                 http: {
                     httpRequest: importSkill(httpRequest),
+                }
+            },
+            Debug: {
+                debug: {
+                    debugMessage: importSkill(debugMessage)
                 }
             }
         }

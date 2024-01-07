@@ -3,16 +3,8 @@ import ClientService from "../../services/ClientService.js";
 import IntegrationService from "../../services/IntegrationService.js";
 import ApiError from "../../helpers/ApiError.js";
 var router = express.Router();
+import MODULES from "./modules.js";
 
-const MODULES = {
-    DASHBOARD: "DashboardModule",
-    CLIENTS: "ClientModule",
-    INTENTS: "IntentModule",
-    INTENTHANDLERS: "IntentHandlerModule",
-    SKILLS: "SkillModule",
-    ENTITIES: "EntitiesModule",
-    INTEGRATIONS: "IntegrationsModule"
-}
 /**
  * hooked at /clients
  */

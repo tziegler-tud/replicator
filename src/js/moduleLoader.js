@@ -8,10 +8,13 @@ import IntentHandlerDetails from "./modules/intentHandler/intentHandlerDetails.j
 import IntentHandlerAction from "./modules/intentHandler/intentHandlerAction";
 import Entities from "./modules/entities";
 import Integrations from "./modules/integrations";
+import Alerts from "./modules/alerts/alerts.js";
+import AlertDetails from "./modules/alerts/alertDetails.js";
+import AlertAction from "./modules/alerts/alertAction.js";
 
 export default class ModuleLoader {
     constructor(){
-        this.modules = [Dashboard, Clients, ClientDetails, Intents, IntentHandlers, IntentHandlerAdd, IntentHandlerDetails, IntentHandlerAction, Entities, Integrations];
+        this.modules = [Dashboard, Clients, ClientDetails, Intents, IntentHandlers, IntentHandlerAdd, IntentHandlerDetails, IntentHandlerAction, Entities, Integrations, Alerts, AlertDetails, AlertAction];
 
     }
 

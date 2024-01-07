@@ -9,28 +9,30 @@
        <div class="stage3--container">
 
        </div>
-       <div class="fallback--container">
-           <div class="fallback-heading mappingSelect-stage-heading">
-               <span>Fallback</span>
-           </div>
-           <div class="fallback--content mappingSelect-stage-content">
-               <div class="dashboard-list-container">
-                   <ul class="dashboard-list">
-                       <li class="dashboard-list-item dashboard-list-item--select variable-mapping fallback--option">
-                           <span class="fallback-label dashboard-list-item-entry dashboard-list-item-label fallback-label">fallback</span>
-                           <label class="replicator-form-element mdc-text-field mdc-text-field--filled">
-                               <span class="mdc-text-field__ripple"></span>
-                               <span class="mdc-floating-label" id="my-label-id">Identifier</span>
-                               <input class="fallback--input mdc-text-field__input fallback--input" type="text" aria-labelledby="my-label-id">
-                               <span class="mdc-line-ripple"></span>
-                           </label>
-                           <button class="fallback--entitySelect entitySelect--button">
-                               <span class="material-icons">manage_search</span>
-                           </button>
-                       </li>
-                   </ul>
+       {{#if config.enableFallback}}
+           <div class="fallback--container">
+               <div class="fallback-heading mappingSelect-stage-heading">
+                   <span>Fallback</span>
+               </div>
+               <div class="fallback--content mappingSelect-stage-content">
+                   <div class="dashboard-list-container">
+                       <ul class="dashboard-list">
+                           <li class="dashboard-list-item dashboard-list-item--select variable-mapping fallback--option">
+                               <span class="fallback-label dashboard-list-item-entry dashboard-list-item-label fallback-label">fallback</span>
+                               <label class="replicator-form-element mdc-text-field mdc-text-field--filled">
+                                   <span class="mdc-text-field__ripple"></span>
+                                   <span class="mdc-floating-label" id="my-label-id">Identifier</span>
+                                   <input class="fallback--input mdc-text-field__input fallback--input" type="text" aria-labelledby="my-label-id">
+                                   <span class="mdc-line-ripple"></span>
+                               </label>
+                               <button class="fallback--entitySelect entitySelect--button">
+                                   <span class="material-icons">manage_search</span>
+                               </button>
+                           </li>
+                       </ul>
+                   </div>
                </div>
            </div>
-       </div>
+       {{/if}}
    </div>
 </div>

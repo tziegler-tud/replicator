@@ -23,6 +23,8 @@ import ClientService from "./services/ClientService.js";
 import LightsService from "./services/LightsService.js";
 import IntegrationService from "./services/IntegrationService.js";
 import SettingsService from "./services/SettingsService.js";
+import AlertService from "./services/AlertService.js";
+import SkillService from "./services/SkillService.js";
 
 import apiIndexRouter from './routes/api/v1/index.js';
 import clientRouter from './routes/api/v1/client.js';
@@ -31,6 +33,7 @@ import locationRouter from './routes/api/v1/location.js';
 import lightRouter from './routes/api/v1/lights.js';
 import intentHandlerRouter from './routes/api/v1/intentHandler.js';
 import integrationsRouter from './routes/api/v1/integrations.js';
+import alertsRouter from './routes/api/v1/alerts.js';
 
 import webIndexRouter from './routes/web/index.js';
 import webClientRouter from './routes/web/clients.js';
@@ -38,6 +41,7 @@ import webIntentRouter from './routes/web/intents.js';
 import webIntentHandlerRouter from './routes/web/intentHandlers.js';
 import webEntitiesRouter from './routes/web/entities.js';
 import webIntegrationsRouter from './routes/web/integrations.js';
+import webAlertsRouter from './routes/web/alerts.js';
 
 
 
@@ -83,6 +87,7 @@ app.use('/api/v1/locations', locationRouter);
 app.use('/api/v1/lights', lightRouter);
 app.use('/api/v1/intentHandler', intentHandlerRouter);
 app.use('/api/v1/integrations', integrationsRouter);
+app.use('/api/v1/alerts', alertsRouter);
 app.use("/api", apiErrorHandler);
 
 app.use('/', webIndexRouter);
@@ -91,22 +96,13 @@ app.use('/intents', webIntentRouter);
 app.use('/intenthandlers', webIntentHandlerRouter);
 app.use('/entities', webEntitiesRouter);
 app.use('/integrations', webIntegrationsRouter);
+app.use('/alerts', webAlertsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
 });
-
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
+app.use('/', webErrorHandler);
 
 
 //load settings from db
@@ -151,8 +147,10 @@ const integrationService = new Promise(function(resolve, reject){
             console.log("Failed to start IntegrationService: " + e);
         })
 });
-
 const intentHandlerService = IntentHandlerService.start();
+const alertService = AlertService.start({});
+const skillService = SkillService.start({})
+
 
 /**
  * testing
@@ -167,6 +165,8 @@ const servicesArray = [
     lightsService,
     integrationService,
     intentHandlerService,
+    alertService,
+    skillService,
 ]
 
 

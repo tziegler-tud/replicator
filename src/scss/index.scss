@@ -194,6 +194,18 @@ buttons
       @include button.ink-color($primary)
     }
   }
+
+  &.button-container--padding {
+    padding: 15px 0;
+  }
+
+  &.button-container--danger {
+    .button {
+      .mdc-button {
+        @include button.ink-color($font-content-danger);
+      }
+    }
+  }
 }
 
 /**

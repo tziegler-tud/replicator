@@ -14,7 +14,7 @@ let setLightColor = new Skill({
         lightId: Skill.variableTypes.light,
         color: Skill.variableTypes.OBJECT,
     },
-    handler: async function({handlerArgs, configuration, intentHandler}){
+    handler: async function({handlerArgs, configuration}){
         let light = await LightsService.getLightByUniqueId(handlerArgs.lightId);
         light.setColor(handlerArgs.color)
     }
