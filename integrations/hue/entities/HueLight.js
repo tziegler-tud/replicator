@@ -20,7 +20,7 @@ export default class HueLight extends Light {
     parseHueToState(hueObject){
         return {
             on: hueObject.on.on,
-            brightness: hueObject.dimming.brightness,
+            brightness: hueObject.dimming ? hueObject.dimming.brightness : 100,
             color: this.parseColor(hueObject),
             reachable: "not implemented", //use new zigbee_connectivity status for this, will implement later
         }

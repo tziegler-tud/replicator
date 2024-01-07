@@ -121,7 +121,7 @@ export default class Snackbar {
     showError(jqxhr, textstatus, error, options){
         let self = this;
         let snackbar = self.snackbar;
-        let message = jqxhr.responseJSON.message;
+        let message = jqxhr.responseJSON ? jqxhr.responseJSON.message : undefined;
         let text = (error ? error: "Error " + jqxhr.status) +": " + (message ? message : jqxhr.responseText);
         let defaultOptions = {
             timeout: -1,

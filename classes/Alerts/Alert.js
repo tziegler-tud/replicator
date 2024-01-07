@@ -2,6 +2,9 @@ import mongoose from "mongoose";
 import db from '../../schemes/mongo.js';
 import SkillService from "../../services/SkillService.js";
 const DbAlert = db.Alert;
+import AlertExecutionContext from "../../classes/Alerts/AlertExecutionContext.js";
+import Debug from "../../helpers/debug.js";
+
 export default class Alert {
     constructor({identifier, name, type, priority=0, properties= {}}) {
         this.identifier = identifier;
@@ -14,31 +17,36 @@ export default class Alert {
         this.phases = [
             {
                 index: 0,
+                initial: true,
                 actions: [],
             }
         ]
         this.settings = {};
+        this.activeExecutionContext = undefined;
     }
 
-    activate(){
-        this.activateHandler();
-        this.active = true;
-    }
-
-    deactivate(){
-        this.deactivateHandler()
-        this.active = false;
-    }
-
-    activateHandler(){
-
-    }
-
-    deactivateHandler(){
+    _setState(state){
+        if(state !== undefined){
+            this.active = state;
+            return this.active;
+        }
+        return undefined;
     }
 
     isActive(){
         return this.active;
+    }
+
+    attachExecutionContext(ec){
+        this.activeExecutionContext = ec;
+    }
+
+    getActiveExecutionContext() {
+        if(!this.isActive() || !this.activeExecutionContext){
+            Debug.debug("Failed to get Execution Context: Alert not active.")
+            return undefined;
+        }
+        return this.activeExecutionContext;
     }
 
     async loadFromDb(){
@@ -64,7 +72,7 @@ export default class Alert {
             dbObject.settings = this.settings;
             dbObject.properties = this.properties;
             dbObject.priority = this.priority;
-            dbObject.priority = this.maxDuration;
+            dbObject.maxDuration = this.maxDuration;
             dbObject.markModified("phases");
             dbObject.markModified("settings");
             dbObject.markModified("properties");
@@ -85,6 +93,14 @@ export default class Alert {
         }
     }
 
+    async removeFromDb(){
+        const dbObject = await DbAlert.findOne({identifier: this.identifier});
+        if(dbObject) {
+            return DbAlert.findByIdAndRemove(dbObject.id);
+        }
+        else return false;
+    }
+
     async update(data){
         const updateAbleSettings = {
             settings: data.settings,
@@ -93,13 +109,27 @@ export default class Alert {
             maxDuration: data.maxDuration,
         }
 
+        const p = [];
+        if(data.phaseSettings) {
+            for(let entry of data.phaseSettings){
+                if(entry.settings){
+                    if(entry.settings.duration) {
+                        await this.setPhaseDurationByIndex(entry.index, entry.settings.duration);
+                    }
+                }
+            }
+        }
+
         const updated = Object.assign(this, updateAbleSettings);
         Object.keys(updateAbleSettings).forEach(key => {
             this[key] = updated[key];
         })
-
-        await this.saveToDb();
+        await this.saveToDb()
         return this;
+    }
+
+    async remove(){
+        this.removeFromDb();
     }
 
     /**

@@ -24,7 +24,7 @@ let stopAlert = new Skill({
         alertType: Skill.variableTypes.STRING,
     },
     handler: async function({handlerArgs, configuration}){
-        AlertService.deactivate(handlerArgs.alertType)
+        AlertService.deactivateByType(handlerArgs.alertType)
     }
 })
 

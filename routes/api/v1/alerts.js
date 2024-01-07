@@ -11,10 +11,13 @@ router.get("/", getAll);
 router.post("/:identifier/addAction", addAction);
 router.post("/:identifier/addPhase", addPhase);
 router.post("/:identifier/removePhase", removePhase);
+router.post("/:identifier/start", startAlert);
+router.post("/:identifier/stop", stopAlert);
 router.delete("/:identifier/actions/:actionId", removeAction);
 router.put("/:identifier/actions/:actionId", updateAction);
 router.put("/:identifier/phases/:phaseId", updatePhase);
 router.delete("/:identifier/phases/:phaseId", removePhaseById);
+
 
 router.put("/:identifier", updateAlert);
 
@@ -129,6 +132,33 @@ async function removePhaseById(req, res, next){
         })
 }
 
+async function startAlert(req, res, next){
+    const identifier = req.params.identifier;
+    const alert = AlertService.getByIdentifier(identifier);
+    if(!alert) {
+        next("Failed to start alert: Unknown identifier.")
+    }
+    else {
+        try{
+            const result = AlertService.activate(alert);
+            res.json(result);
+        }
+        catch(e){
+            next(e);
+        }
+    }
+}
+async function stopAlert(req, res, next){
+    const identifier = req.params.identifier;
+    const alert = AlertService.getByIdentifier(identifier);
+    if(!alert) {
+        next("Failed to stop alert: Unknown identifier.")
+    }
+    else {
+        const result = AlertService.deactivate(alert, "Stopped by API Request");
+        res.json(result);
+    }
+}
 
 
 export default router

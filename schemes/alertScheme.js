@@ -40,6 +40,10 @@ var AlertScheme = new Schema({
             index: {
                 type: Number,
             },
+            initial: {
+                type: Boolean,
+                default: false,
+            },
             duration: {
                 type: Number,
                 default: 2000,

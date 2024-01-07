@@ -66,8 +66,30 @@ class AlertService extends Service {
         })
     }
 
-    remove(id){
+    _removeInternalByIdentifier(identifier){
+        const index = this.alerts.findIndex(alert => alert.identifier === identifier);
+        if(index > -1){
+            this.alerts.splice(index, 1);
+        }
+    }
 
+    remove(identifier){
+        return new Promise((resolve, reject) => {
+            const alert = this.getByIdentifier(identifier);
+            if(!alert){
+                reject("No matching alert found.");
+            }
+            else {
+                this._removeInternalByIdentifier(identifier);
+                alert.remove()
+                    .then(result => {
+                        resolve(result);
+                    })
+                    .catch(err => {
+                        reject(err);
+                    })
+            }
+        })
     }
 
     activate(alert){
@@ -98,7 +120,15 @@ class AlertService extends Service {
             function activateAlert(self, alert){
                 //create exec context
                 const ec = new AlertExecutionContext(alert);
-                return ec.run();
+                alert._setState(true);
+                alert.attachExecutionContext(ec);
+                return ec.run()
+                    .then(result => {
+                        alert._setState(false)
+                    })
+                    .catch(err => {
+                        alert._setState(false);
+                    })
             }
         })
     }
@@ -119,11 +149,24 @@ class AlertService extends Service {
         return false;
     }
 
-    deactivate(type){
+    deactivate(alert, reason="Unknown"){
+        if(alert.isActive()){
+            const ec = alert.getActiveExecutionContext();
+            if(ec) {
+                ec.stop({reason});
+                return true;
+            }
+        }
+        return false;
+    }
+
+    deactivateByType(type){
         const alert = this.getByType(type);
         if(alert.isActive()){
             alert.deactivate();
+            return true;
         }
+        return false;
     }
 
     /**

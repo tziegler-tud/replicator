@@ -7,6 +7,7 @@ import SkillSelectDialog from "../../components/skillSelectDialog";
 import InteractiveList from "../../components/interactiveList";
 
 
+
 export default new Module({
     name: "AlertsDetailsModule",
     init: function(){
@@ -50,6 +51,12 @@ export default new Module({
         $(".dashboard-save-button").on("click", function(){
             save()
         })
+        $(".dashboard-start-button").on("click", function(){
+            startAlert();
+        })
+        $(".dashboard-stop-button").on("click", function(){
+            stopAlert();
+        })
 
         $(".button-addPhase").on("click", function(){
             addPhase()
@@ -59,10 +66,64 @@ export default new Module({
             removePhase()
         })
 
+        function startAlert(){
+            let data = {
+
+            }
+            $.ajax({
+                method: "POST",
+                url: "/api/v1/alerts/" + alert.identifier + "/start",
+                data: JSON.stringify(data),
+                contentType: "application/json; charset=UTF-8",
+                dataType: "json",
+            })
+                .done(result => {
+                    snackbar.show("Alert started.")
+                })
+                .fail((jqxhr, textStatus, errorThrown) => {
+                    snackbar.showError(jqxhr, textStatus, errorThrown);
+
+                })
+        }
+
+        function stopAlert(){
+            let data = {
+
+            }
+            $.ajax({
+                method: "POST",
+                url: "/api/v1/alerts/" + alert.identifier + "/stop",
+                data: JSON.stringify(data),
+                contentType: "application/json; charset=UTF-8",
+                dataType: "json",
+            })
+                .done(result => {
+                    snackbar.show("Alert stopped.")
+                })
+                .fail((jqxhr, textStatus, errorThrown) => {
+                    snackbar.showError(jqxhr, textStatus, errorThrown);
+
+                })
+        }
+
         function save(){
+            const phaseSettings = [];
+            phaseSettingsLists.forEach(o => {
+                const list = o.settingsList;
+                const index = o.phaseIndex;
+                const entries = list.getEntries();
+                const vals = {};
+                entries.forEach(entry => {
+                    for(let interaction of entry.interactions) {
+                        vals[interaction.listEntry.key] = interaction.getValue()
+                    }
+                })
+                phaseSettings.push({index: index, settings: vals})
+            })
             let data = {
                 priority: priorityInput ? priorityInput.value : undefined,
                 maxDuration: maxDurationInput ? maxDurationInput.value : undefined,
+                phaseSettings: phaseSettings,
             }
             $.ajax({
                 method: "PUT",
@@ -129,10 +190,7 @@ export default new Module({
 
 
         const phaseSettingsContainers = document.querySelectorAll(".phaseSettingsList");
-
-
-
-
+        let phaseSettingsLists = [];
         phaseSettingsContainers.forEach(container => {
             const phase = alert.phases.find(phase => parseInt(phase.index) === parseInt(container.dataset.index));
             const phaseSettings = [
@@ -165,6 +223,7 @@ export default new Module({
             }
             let phaseSettingsList = new InteractiveList({element: container, config: phaseSettingsConfig}, phaseSettingsData);
             phaseSettingsList.render();
+            phaseSettingsLists.push({phaseIndex: phase.index, settingsList: phaseSettingsList});
         })
 
 

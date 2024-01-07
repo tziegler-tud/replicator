@@ -9,6 +9,7 @@ import lightGroupState from "./Light/lightGroup/state.js";
 import lightSceneState from "./Light/lightScene/state.js";
 import lightSceneAdjust from "./Light/lightScene/adjust.js";
 import httpRequest from "./Connections/http/httpRequest.js";
+import debugMessage from "./Debug/Debug/debug.js";
 import alertState from "./Alerts/Alerts/state.js";
 
 class SkillImporter {
@@ -46,6 +47,11 @@ class SkillImporter {
             Connections: {
                 http: {
                     httpRequest: importSkill(httpRequest),
+                }
+            },
+            Debug: {
+                debug: {
+                    debugMessage: importSkill(debugMessage)
                 }
             }
         }
