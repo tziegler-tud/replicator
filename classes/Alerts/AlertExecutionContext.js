@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Debug from "../../helpers/debug.js"
 import SettingsService from "../../services/SettingsService.js";
 import SkillService from "../../services/SkillService.js";
+import LightsService from "../../services/LightsService.js";
 
 
 /**
@@ -35,15 +36,23 @@ export default class ExecutionContext {
         /**
          * @type Alert
          */
-        this.alert = alert;
+        // this.alert = alert;
+        this.identifier = alert.identifier;
+        this.phases = alert.phases;
+        this.maxDuration = alert.maxDuration;
+        this.restoreLightState = alert.restoreLightState;
         this.state = ExecutionContext.STATE.INITIALIZED;
         this.endTime = undefined;
         this.terminated = true;
         this.lastTerminationReason = "unknown";
     }
 
-    getAlert(){
-        return this.alert;
+    // getAlert(){
+    //     return this.alert;
+    // }
+
+    getAlertIdentifier(){
+        return this.identifier;
     }
 
     /**
@@ -51,17 +60,16 @@ export default class ExecutionContext {
      * @returns {Promise<unknown>}
      */
     async run(){
-        Debug.debug("Executing alert: " + this.alert.identifier);
+        Debug.debug("Executing alert: " + this.identifier);
         this.lastTerminationReason = "unknown";
         let self = this;
         this.state = ExecutionContext.STATE.RUNNING;
         this.currentAction = undefined;
         this.terminated = false;
         const forcedEndTime = Date.now() + 120000; //force end after 2 minutes
-        let skillRunners = [];
 
         const phases = [];
-        this.alert.phases.forEach(phase => {
+        this.phases.forEach(phase => {
             console.log(phase.index)
             phases.push(new Phase({index: phase.index, duration: phase.duration, actions: phase.actions, initial: phase.initial}))
         })
@@ -74,7 +82,7 @@ export default class ExecutionContext {
         })
         this.availablePhaseIndexes.sort((a,b) => a-b);
         //phases are run sequential until the ec is terminated.
-        this.endTime = this.alert.maxDuration > 0 ? Math.min(Date.now() + parseInt(this.alert.maxDuration)*1000, forcedEndTime) : forcedEndTime;
+        this.endTime = this.maxDuration > 0 ? Math.min(Date.now() + parseInt(this.maxDuration)*1000, forcedEndTime) : forcedEndTime;
         Debug.debug("Starting alert execution. Automatic timeout at " + this.endTime);
         const timeout = this.endTime - Date.now();
         setTimeout(() => {
@@ -86,11 +94,20 @@ export default class ExecutionContext {
         }, timeout)
         let currentPhase = this.getInitialPhase();
 
+        //save light state if set
+        let lightStateBackup;
+        if(this.restoreLightState){
+            lightStateBackup = await LightsService.saveLightsState();
+        }
+
         while(!this.terminated && this.endTime > Date.now()) {
             await this.runPhase(currentPhase);
             currentPhase = this.getNextPhase(currentPhase)
         }
 
+        if(this.restoreLightState) {
+            await LightsService.restoreLightsState(lightStateBackup);
+        }
         return {finished: true, successful: true, state: this.state, reason: this.lastTerminationReason};
     }
 
@@ -101,7 +118,7 @@ export default class ExecutionContext {
             this.state = ExecutionContext.STATE.STOPPED;
             this.terminated = true;
             this.lastTerminationReason = reason;
-            Debug.debug("Alert " + this.alert.identifier + " stopped. Reason: " + reason, 2);
+            Debug.debug("Alert " + this.identifier + " stopped. Reason: " + reason, 2);
         }
     }
 

@@ -701,6 +701,10 @@ class BridgeApiV2 {
         return this.put("resource/light/"+lightId, state);
     }
 
+    setLightOnOffState(lightId, state) {
+        return this.put("resource/light/"+lightId, state);
+    }
+
     getGroupedLightState(lightId) {
         let self = this;
         return new Promise(function(resolve, reject){
@@ -832,141 +836,141 @@ class HueEvent{
 }
 
 
-class BridgeApi {
-    constructor(url, user){
-        this.url = url;
-        this.user = user;
-    }
-    get(path){
-        let self = this;
-        return new Promise(function(resolve, reject){
-            let httpUrl = "http://" + self.url + "/api/" + self.user + "/" + path;
-            http.get(httpUrl, res => {
-                const { statusCode } = res;
-                const contentType = res.headers['content-type'];
-
-                let error;
-                // Any 2xx status code signals a successful response but
-                // here we're only checking for 200.
-                if (statusCode !== 200) {
-                    error = new Error('Request Failed.\n' +
-                        `Status Code: ${statusCode}`);
-                } else if (!/^application\/json/.test(contentType)) {
-                    error = new Error('Invalid content-type.\n' +
-                        `Expected application/json but received ${contentType}`);
-                }
-                if (error) {
-                    console.error(error.message);
-                    // Consume response data to free up memory
-                    res.resume();
-                    reject(e);
-                }
-
-                res.setEncoding('utf8');
-                let rawData = '';
-                res.on('data', (chunk) => { rawData += chunk; });
-                res.on('end', () => {
-                    try {
-                        const parsedData = JSON.parse(rawData);
-                        resolve(parsedData);
-                    } catch (e) {
-                        console.error(e.message);
-                        reject(e);
-                    }
-                });
-            }).on('error', (e) => {
-                console.error(`Got error: ${e.message}`);
-                reject(e);
-            });
-        })
-    }
-    post(path, data){
-        let self = this;
-        return new Promise(function(resolve, reject){
-            let reqData = JSON.stringify(data);
-            let options = {method: "POST"}
-            const req = http.request("http://" + self.url + "/api/" + user + "/" + path, options,(res) => {
-                console.log(`STATUS: ${res.statusCode}`);
-                console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
-                res.setEncoding('utf8');
-                res.on('data', (chunk) => {
-                    console.log(`BODY: ${chunk}`);
-                });
-                res.on('end', () => {
-                    console.log('No more data in response.');
-                });
-            });
-
-            req.on('error', (e) => {
-                console.error(`problem with request: ${e.message}`);
-            });
-            // Write data to request body
-            req.write(reqData);
-            req.end();
-        })
-    }
-    put(path, data){
-        let self = this;
-        return new Promise(function(resolve, reject){
-            let reqData = JSON.stringify(data);
-            let options = {method: "PUT"}
-            const req = http.request("http://" + self.url + "/api/" + self.user + "/" + path, options,(res) => {
-                console.log(`STATUS: ${res.statusCode}`);
-                console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
-                res.setEncoding('utf8');
-                res.on('data', (chunk) => {
-                    console.log(`BODY: ${chunk}`);
-                });
-                res.on('end', () => {
-                    console.log('No more data in response.');
-                });
-            });
-
-            req.on('error', (e) => {
-                console.error(`problem with request: ${e.message}`);
-            });
-            // Write data to request body
-            req.write(reqData);
-            req.end();
-        })
-    }
-    getGroupsArray(){
-        let self = this;
-        return new Promise(function(resolve, reject) {
-            self.get("groups")
-                .then(groupsObject => {
-                    let groupsArray = [];
-                    Object.keys(groupsObject).forEach(function (key) {
-                        groupsArray.push({id: key, group: groupsObject[key]});
-                    })
-                    resolve(groupsArray);
-                })
-                .catch(e => {
-                    reject(e);
-                })
-        })
-    }
-    getLightState(lightId) {
-        return this.get("lights/"+lightId);
-    }
-    setLightState(lightId, state) {
-        return this.put("lights/"+lightId + "/state", state);
-    }
-
-    getGroupState(groupId) {
-        return this.get("groups/"+groupId);
-    }
-
-    setGroupState(groupId, state) {
-        return this.put("groups/"+groupId + "/action", state);
-    }
-    getScenes(){
-        return this.get("scenes");
-    }
-    setGroupScene(groupId, sceneId) {
-        return this.put("groups/"+groupId + "/action", sceneId)
-    }
-}
+// class BridgeApi {
+//     constructor(url, user){
+//         this.url = url;
+//         this.user = user;
+//     }
+//     get(path){
+//         let self = this;
+//         return new Promise(function(resolve, reject){
+//             let httpUrl = "http://" + self.url + "/api/" + self.user + "/" + path;
+//             http.get(httpUrl, res => {
+//                 const { statusCode } = res;
+//                 const contentType = res.headers['content-type'];
+//
+//                 let error;
+//                 // Any 2xx status code signals a successful response but
+//                 // here we're only checking for 200.
+//                 if (statusCode !== 200) {
+//                     error = new Error('Request Failed.\n' +
+//                         `Status Code: ${statusCode}`);
+//                 } else if (!/^application\/json/.test(contentType)) {
+//                     error = new Error('Invalid content-type.\n' +
+//                         `Expected application/json but received ${contentType}`);
+//                 }
+//                 if (error) {
+//                     console.error(error.message);
+//                     // Consume response data to free up memory
+//                     res.resume();
+//                     reject(e);
+//                 }
+//
+//                 res.setEncoding('utf8');
+//                 let rawData = '';
+//                 res.on('data', (chunk) => { rawData += chunk; });
+//                 res.on('end', () => {
+//                     try {
+//                         const parsedData = JSON.parse(rawData);
+//                         resolve(parsedData);
+//                     } catch (e) {
+//                         console.error(e.message);
+//                         reject(e);
+//                     }
+//                 });
+//             }).on('error', (e) => {
+//                 console.error(`Got error: ${e.message}`);
+//                 reject(e);
+//             });
+//         })
+//     }
+//     post(path, data){
+//         let self = this;
+//         return new Promise(function(resolve, reject){
+//             let reqData = JSON.stringify(data);
+//             let options = {method: "POST"}
+//             const req = http.request("http://" + self.url + "/api/" + user + "/" + path, options,(res) => {
+//                 console.log(`STATUS: ${res.statusCode}`);
+//                 console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
+//                 res.setEncoding('utf8');
+//                 res.on('data', (chunk) => {
+//                     console.log(`BODY: ${chunk}`);
+//                 });
+//                 res.on('end', () => {
+//                     console.log('No more data in response.');
+//                 });
+//             });
+//
+//             req.on('error', (e) => {
+//                 console.error(`problem with request: ${e.message}`);
+//             });
+//             // Write data to request body
+//             req.write(reqData);
+//             req.end();
+//         })
+//     }
+//     put(path, data){
+//         let self = this;
+//         return new Promise(function(resolve, reject){
+//             let reqData = JSON.stringify(data);
+//             let options = {method: "PUT"}
+//             const req = http.request("http://" + self.url + "/api/" + self.user + "/" + path, options,(res) => {
+//                 console.log(`STATUS: ${res.statusCode}`);
+//                 console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
+//                 res.setEncoding('utf8');
+//                 res.on('data', (chunk) => {
+//                     console.log(`BODY: ${chunk}`);
+//                 });
+//                 res.on('end', () => {
+//                     console.log('No more data in response.');
+//                 });
+//             });
+//
+//             req.on('error', (e) => {
+//                 console.error(`problem with request: ${e.message}`);
+//             });
+//             // Write data to request body
+//             req.write(reqData);
+//             req.end();
+//         })
+//     }
+//     getGroupsArray(){
+//         let self = this;
+//         return new Promise(function(resolve, reject) {
+//             self.get("groups")
+//                 .then(groupsObject => {
+//                     let groupsArray = [];
+//                     Object.keys(groupsObject).forEach(function (key) {
+//                         groupsArray.push({id: key, group: groupsObject[key]});
+//                     })
+//                     resolve(groupsArray);
+//                 })
+//                 .catch(e => {
+//                     reject(e);
+//                 })
+//         })
+//     }
+//     getLightState(lightId) {
+//         return this.get("lights/"+lightId);
+//     }
+//     setLightState(lightId, state) {
+//         return this.put("lights/"+lightId + "/state", state);
+//     }
+//
+//     getGroupState(groupId) {
+//         return this.get("groups/"+groupId);
+//     }
+//
+//     setGroupState(groupId, state) {
+//         return this.put("groups/"+groupId + "/action", state);
+//     }
+//     getScenes(){
+//         return this.get("scenes");
+//     }
+//     setGroupScene(groupId, sceneId) {
+//         return this.put("groups/"+groupId + "/action", sceneId)
+//     }
+// }
 
 function checkBridge(url) {
     let self = this;

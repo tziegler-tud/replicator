@@ -17,12 +17,26 @@ export default class HueLight extends Light {
         this.nativeObject = hueObject;
     }
 
+    get(){
+        return {
+            id: this.id,
+            uniqueId: this.uniqueId,
+            identifier: this.identifier,
+            state: this.state,
+            integration: this.integration,
+            configuration: this.configuration,
+            settings: this.settings,
+            properties: this.properties,
+        }
+    }
+
     parseHueToState(hueObject){
         return {
             on: hueObject.on.on,
             brightness: hueObject.dimming ? hueObject.dimming.brightness : 100,
             color: this.parseColor(hueObject),
             reachable: "not implemented", //use new zigbee_connectivity status for this, will implement later
+            color_temperature: hueObject.color_temperature,
         }
     }
 
@@ -46,6 +60,29 @@ export default class HueLight extends Light {
             }
             oj.brightness = xyBri.bri;
         }
+        else {
+            if(state.color) {
+                let xyBri = undefined;
+                if(state.color.hsv) {
+                    xyBri = this.colorParser.hsvToXYBri({h: state.color.hsv.h, s: state.color.hsv.s, v: state.color.hsv.v});
+                }
+                else {
+                    if(state.color.rgb) {
+                        xyBri = this.colorParser.rgbToXYBri({r: state.color.rgb.r, g: state.color.rgb.g, b: state.color.rgb.b});
+                    }
+                }
+                if(xyBri){
+                    oj.color = {
+                        xy: {
+                            x: xyBri.x,
+                            y: xyBri.y,
+                        }
+                    }
+                    oj.brightness = xyBri.bri;
+                }
+            }
+        }
+        if(state.color_temperature && state.color_temperature.mirek) oj.color_temperature = {mirek: state.color_temperature.mirek};
         return oj;
     }
 
@@ -89,10 +126,19 @@ export default class HueLight extends Light {
         else return {};
     }
 
+    /**
+     *
+     * @param state
+     * @returns {Promise<void>}
+     */
     async setState(state){
         this.bridgeApi.setLightState(this.lightId, this.parseStateChangeToHue(state));
     }
 
+    /**
+     *
+     * @returns {Promise<object>}
+     */
     async getState(){
         this.nativeObject = await this.bridgeApi.getLightState(this.lightId);
         this.state = this.parseHueToState(this.nativeObject);

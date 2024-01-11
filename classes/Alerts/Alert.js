@@ -14,6 +14,7 @@ export default class Alert {
         this.priority = priority;
         this.properties = properties;
         this.maxDuration = 0;
+        this.restoreLightState = true;
         this.phases = [
             {
                 index: 0,
@@ -57,6 +58,7 @@ export default class Alert {
             this.priority = dbObject.priority;
             this.properties = dbObject.properties;
             this.maxDuration = dbObject.maxDuration;
+            this.restoreLightState = dbObject.restoreLightState;
             return this;
         }
         else {
@@ -73,6 +75,8 @@ export default class Alert {
             dbObject.properties = this.properties;
             dbObject.priority = this.priority;
             dbObject.maxDuration = this.maxDuration;
+            dbObject.restoreLightState = this.restoreLightState;
+
             dbObject.markModified("phases");
             dbObject.markModified("settings");
             dbObject.markModified("properties");
@@ -87,6 +91,7 @@ export default class Alert {
                 properties: this.properties,
                 priority: this.priority,
                 maxDuration: this.maxDuration,
+                restoreLightState: this.restoreLightState,
             })
             await dbObject.save();
             return this;
@@ -107,6 +112,7 @@ export default class Alert {
             priority: data.priority,
             properties: data.properties,
             maxDuration: data.maxDuration,
+            restoreLightState: data.restoreLightState,
         }
 
         const p = [];

@@ -273,7 +273,11 @@ class LightsService extends Service {
         })
     }
 
-    getLights(){
+    /**
+     *
+     * @returns {Promise<Light[]>}
+     */
+    getLights(simplify = false){
         let self = this;
         return new Promise(function(resolve, reject){
             let p = [];
@@ -335,10 +339,21 @@ class LightsService extends Service {
         return group.get();
     }
 
+    /**
+     *
+     * @param id
+     * @returns {Promise<Light|undefined>}
+     */
     async getLightById(id){
         return this.findLightById(id).get();
 
     }
+
+    /**
+     *
+     * @param uniqueId
+     * @returns {Promise<Light|undefined>}
+     */
     async getLightByUniqueId(uniqueId){
         return this.findLightByUniqueId(uniqueId).get();
     }
@@ -361,6 +376,11 @@ class LightsService extends Service {
         return this.groups.find(group => group.uniqueId === uniqueId);
     }
 
+    /**
+     *
+     * @param id
+     * @returns {Light | undefined}
+     */
     findLightById(id){
         return this.lights.find(light => light.id.toString() === id.toString());
     }
@@ -469,7 +489,7 @@ class LightsService extends Service {
         this.getLightIdByName(lightName)
             .then(id => {
                 if(id){
-                    self.setLightState(id, newState)
+                    return self.setLightState(id, newState)
                 }
             })
             .catch(e => {
@@ -477,6 +497,22 @@ class LightsService extends Service {
             })
     }
 
+    async saveLightsState(){
+        return await this.getLights();
+    }
+
+    /**
+     *
+     * @param {Light[]} lights
+     */
+    async restoreLightsState(lights){
+        for(const lightConfig of lights){
+            //find light
+            const light = this.findLightById(lightConfig.id);
+            await light.setState(light.state);
+        }
+        return true;
+    }
 }
 
 LightsService.STATES = {

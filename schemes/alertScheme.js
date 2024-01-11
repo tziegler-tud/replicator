@@ -18,6 +18,10 @@ var AlertScheme = new Schema({
         type: Number,
         default: 0,
     },
+    restoreLightState: {
+        type: Boolean,
+        default: true
+    },
     properties: [
         {
             key: {
