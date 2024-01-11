@@ -114,6 +114,10 @@ export default class InteractiveList extends Component{
         })
     }
 
+    /**
+     *
+     * @returns {[]}
+     */
     getEntries(){
         return this.entries;
     }

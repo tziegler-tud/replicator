@@ -27,6 +27,35 @@ export default new Module({
         const priorityInput = document.querySelector("#alert-input--priority");
         const maxDurationInput = document.querySelector("#alert-input--maxDuration");
 
+        const settingsListContainer = document.getElementById("alertSettingsList");
+        const settingsEntries = [
+            {
+                label: "Restore Light state after finishing",
+                key: "restoreLightState",
+                value: alert.restoreLightState,
+            },
+        ];
+
+        const settingsSwitch = {
+            type: "switch",
+            identifier: "switch-property-enabled",
+            valueFunc: function(entry){
+                return entry.value;
+            }
+        }
+
+        let settingsData = {
+            listEntries: settingsEntries,
+            interactions: [settingsSwitch]
+        }
+        let settingsConfig = {
+            entryLabel: function(entry){
+                return entry.label;
+            }
+        }
+        let settingsList = new InteractiveList({element: settingsListContainer, config: settingsConfig}, settingsData);
+        settingsList.render();
+
         //actions
         $(".dashboard-action-item").on("click", function(event){
             window.location.href = "/alerts/"+ alert.identifier + "/actions/"+this.dataset.actionid;
@@ -125,6 +154,11 @@ export default new Module({
                 maxDuration: maxDurationInput ? maxDurationInput.value : undefined,
                 phaseSettings: phaseSettings,
             }
+            settingsList.getEntries().forEach(entry => {
+                for(let interaction of entry.interactions) {
+                    data[interaction.listEntry.key] = interaction.getValue()
+                }
+            })
             $.ajax({
                 method: "PUT",
                 url: "/api/v1/alerts/" + alert.identifier,

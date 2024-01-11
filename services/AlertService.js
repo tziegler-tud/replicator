@@ -98,8 +98,8 @@ class AlertService extends Service {
             if(!alert) reject("Invalid arguments received");
             //check for active alerts
             const context = this.activeContext;
-            if(context && !context.state === AlertExecutionContext.STATE.FINISHED){
-                const activeAlert = context.getAlert();
+            if(context && context.state !== AlertExecutionContext.STATE.FINISHED){
+                const activeAlert = this.getByIdentifier(context.getAlertIdentifier());
                 //check priority
                 if(activeAlert.priority < alert.priority){
                     context.stop({

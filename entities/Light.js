@@ -49,11 +49,11 @@ export default class Light {
         return this;
     }
 
-    getState(){
+    async getState(){
         return this.state;
     }
 
-    setState(state){
+    async setState(state){
         Object.assign(this.state, state);
     }
 
@@ -92,10 +92,10 @@ export default class Light {
         }
     }
 
-    setBrightnessAbsolute(val){
+    async setBrightnessAbsolute(val){
         return this.setState({brightness: this.normalizeBrightness(val)});
     }
-    setBrightnessRelative(val){
+    async setBrightnessRelative(val){
         const current = this.getState().brightness;
         const updatedVal = current + val;
         return this.setState({brightness: this.normalizeBrightness(updatedVal)});
