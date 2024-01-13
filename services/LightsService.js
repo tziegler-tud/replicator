@@ -509,7 +509,9 @@ class LightsService extends Service {
         for(const lightConfig of lights){
             //find light
             const light = this.findLightById(lightConfig.id);
-            await light.setState(light.state);
+            console.log("Loading state: \n");
+            console.log(JSON.stringify(lightConfig))
+            await light.setState(lightConfig.state);
         }
         return true;
     }
