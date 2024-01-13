@@ -546,6 +546,7 @@ class BridgeApiV2 {
             op.headers = Object.assign(op.headers, postHeaders);
             op.method = "PUT";
             op.body = JSON.stringify(data);
+            console.log("sending request: " + path + "\n" + op.body)
             fetch(self.address + path, op)
                 .then(response => {
                     if (response.ok) {
