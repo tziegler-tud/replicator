@@ -172,7 +172,7 @@ export default class Light {
     };
 
     setBrightness({percentValue= 0, isRelative=false}={}){
-        let updatedVal = this.parseBrightnessPercent(percentValue);
+        let updatedVal = this.parseBrightness(percentValue);
         if(isRelative) {
             return this.setBrightnessRelative(updatedVal)
         }
