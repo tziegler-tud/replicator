@@ -277,12 +277,12 @@ class LightsService extends Service {
      *
      * @returns {Promise<Light[]>}
      */
-    getLights(simplify = false){
+    getLights(json = false){
         let self = this;
         return new Promise(function(resolve, reject){
             let p = [];
             self.lights.forEach(light => {
-                p.push(light.get());
+                p.push(json ? light.getJson() : light.get());
             })
             Promise.all(p)
                 .then(result => {
@@ -295,12 +295,12 @@ class LightsService extends Service {
 
     }
 
-    getGroups(){
+    getGroups(json = false){
         let self = this;
         return new Promise(function(resolve, reject){
             let p = [];
-            self.groups.forEach(light => {
-                p.push(light.get());
+            self.groups.forEach(group => {
+                p.push(json ? group.getJson() : group.get());
             })
             Promise.all(p)
                 .then(result => {
@@ -312,12 +312,12 @@ class LightsService extends Service {
         })
     }
 
-    getScenes(){
+    getScenes(json = false){
         let self = this;
         return new Promise(function(resolve, reject){
             let p = [];
-            self.scenes.forEach(light => {
-                p.push(light.get());
+            self.scenes.forEach(scene => {
+                p.push(json ? scene.getJson() : scene.get());
             })
             Promise.all(p)
                 .then(result => {
@@ -509,8 +509,6 @@ class LightsService extends Service {
         for(const lightConfig of lights){
             //find light
             const light = this.findLightById(lightConfig.id);
-            console.log("Loading state: \n");
-            console.log(JSON.stringify(lightConfig))
             await light.setState(lightConfig.state);
         }
         return true;

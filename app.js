@@ -13,7 +13,6 @@ import hueConfig from './config/hueConfig.json' assert { type: 'json' };
 import deconzConfig from './config/deconzConfig.json' assert { type: 'json' };
 
 import {apiErrorHandler, webErrorHandler} from "./helpers/error-handler.js";
-// var sassMiddleware = require('node-sass-middleware');
 
 import IntentService from './services/IntentService.js';
 import IntentHandlerService from "./services/IntentHandlerService.js";
@@ -71,12 +70,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-// app.use(sassMiddleware({
-//   src: path.join(__dirname, 'public'),
-//   dest: path.join(__dirname, 'public'),
-//   indentedSyntax: true, // true = .sass and false = .scss
-//   sourceMap: true
-// }));
 
 app.use(express.static(path.join(__dirname, 'src')));
 
@@ -132,15 +125,9 @@ const integrationService = new Promise(function(resolve, reject){
             let BridgeUser = hueConfig.bridgeUserToken;
             const HueIntegration = IntegrationService.loadIntegration(IntegrationService.integrations.HUE, {BridgeUrl: BridgeUrl, BridgeUser: BridgeUser});
 
-            // let deconzUrl = deconzConfig.bridgeUrl;
-            // let deconzUser = deconzConfig.bridgeUrl;
-            // IntegrationService.loadIntegration(IntegrationService.integrations.DECONZ, {BridgeUrl: deconzUrl, BridgeUser: deconzUser})
-            //     .then(()=> {
-            //         resolve();
-            //     })
-            //     .catch(err=> {
-            //         reject(err);
-            //     })
+            let deconzUrl = deconzConfig.bridgeUrl;
+            let deconzUser = deconzConfig.bridgeUserToken;
+            const DeconzIntegration = IntegrationService.loadIntegration(IntegrationService.integrations.DECONZ, {BridgeUrl: deconzUrl, BridgeUser: deconzUser});
             resolve();
         })
         .catch(e => {

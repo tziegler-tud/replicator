@@ -2,6 +2,7 @@
  * @class LightGroup
  */
 import Light from "./Light.js";
+import LightScene from "./LightScene.js";
 
 export default class LightGroup extends Light {
     constructor({uniqueId, identifier= "NewDefaultLightGroup", nativeObject={}, configuration={}}={}){
@@ -22,8 +23,20 @@ export default class LightGroup extends Light {
         return this;
     }
 
+    /**
+     *
+     * @param light {Light}
+     */
     addLight(light){
         this.lights.add(light);
+    }
+
+    /**
+     *
+     * @param scene {LightScene}
+     */
+    addScene(scene) {
+        this.scenes.add(scene);
     }
 
     saveToDb(){
