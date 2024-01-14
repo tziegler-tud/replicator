@@ -63,6 +63,11 @@ export default class Integration {
         return Object.assign(this.integration, i);
     }
 
+    getResource(uniqueId){
+        console.log("Integration::getResource: Warning - method not implemented.")
+        return undefined;
+    }
+
 
     statusEnum = {
         NOTLOADED: 0,
@@ -137,7 +142,7 @@ export function httpGet(url){
                 console.error(error.message);
                 // Consume response data to free up memory
                 res.resume();
-                reject(e);
+                reject(error);
             }
 
             res.setEncoding('utf8');

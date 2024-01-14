@@ -1,4 +1,5 @@
 {
-  "bridgeUrl": "192.168.1.101",
-  "bridgeUserToken": "Create an access token and paste it here - See Deconz developer docs"
+  "host": "192.168.1.101",
+  "port": 80,
+  "apiKey": "Create an access token and paste it here - See Deconz developer docs"
 }

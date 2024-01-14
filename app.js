@@ -123,11 +123,12 @@ const integrationService = new Promise(function(resolve, reject){
         .then(init => {
             let BridgeUrl = hueConfig.bridgeUrl;
             let BridgeUser = hueConfig.bridgeUserToken;
-            const HueIntegration = IntegrationService.loadIntegration(IntegrationService.integrations.HUE, {BridgeUrl: BridgeUrl, BridgeUser: BridgeUser});
+            // const HueIntegration = IntegrationService.loadIntegration(IntegrationService.integrations.HUE, {host: BridgeUrl, apiKey: BridgeUser});
 
-            let deconzUrl = deconzConfig.bridgeUrl;
-            let deconzUser = deconzConfig.bridgeUserToken;
-            const DeconzIntegration = IntegrationService.loadIntegration(IntegrationService.integrations.DECONZ, {BridgeUrl: deconzUrl, BridgeUser: deconzUser});
+            let deconzUrl = deconzConfig.host;
+            let deconzPort = deconzConfig.port ?? 80;
+            let deconzUser = deconzConfig.apiKey;
+            const DeconzIntegration = IntegrationService.loadIntegration(IntegrationService.integrations.DECONZ, {host: deconzUrl, port: deconzPort, apiKey: deconzUser});
             resolve();
         })
         .catch(e => {

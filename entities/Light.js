@@ -6,7 +6,7 @@
 /**
  * @typedef LightState
  * @property {boolean} on
- * @property {number} brightness
+ * @property {number} brightness 0 - 100. Brightness is handled internally as 0-100 percent value. Automatic value parsing is done via configuration
  * @property {number} hue
  * @property {number} sat
  * @property {boolean} reachable
@@ -39,7 +39,6 @@
  * @property {number} [ct]
  * @property {number} [hue]
  * @property {number} [sat]
- * @property {boolean} [reachable]
  * @property {LightColorObject} [color]
  * @property {string} [action]
  * @property {number} [color_temperature]
@@ -80,12 +79,12 @@ export default class Light {
         };
         let defaultConfiguration = {
             brightness: {
-                max: 254,
+                max: 100,
                 min: 0,
             }
         }
-        this.colorParser = new ColorParser({maxBrightness: 254});
         this.configuration = Object.assign(defaultConfiguration, configuration);
+        this.colorParser = new ColorParser({maxBrightness: this.configuration.brightness.max});
         this.nativeObject = nativeObject;
         this.settings = {
             identifier: identifier,
@@ -173,7 +172,7 @@ export default class Light {
     };
 
     setBrightness({percentValue= 0, isRelative=false}={}){
-        let updatedVal = this.parseBrightness(percentValue);
+        let updatedVal = this.parseBrightnessPercent(percentValue);
         if(isRelative) {
             return this.setBrightnessRelative(updatedVal)
         }
@@ -219,6 +218,19 @@ export default class Light {
                     reject(err);
                 })
         })
+    }
+
+    /**
+     *
+     * @param value {number} a value between min - max
+     * @param [max] {number} maximum brightness used for normalizing. Defaults to the objects configuration
+     * @param [min] {number} minimum brightness used for normalizing. Defaults to the objects configuration
+     * @returns {number} A number in range 0-100
+     */
+    parseBrightnessBackwards(value=0, max=this.configuration.brightness.max, min=this.configuration.brightness.min){
+        if (value === 0 || value <= min) return 0;
+        if (value >= max) return 100
+        return this.parseBrightness(100*value/max, 100, 0);
     }
 
     /**

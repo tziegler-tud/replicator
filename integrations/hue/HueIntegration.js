@@ -12,7 +12,7 @@ import HueLightScene from "./entities/HueLightScene.js"
 import EventStreamHandler from "./EventStreamHandler.js";
 
 export default class HueIntegration extends Integration {
-    constructor({BridgeUrl, BridgeUser}={}){
+    constructor({host, port=80, apiKey}={}){
         super();
         this.uniqueName = "hue";
         this.readableName = "Phillips Hue Integration";
@@ -22,6 +22,7 @@ export default class HueIntegration extends Integration {
 
             }
         }
+        this.port = port;
         this.locations = [];
         this.lights = [];
         this.groups = [];
@@ -33,8 +34,8 @@ export default class HueIntegration extends Integration {
         this.groupObjects = [];
         this.sceneObjects = [];
 
-        this.BridgeUrl = BridgeUrl;
-        this.BridgeUser = BridgeUser;
+        this.BridgeUrl = host;
+        this.BridgeUser = apiKey;
         this.initStarted = false;
 
     }

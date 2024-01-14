@@ -107,7 +107,7 @@ export default class DeconzLight extends Light {
     parseNativeToState(nativeObject){
         return {
             on: nativeObject.state.on,
-            brightness: nativeObject.state.bri ? nativeObject.state.bri : this.configuration.brightness.max,
+            brightness: nativeObject.state.bri ? this.parseBrightnessBackwards(nativeObject.state.bri) : this.configuration.brightness.max,
             color: this.parseColor(nativeObject),
             reachable: "not implemented", //use new zigbee_connectivity status for this, will implement later
             color_temperature: nativeObject.state.ct,
@@ -133,10 +133,9 @@ export default class DeconzLight extends Light {
     parseStateChangeToNative(state){
         let oj = {}
         if(state.on !== undefined) oj.on = state.on;
-        if(state.brightness !== undefined) oj.bri = state.brightness;
+        if(state.brightness !== undefined) oj.bri = this.parseBrightness(state.brightness);
         if(state.hue !== undefined) oj.hue = this.colorParser.normalize({max: hueMax, value: (state.hue / 360)});
         if(state.sat !== undefined) oj.sat = state.sat;
-        if(state.brightness !== undefined) oj.bri = this.normalizeBrightness(state.brightness);
         if(state.color_temperature) oj.ct = state.color_temperature;
         if(state.action) oj.alert = state.action;
         return oj;

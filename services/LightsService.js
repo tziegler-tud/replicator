@@ -58,7 +58,7 @@ class LightsService extends Service {
 
     /**
      *
-     * @param group
+     * @param group {LightGroup}
      * @returns {Promise<unknown>}
      */
     addGroup(group){
@@ -436,7 +436,7 @@ class LightsService extends Service {
     /**
      *
      * @param lightId {number}
-     * @param newState {Object}
+     * @param newState {LightStateUpdate}
      */
     setLightProperty(lightId, newState) {
         let self = this;
@@ -459,7 +459,7 @@ class LightsService extends Service {
     /**
      *
      * @param lightId {number}
-     * @param newState {Boolean}
+     * @param newState {LightState}
      */
     setLightState(lightId, newState) {
         let self = this;
@@ -468,7 +468,54 @@ class LightsService extends Service {
             self.init.then(function () {
                 //get light
                 let light = self.findLightById(lightId);
-                light.onOff(state)
+                light.setState(newState)
+                    .then(result => {
+                        resolve(result)
+                    })
+                    .catch(err => {
+                        reject(err)
+                    })
+            })
+        });
+    }
+
+    /**
+     *
+     * @param lightId {string}
+     * @param newState {boolean} true to turn on, false to turn off
+     * @returns {Promise<unknown>}
+     */
+    setLightOnOffState(lightId, newState) {
+        let self = this;
+        let state = parseState(newState);
+        return new Promise(function (resolve, reject) {
+            self.init.then(function () {
+                //get light
+                let light = self.findLightById(lightId);
+                light.onOff(newState)
+                    .then(result => {
+                        resolve(result)
+                    })
+                    .catch(err => {
+                        reject(err)
+                    })
+            })
+        });
+    }
+
+    /**
+     *
+     * @param id {string} group database id
+     * @param newState {LightGroupState}
+     */
+    setGroupState(id, newState) {
+        let self = this;
+        let state = parseState(newState);
+        return new Promise(function (resolve, reject) {
+            self.init.then(function () {
+                //get light
+                let group = self.findGroupById(id);
+                group.setState(newState)
                     .then(result => {
                         resolve(result)
                     })

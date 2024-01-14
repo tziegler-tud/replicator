@@ -1,30 +1,30 @@
-import https from 'https';
-import http from 'http';
 import Integration, {httpGet, httpsGet} from "../Integration.js";
 import LightsService from "../../services/LightsService.js";
 import DeconzBridgeApi from "./DeconzBridgeApi.js"
 import DeconzLight from "./entities/DeconzLight.js";
 import DeconzLightGroup from "./entities/DeconzLightGroup.js";
-import HueLightScene from "../hue/entities/HueLightScene.js";
 import DeconzLightScene from "./entities/DeconzLightScene.js";
+import EventStreamHandler from "./EventStreamHandler.js";
 
 export default class DeconzIntegration extends Integration {
-    constructor({BridgeUrl, ApiKey} = {}) {
+    constructor({host, port=80, apiKey} = {}) {
         super();
         this.readableName = "Deconz Api Integration"
         this.integration = {
             type: "Deconz",
             data: {}
         }
+        this.port = port
         this.locations = [];
         this.lights = [];
 
         this.lightObjects = [];
         this.groupObjects = [];
         this.sceneObjects = [];
+        this.sensorObjects = [];
 
-        this.BridgeUrl = BridgeUrl;
-        this.apiKey = ApiKey;
+        this.BridgeUrl = host;
+        this.BridgeUser = apiKey;
         this.initStarted = false;
 
     }
@@ -47,15 +47,18 @@ export default class DeconzIntegration extends Integration {
                         .then(fullConfiguration => {
                             self.BridgeApi = new DeconzBridgeApi(self.BridgeUrl, self.BridgeUser);
 
+                            let configPromise = self.BridgeApi.getConfiguration();
+
                             let lightsPromise = self.BridgeApi.getLights();
                             let groupsPromise = self.BridgeApi.getGroups();
                             let sensorsPromise = self.BridgeApi.getSensors();
 
-                            Promise.all([lightsPromise, groupsPromise, sensorsPromise])
+                            Promise.all([lightsPromise, groupsPromise, sensorsPromise, configPromise])
                                 .then(result => {
                                     const lights = result[0];
                                     const groups = result[1];
                                     const sensors = result[2];
+                                    self.BridgeConfiguration = result[3];
 
                                     self.lights = lights;
                                     self.groups = groups;
@@ -74,25 +77,8 @@ export default class DeconzIntegration extends Integration {
                                                 .then(() => {
                                                     self.addScenesFromGroups(groups)
                                                         .then(result => {
-                                                            // console.log("Phillips Hue Integration initialized successfully. Bridge IP: " + self.BridgeUrl);
                                                             // //subscribe to eventstream
-                                                            // const eventSource = self.BridgeApi.getEventSource();
-                                                            // const eventStreamHandler = new EventStreamHandler(self);
-                                                            // eventSource.addEventListener('update', (event) => {
-                                                            //     eventStreamHandler.update(event)
-                                                            // });
-                                                            // eventSource.addEventListener('add', (event) => {
-                                                            //     eventStreamHandler.add(event)
-                                                            // });
-                                                            // eventSource.addEventListener('delete', (event) => {
-                                                            //     eventStreamHandler.delete(event)
-                                                            // });
-                                                            // eventSource.addEventListener('error', (event) => {
-                                                            //     eventStreamHandler.error(event)
-                                                            // });
-                                                            // eventSource.addEventListener('message', (event) => {
-                                                            //     eventStreamHandler.message(event)
-                                                            // });
+                                                            const eventStreamHandler = new EventStreamHandler(self, self.BridgeUrl, self.BridgeConfiguration.websocketport)
                                                             resolve(self);
                                                         })
                                                         .catch(err => {
@@ -203,6 +189,9 @@ export default class DeconzIntegration extends Integration {
             let lightPromises = [];
             let lightIds = Object.keys(lightsObject);
             lightIds.forEach(function (id) {
+                /**
+                 * @type {DeconzNativeLight}
+                 */
                 const light = lightsObject[id];
                 if(light === undefined) return;
                 //create unique id based on key and some other props that should not change
@@ -245,6 +234,9 @@ export default class DeconzIntegration extends Integration {
             let promises = [];
             let groupIds = Object.keys(groupsObject);
             groupIds.forEach(function (id) {
+                /**
+                 * @type {DeconzNativeLightGroup}
+                 */
                 const group = groupsObject[id];
                 if(group === undefined) return;
                 //create unique id based on key and some other props that should not change
@@ -256,7 +248,8 @@ export default class DeconzIntegration extends Integration {
                     bridgeApi: self.BridgeApi,
                     nativeObject: group,
                     identifier: group.name,
-                    groupId: group.id,
+                    deconzGroupId: id,
+                    groupId: id,
                     uniqueId: uniqueId
                 })
                 self.groupObjects.push(deconzGroup)
@@ -344,6 +337,28 @@ export default class DeconzIntegration extends Integration {
                     reject(err);
                 })
         })
+    }
+
+    getResource(uniqueId){
+        //check lights
+        let resources = [...this.lightObjects, ...this.groupObjects, ...this.sceneObjects];
+        return resources.find(o => o.uniqueId === uniqueId);
+    }
+
+    getLight(lightId){
+        return this.lightObjects.find(o => o.deconzLightId === lightId);
+    }
+
+    getGroup(groupId){
+        return this.groupObjects.find(o => o.deconzGroupId === groupId);
+    }
+
+    getScene(sceneId){
+        return this.sceneObjects.find(o => o.deconzSceneId === sceneId);
+    }
+
+    getSensor(sensorId){
+        return this.sensorObjects.find(o => o.deconzGroupId === sensorId);
     }
 }
 

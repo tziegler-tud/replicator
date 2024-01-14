@@ -1,6 +1,34 @@
 /**
  * @class LightGroup
+ * @property {string} uniqueId
+ * @property {string} id internal database id
+ * @property {Light[]} lights
+ * @property {LightScene[]} scenes
+ * @property {LightGroupState} state
  */
+
+/**
+ * @typedef LightGroupState
+ * @property {boolean} on
+ * @property {number} brightness
+ * @property {number} hue
+ * @property {number} sat
+ * @property {number} color_temperature
+ * @property {string} action
+ * @property {LightColorObject} color
+ */
+
+/**
+ * @typedef LightGroupStateUpdate
+ * @property {boolean} [on]
+ * @property {number} [brightness]
+ * @property {number} [hue]
+ * @property {number} [sat]
+ * @property {number} [color_temperature]
+ * @property {string} [action]
+ * @property {LightColorObject} [color]
+ */
+
 import Light from "./Light.js";
 import LightScene from "./LightScene.js";
 
@@ -9,6 +37,7 @@ export default class LightGroup extends Light {
         super({uniqueId: uniqueId, identifier: identifier, nativeObject: nativeObject, configuration: configuration});
         this.lights = [];
         this.scenes = [];
+        this.integration = "default";
     }
 
     get(){

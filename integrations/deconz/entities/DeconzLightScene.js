@@ -9,16 +9,17 @@ export default class DeconzLightScene extends LightScene {
         this.nativeObject = nativeObject;
         this.groupUniqueId = deconzGroup.uniqueId;
         this.deconzGroupId = deconzGroup.nativeObject.id;
+        this.deconzSceneId = sceneId;
         this.group = deconzGroup;
     }
 
     activate(){
-        if(this.groupId === undefined || this.sceneId === undefined) {
-            console.error("Failed to activate scene: GroupId or SceneId not set. GroupId: " + this.groupId + " , SceneId: "+ this.sceneId);
+        if(this.deconzGroupId === undefined || this.sceneId === undefined) {
+            console.error("Failed to activate scene: GroupId or SceneId not set. GroupId: " + this.deconzGroupId + " , SceneId: "+ this.sceneId);
             return new Promise((resolve, reject) => {
                 reject();
             })
         }
-        this.bridgeApi.activateScene(this.deconzGroupId, this.uniqueId);
+        return this.bridgeApi.activateScene(this.deconzGroupId, this.sceneId);
     }
 }
