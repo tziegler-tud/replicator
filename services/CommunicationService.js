@@ -76,7 +76,7 @@ class CommunicationService extends Service {
             else self.selectNetworkInterface(self.networkAddresses.internal[0]);
 
             //start socket.io server
-            const io = new Server(self.server.endpoints.tcp.port, { /* options */ });
+            const io = new Server(self.server.endpoints.tcp.port);
 
             io.use(self.tcpClientAuthHandler);
 
@@ -239,7 +239,7 @@ class CommunicationService extends Service {
         const commandClientId = commandData.clientId;
 
         return new Promise(function(resolve, reject){
-            if(!socket.attachedClient.id === commandClientId) {
+            if(!socket.attachedClient.clientId === commandClientId) {
                 //missmatch. Something is wrong
                 let err = new TcpError(tcpResponse.tpcResponse.ARGUMENTS.INVALIDCLIENTID);
                 socket.emit("error", err);

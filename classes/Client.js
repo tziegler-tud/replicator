@@ -343,7 +343,7 @@ export default class Client {
      * @returns {Promise<Response>}
      */
     sendHttp({path="/", method="GET", data={}, options={}, protocol="http://", port=this.httpPort}){
-        const url = protocol + this.url + port ? ":"+port: "" + path;
+        const url = protocol + this.url + (port ? ":"+port: "") + path;
         let fetchOptions = options;
         fetchOptions.method = method;
         fetchOptions.body = JSON.stringify(data);
