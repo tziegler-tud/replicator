@@ -1,6 +1,7 @@
 export default {
     DASHBOARD: "DashboardModule",
     CLIENTS: "ClientModule",
+    CLIENTDETAILS: "ClientDetailsModule",
     INTENTS: "IntentModule",
     INTENTHANDLERS: "IntentHandlerModule",
     IntentHandlerDetails: "IntentHandlerDetailsModule",
