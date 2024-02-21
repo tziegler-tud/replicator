@@ -50,7 +50,7 @@ function getLightById(req, res, next) {
 
 function setLightState(req, res, next){
     const id = req.params.lightId;
-    LightsService.setLightProperty(id, req.body)
+    LightsService.setLightState(id, req.body)
         .then(result => {
             res.json(result)
         })
@@ -87,15 +87,14 @@ function getGroupById(req, res, next) {
 }
 
 function setGroupState(req, res, next){
-    const id = req.params.lightId;
-    res.send("not implemented");
-    // LightsService.setGroupProperty(id, req.body)
-    //     .then(result => {
-    //         res.json(result)
-    //     })
-    //     .catch(err => {
-    //         next(err);
-    //     })
+    const id = req.params.groupId;
+    LightsService.setGroupState(id, req.body)
+        .then(result => {
+            res.json(result)
+        })
+        .catch(err => {
+            next(err);
+        })
 }
 
 

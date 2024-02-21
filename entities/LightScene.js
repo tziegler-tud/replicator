@@ -18,6 +18,20 @@ export default class LightScene {
         return this;
     }
 
+    getJson(){
+        return {
+            id: this.id,
+            uniqueId: this.uniqueId,
+            identifier: this.identifier,
+            nativeObject: this.nativeObject,
+            lights: this.lights,
+            scenes: this.scenes,
+            groups: this.groups,
+            settings: this.settings,
+            properties: this.properties,
+        }
+    }
+
     getGroups(){
         return this.groups;
     }

@@ -18,6 +18,7 @@
     "@material/fab": "^14.0.0",
     "@material/icon-button": "^14.0.0",
     "@material/list": "^14.0.0",
+    "@material/ripple": "^14.0.0",
     "@material/snackbar": "^14.0.0",
     "@material/switch": "^14.0.0",
     "@material/tab-bar": "^14.0.0",

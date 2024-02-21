@@ -1,6 +1,104 @@
 import Light from "../../../entities/Light.js";
 import ColorParser from "../../../helpers/colorParser.js";
 
+
+/**
+ * @typedef HueOnObject
+ * @property {boolean} on
+ */
+/**
+ * @typedef HueDimmingObject
+ * @property {number} brightness
+ * @property {number} min_dim_level
+ */
+
+/**
+ * @typedef HueColorTemperatureObject
+ * @property {number} mirek
+ * @property {boolean} mirek_valid
+ * @property {object} mirek_schema
+ * @property {number} mirek_schema.mirek_minimum
+ * @property {number} mirek_schema.mirek_maximum
+ */
+
+/**
+ * @typedef HueColorObject
+ * @property {object} xy
+ * @property {number} xy.x
+ * @property {number} xy.y
+ * @property {object} gamut
+ * @property {object} gamut.red
+ * @property {number} gamut.red.x
+ * @property {number} gamut.red.y
+ * @property {object} gamut.green
+ * @property {number} gamut.green.x
+ * @property {number} gamut.green.y
+ * @property {object} gamut.blue
+ * @property {number} gamut.blue.x
+ * @property {number} gamut.blue.y
+ * @property {string} gamut_type
+ */
+
+/**
+ * @typedef HueNativeLight
+ * @property {string} type
+ * @property {string} id
+ * @property {string} id_v1
+ * @property {object} owner
+ * @property {string} owner.rid
+ * @property {string} owner.rtype
+ * @property {object} metadata
+ * @property {string} metadata.name
+ * @property {string} metadata.archetype
+ * @property {number} fixed_mired
+ * @property {HueOnObject} on
+ * @property {HueDimmingObject} dimming
+ * @property {HueColorTemperatureObject} color_temperature
+ * @property {HueColorObject} color
+ * @property {object} dynamics
+ * @property {string} dynamics.status
+ * @property {string[]} dynamics.status_values
+ * @property {number} dynamics.speed
+ * @property {boolean} dynamics.speed_valid
+ * @property {object} alert
+ * @property {string[]} alert.action_values
+ *
+ */
+
+
+/**
+ * @typedef HueNativeLightStateUpdate
+ * @property {string} type
+ * @property {object} metadata
+ * @property {string} metadata.name
+ * @property {string} metadata.archetype
+ * @property {object} identify
+ * @property {string} identify.action
+ * @property {object} on
+ * @property {boolean} on.on
+ * @property {object} dimming
+ * @property {number} dimming.brightness
+ * @property {object} dimming_delta
+ * @property {string} dimming_delta.action one of up, down, stop
+ * @property {number} dimming_delta.brightness_delta Brightness percentage of full-scale increase delta to current dimlevel. Clip at Max-level or Min-level.
+ * @property {object} color_temperature
+ * @property {number} color_temperature.mirek color temperature in mirek or null when the light color is not in the ct spectrum
+ * @property {object} color_temperature_delta
+ * @property {string} color_temperature_delta.action one of up, down, stop
+ * @property {number} color_temperature_delta.mirek_delta Mirek delta to current mirek. Clip at mirek_minimum and mirek_maximum of mirek_schema
+ * @property {object} color
+ * @property {object} color.xy
+ * @property {number} color.xy.x
+ * @property {number} color.xy.y
+ * @property {object} dynamics
+ * @property {number} dynamics.duration
+ * @property {number} dynamics.speed
+ * @property {object} alert
+ * @property {string} alert.action
+ *
+ */
+
+
 export default class HueLight extends Light {
     constructor({bridgeApi, hueObject, uniqueId, lightId, identifier="MyHueLight", integration}={}){
         super({uniqueId: uniqueId, identifier: identifier, nativeObject: hueObject, configuration: {
@@ -18,6 +116,10 @@ export default class HueLight extends Light {
     }
 
     get(){
+        return this;
+    }
+
+    getJson(){
         return {
             id: this.id,
             uniqueId: this.uniqueId,
@@ -30,6 +132,11 @@ export default class HueLight extends Light {
         }
     }
 
+    /**
+     *
+     * @param hueObject {HueNativeLight}
+     * @returns {LightState}
+     */
     parseHueToState(hueObject){
         return {
             on: hueObject.on.on,
@@ -40,12 +147,23 @@ export default class HueLight extends Light {
         }
     }
 
+    /**
+     *
+     * @param hueObject {HueNativeLight}
+     * @returns {LightState}
+     */
+
     parseHueChangeToState(hueObject){
         let stateChange = Object.assign(this.nativeObject, hueObject);
         return this.parseHueToState(stateChange)
 
     }
 
+    /**
+     *
+     * @param state {LightStateUpdate}
+     * @returns {HueNativeLightStateUpdate}
+     */
     parseStateChangeToHue(state){
         let oj = {}
         if(state.on !== undefined) oj.on = {on: state.on};
@@ -86,6 +204,11 @@ export default class HueLight extends Light {
         return oj;
     }
 
+    /**
+     *
+     * @param state {LightState}
+     * @returns {HueNativeLightStateUpdate}
+     */
     parseStateToHue(state){
         const xyBri = this.colorParser.hsvToXYBri({h: state.hue, s: state.sat, v: state.brightness});
         return {
@@ -104,6 +227,11 @@ export default class HueLight extends Light {
         }
     }
 
+    /**
+     *
+     * @param hue {HueNativeLight}
+     * @returns {{}|{hsv: {h, s, v: number}, rgb: {r: number, b: number, g: number}}}
+     */
     parseColor(hue){
         if(hue.color) {
             if(hue.color.xy) {
@@ -128,7 +256,7 @@ export default class HueLight extends Light {
 
     /**
      *
-     * @param state
+     * @param state {LightState}
      * @returns {Promise<void>}
      */
     async setState(state){
@@ -137,7 +265,7 @@ export default class HueLight extends Light {
 
     /**
      *
-     * @returns {Promise<object>}
+     * @returns {Promise<LightState>}
      */
     async getState(){
         this.nativeObject = await this.bridgeApi.getLightState(this.lightId);
@@ -165,6 +293,15 @@ export default class HueLight extends Light {
 
         return this.setState({on: !state.on})
     };
+
+    async setColor({h,s,v}){
+        return this.setState({color: {hsv: {h:h,s:s,v:v}}})
+    }
+
+    async setColorRgb({r,g,b}){
+        return this.setState({color: {rgb: {r:r, g:g, b:b}}})
+
+    }
 
     /**
      * relative brightness change. negative values to decrease
@@ -198,21 +335,6 @@ export default class HueLight extends Light {
     alert(){
         return this.setState({
             action: "breathe",
-        })
-    }
-
-    setColor({h,s,v}){
-        const xyBri = this.colorParser.hsvToXYBri({h:h, s:s, v:v});
-        this.setState({
-            dimming: {
-                brightness: xyBri.bri,
-            },
-            color: {
-                xy: {
-                    x: xyBri.x,
-                    y: xyBri.y,
-                }
-            }
         })
     }
 }

@@ -87,9 +87,10 @@ export default class ColorParser {
      * @param r {Number} red value, 0 - 255
      * @param g {Number} green value, 0 - 255
      * @param b {Number} blue value, 0 - 255
-     * @returns {{s, v, h: number}}
+     * @param maxBrightness {Number}
+     * @returns {{h, s, v : number}} h 0-360, s: 0-100, v: 0 - 100
      */
-    rgbToHSV ({r=0,g=0,b=0}={}) {
+    rgbToHSV ({r=0,g=0,b=0}={}, maxBrightness=this.maxBrightness) {
         let rabs, gabs, babs, rr, gg, bb, h, s, v, diff, diffc, percentRoundFn;
         rabs = r / 255;
         gabs = g / 255;
@@ -97,7 +98,7 @@ export default class ColorParser {
         v = Math.max(rabs, gabs, babs),
             diff = v - Math.min(rabs, gabs, babs);
         diffc = c => (v - c) / 6 / diff + 1 / 2;
-        percentRoundFn = num => Math.round(num * 100) / 100;
+        percentRoundFn = (num) => Math.round(num * 100) / 100;
         if (diff == 0) {
             h = s = 0;
         } else {
@@ -123,6 +124,31 @@ export default class ColorParser {
             h: Math.round(h * 360),
             s: percentRoundFn(s * 100),
             v: percentRoundFn(v * 100)
+        };
+    }
+
+    /**
+     *
+     * @param r {Number} red value, 0 - 255
+     * @param g {Number} green value, 0 - 255
+     * @param b {Number} blue value, 0 - 255
+     * @param maxBrightness {Number}
+     * @returns {{h, s, v : number}} h: 0 - 360, s: 0-255, v: 0-maxBrightness
+     */
+    rgbToHSV2({r,g,b, maxBrightness = this.maxBrightness}) {
+        r  = r/255
+        g  = g/255
+        b  = b/255
+
+        let v=Math.max(r,g,b);
+        let c=v-Math.min(r,g,b);
+        let h= c && ((v==r) ? (g-b)/c : ((v==g) ? 2+(b-r)/c : 4+(r-g)/c));
+        const res_s = this.normalize({max: 255, value: (v&&c/v)})
+        const res_v = this.normalize({max: maxBrightness, value: v});
+        return {
+            h: 60*(h<0?h+6:h),
+            s: res_s,
+            v: res_v
         };
     }
 
@@ -161,5 +187,22 @@ export default class ColorParser {
 
     hsvToXYBri ({h=0, s=0, v=this.maxBrightness}={}){
         return this.rgbToXYBri(this.hsvToRGB({h,s,v}));
+    }
+
+    /**
+     *
+     * @param min {number}
+     * @param max {number}
+     * @param value {number} percent value
+     * @returns {Integer}
+     */
+    normalize({min=0, max=255, value}){
+        if(value < 0) return min;
+        if(value > 1) return max;
+        const span = max - min;
+        let res = Math.round(span * value) + min;
+        if(res < min) res = min;
+        if(value > max) res = max;
+        return res;
     }
 }

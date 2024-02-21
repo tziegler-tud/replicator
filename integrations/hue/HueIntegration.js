@@ -2,16 +2,17 @@ import https from 'https';
 import http from 'http';
 import fetch from 'node-fetch';
 import EventSource from "eventsource";
-import Integration from "../Integration.js";
+import Integration, {httpGet, httpsGet} from "../Integration.js";
 import LightsService from "../../services/LightsService.js";
 
 import HueLight from "./entities/HueLight.js"
 import GroupedLight from "./entities/GroupedLight.js"
 import HueLightGroup from "./entities/HueLightGroup.js"
 import HueLightScene from "./entities/HueLightScene.js"
+import EventStreamHandler from "./EventStreamHandler.js";
 
 export default class HueIntegration extends Integration {
-    constructor({BridgeUrl, BridgeUser}={}){
+    constructor({host, port=80, apiKey}={}){
         super();
         this.uniqueName = "hue";
         this.readableName = "Phillips Hue Integration";
@@ -21,6 +22,7 @@ export default class HueIntegration extends Integration {
 
             }
         }
+        this.port = port;
         this.locations = [];
         this.lights = [];
         this.groups = [];
@@ -32,8 +34,8 @@ export default class HueIntegration extends Integration {
         this.groupObjects = [];
         this.sceneObjects = [];
 
-        this.BridgeUrl = BridgeUrl;
-        this.BridgeUser = BridgeUser;
+        this.BridgeUrl = host;
+        this.BridgeUser = apiKey;
         this.initStarted = false;
 
     }
@@ -107,11 +109,21 @@ export default class HueIntegration extends Integration {
                                                             //subscribe to eventstream
                                                             const eventSource = self.BridgeApi.getEventSource();
                                                             const eventStreamHandler = new EventStreamHandler(self);
-                                                            eventSource.addEventListener('update', (event)=>{eventStreamHandler.update(event)});
-                                                            eventSource.addEventListener('add', (event)=>{eventStreamHandler.add(event)});
-                                                            eventSource.addEventListener('delete', (event)=>{eventStreamHandler.delete(event)});
-                                                            eventSource.addEventListener('error', (event)=>{eventStreamHandler.error(event)});
-                                                            eventSource.addEventListener('message', (event)=>{eventStreamHandler.message(event)});
+                                                            eventSource.addEventListener('update', (event) => {
+                                                                eventStreamHandler.update(event)
+                                                            });
+                                                            eventSource.addEventListener('add', (event) => {
+                                                                eventStreamHandler.add(event)
+                                                            });
+                                                            eventSource.addEventListener('delete', (event) => {
+                                                                eventStreamHandler.delete(event)
+                                                            });
+                                                            eventSource.addEventListener('error', (event) => {
+                                                                eventStreamHandler.error(event)
+                                                            });
+                                                            eventSource.addEventListener('message', (event) => {
+                                                                eventStreamHandler.message(event)
+                                                            });
                                                             resolve(self);
                                                         })
                                                         .catch(err => {
@@ -171,62 +183,14 @@ export default class HueIntegration extends Integration {
         });
     }
 
-    addGroupsV1(){
-        let self = this;
-        return new Promise(function(resolve, reject){
-            LightsService.init.then(() => {
-                let promises = [];
-                Object.keys(self.groups).forEach(function (key) {
-                    const group = self.groups[key];
-                    //create unique id based on key and some other props that should not change
-                    const uniqueId = "HueGroup-" + group.type + "-" + key;
-                    group.uniqueId = uniqueId;
-                    let hueGroup = new HueLightGroup({
-                        bridgeApi: self.BridgeApi,
-                        hueState: group.state,
-                        identifier: group.name,
-                        groupId: key,
-                        uniqueId: uniqueId,
-                    })
-                    promises.push(LightsService.addGroup(hueGroup))
-                })
-                Promise.all(promises)
-                    .then(result => {
-                        resolve(result)
-                    })
-                    .catch(err => {
-                        reject(err);
-                    })
-            })
-        })
-    }
-
-    addLightsToGroupsV1(){
-        let self = this;
-        return new Promise(function(resolve, reject){
-            Object.keys(self.groups).forEach(function(key){
-                const group = self.groups[key];
-                const uniqueId = group.uniqueId;
-                const array = group.lights.map(lightId => {
-                    return self.lights[lightId].uniqueid
-                })
-                LightsService.addLightsToGroup({groupUniqueId: uniqueId, lightUniqueIdArray: array})
-                    .then(result => {
-                        resolve(result);
-                    })
-                    .catch(err => {
-                        reject(err);
-                    })
-            })
-        })
-
-
-    }
-
     getResource(uniqueId){
         //check lights
         let resources = [...this.lightObjects, ...this.groupObjects, ...this.sceneObjects];
         return resources.find(o => o.uniqueId === uniqueId);
+    }
+
+    addSensors(sensorsObject){
+
     }
     addLights(lightsArray) {
         let self = this;
@@ -546,7 +510,6 @@ class BridgeApiV2 {
             op.headers = Object.assign(op.headers, postHeaders);
             op.method = "PUT";
             op.body = JSON.stringify(data);
-            console.log("sending request: " + path + "\n" + op.body)
             fetch(self.address + path, op)
                 .then(response => {
                     if (response.ok) {
@@ -748,231 +711,6 @@ class BridgeApiV2 {
     }
 }
 
-class EventStreamHandler {
-    constructor(integration){
-        this.integration = integration;
-    }
-    add(event){
-        this.log(event)
-    }
-    update(event){
-        this.log(event)
-    }
-    delete(event){
-        this.log(event)
-    }
-    error(event){
-        this.log(event)
-    }
-    message(event){
-        // this.log(event);
-        const data = JSON.parse(event.data);
-        data.forEach(event => {
-            let hueEvent = new HueEvent(event);
-            switch(hueEvent.type){
-                case "add":
-                    return this.addEvent(hueEvent);
-                case "update":
-                    return this.updateEvent(hueEvent);
-                case "delete":
-                    return this.deleteEvent(hueEvent);
-                case "error":
-                default:
-                    return this.errorEvent(hueEvent);
-            }
-        })
-    }
-    log(event){
-        console.log("HueIntegration: Received event: Type: " + event.type + " data: " + event.data.toString());
-    }
-
-    addEvent(hueEvent){
-        console.log("HueIntegration: something was added!");
-    }
-    updateEvent(hueEvent){
-        const self = this;
-        //identify updated resources
-        const modifiedResources = hueEvent.getModifiedResources();
-        //get resources
-        if(modifiedResources.length > 0){
-            console.log("HueIntegration: "+ modifiedResources.length + " resources were updated!")
-            modifiedResources.forEach(resource => {
-                let entity = self.integration.getResource(resource.uniqueId);
-                if(entity) {
-                    entity.setInternalState(resource.data)
-                }
-            })
-        }
-    }
-    deleteEvent(hueEvent){
-        console.log("HueIntegration: something was deleted!")
-        // return this.integration.reload();
-    }
-    errorEvent(hueEvent){
-        console.log("HueIntegration: Error received:");
-        this.log(hueEvent);
-
-    }
-}
-
-class HueEvent{
-    constructor(eventData){
-        this.id = eventData.id;
-        this.type = eventData.type;
-        this.data = eventData.data;
-        this.creationTime = eventData.creationTime;
-    }
-
-    getModifiedResources(){
-        let resources = [];
-        this.data.forEach(dataset => {
-            resources.push({
-                type: dataset.type,
-                uniqueId: dataset.id,
-                data: dataset,
-            });
-        })
-        return resources;
-    }
-}
-
-
-// class BridgeApi {
-//     constructor(url, user){
-//         this.url = url;
-//         this.user = user;
-//     }
-//     get(path){
-//         let self = this;
-//         return new Promise(function(resolve, reject){
-//             let httpUrl = "http://" + self.url + "/api/" + self.user + "/" + path;
-//             http.get(httpUrl, res => {
-//                 const { statusCode } = res;
-//                 const contentType = res.headers['content-type'];
-//
-//                 let error;
-//                 // Any 2xx status code signals a successful response but
-//                 // here we're only checking for 200.
-//                 if (statusCode !== 200) {
-//                     error = new Error('Request Failed.\n' +
-//                         `Status Code: ${statusCode}`);
-//                 } else if (!/^application\/json/.test(contentType)) {
-//                     error = new Error('Invalid content-type.\n' +
-//                         `Expected application/json but received ${contentType}`);
-//                 }
-//                 if (error) {
-//                     console.error(error.message);
-//                     // Consume response data to free up memory
-//                     res.resume();
-//                     reject(e);
-//                 }
-//
-//                 res.setEncoding('utf8');
-//                 let rawData = '';
-//                 res.on('data', (chunk) => { rawData += chunk; });
-//                 res.on('end', () => {
-//                     try {
-//                         const parsedData = JSON.parse(rawData);
-//                         resolve(parsedData);
-//                     } catch (e) {
-//                         console.error(e.message);
-//                         reject(e);
-//                     }
-//                 });
-//             }).on('error', (e) => {
-//                 console.error(`Got error: ${e.message}`);
-//                 reject(e);
-//             });
-//         })
-//     }
-//     post(path, data){
-//         let self = this;
-//         return new Promise(function(resolve, reject){
-//             let reqData = JSON.stringify(data);
-//             let options = {method: "POST"}
-//             const req = http.request("http://" + self.url + "/api/" + user + "/" + path, options,(res) => {
-//                 console.log(`STATUS: ${res.statusCode}`);
-//                 console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
-//                 res.setEncoding('utf8');
-//                 res.on('data', (chunk) => {
-//                     console.log(`BODY: ${chunk}`);
-//                 });
-//                 res.on('end', () => {
-//                     console.log('No more data in response.');
-//                 });
-//             });
-//
-//             req.on('error', (e) => {
-//                 console.error(`problem with request: ${e.message}`);
-//             });
-//             // Write data to request body
-//             req.write(reqData);
-//             req.end();
-//         })
-//     }
-//     put(path, data){
-//         let self = this;
-//         return new Promise(function(resolve, reject){
-//             let reqData = JSON.stringify(data);
-//             let options = {method: "PUT"}
-//             const req = http.request("http://" + self.url + "/api/" + self.user + "/" + path, options,(res) => {
-//                 console.log(`STATUS: ${res.statusCode}`);
-//                 console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
-//                 res.setEncoding('utf8');
-//                 res.on('data', (chunk) => {
-//                     console.log(`BODY: ${chunk}`);
-//                 });
-//                 res.on('end', () => {
-//                     console.log('No more data in response.');
-//                 });
-//             });
-//
-//             req.on('error', (e) => {
-//                 console.error(`problem with request: ${e.message}`);
-//             });
-//             // Write data to request body
-//             req.write(reqData);
-//             req.end();
-//         })
-//     }
-//     getGroupsArray(){
-//         let self = this;
-//         return new Promise(function(resolve, reject) {
-//             self.get("groups")
-//                 .then(groupsObject => {
-//                     let groupsArray = [];
-//                     Object.keys(groupsObject).forEach(function (key) {
-//                         groupsArray.push({id: key, group: groupsObject[key]});
-//                     })
-//                     resolve(groupsArray);
-//                 })
-//                 .catch(e => {
-//                     reject(e);
-//                 })
-//         })
-//     }
-//     getLightState(lightId) {
-//         return this.get("lights/"+lightId);
-//     }
-//     setLightState(lightId, state) {
-//         return this.put("lights/"+lightId + "/state", state);
-//     }
-//
-//     getGroupState(groupId) {
-//         return this.get("groups/"+groupId);
-//     }
-//
-//     setGroupState(groupId, state) {
-//         return this.put("groups/"+groupId + "/action", state);
-//     }
-//     getScenes(){
-//         return this.get("scenes");
-//     }
-//     setGroupScene(groupId, sceneId) {
-//         return this.put("groups/"+groupId + "/action", sceneId)
-//     }
-// }
-
 function checkBridge(url) {
     let self = this;
     return new Promise(function(resolve, reject){
@@ -1062,141 +800,7 @@ function discoverBridgeIp(){
     })
 }
 
-function httpsGet(url){
-    return new Promise(function(resolve, reject){
-        https.get("https://" + url, res => {
-            const { statusCode } = res;
-            const contentType = res.headers['content-type'];
 
-            let error;
-            // Any 2xx status code signals a successful response but
-            // here we're only checking for 200.
-            if (statusCode !== 200) {
-                error = new Error('Request Failed.\n' +
-                    `Status Code: ${statusCode}`);
-            } else if (!/^application\/json/.test(contentType)) {
-                error = new Error('Invalid content-type.\n' +
-                    `Expected application/json but received ${contentType}`);
-            }
-            if (error) {
-                console.error(error.message);
-                // Consume response data to free up memory
-                res.resume();
-                reject(e);
-            }
-
-            res.setEncoding('utf8');
-            let rawData = '';
-            res.on('data', (chunk) => { rawData += chunk; });
-            res.on('end', () => {
-                try {
-                    const parsedData = JSON.parse(rawData);
-                    //try to find local IP adress
-                    resolve(parsedData);
-                } catch (e) {
-                    console.error(e.message);
-                    reject(e);
-                }
-            });
-        }).on('error', (e) => {
-            console.error(`Got error: ${e.message}`);
-            reject(e);
-        });
-    })
-}
-
-
-function httpGet(url){
-    return new Promise(function(resolve, reject){
-        let httpUrl = "http://" + url;
-        http.get(httpUrl, res => {
-            const { statusCode } = res;
-            const contentType = res.headers['content-type'];
-
-            let error;
-            // Any 2xx status code signals a successful response but
-            // here we're only checking for 200.
-            if (statusCode !== 200) {
-                error = new Error('Request Failed.\n' +
-                    `Status Code: ${statusCode}`);
-            } else if (!/^application\/json/.test(contentType)) {
-                error = new Error('Invalid content-type.\n' +
-                    `Expected application/json but received ${contentType}`);
-            }
-            if (error) {
-                console.error(error.message);
-                // Consume response data to free up memory
-                res.resume();
-                reject(e);
-            }
-
-            res.setEncoding('utf8');
-            let rawData = '';
-            res.on('data', (chunk) => { rawData += chunk; });
-            res.on('end', () => {
-                try {
-                    const parsedData = JSON.parse(rawData);
-                    //try to find local IP adress
-                    resolve(parsedData);
-                } catch (e) {
-                    console.error(e.message);
-                    reject(e);
-                }
-            });
-        }).on('error', (e) => {
-            console.error(`Got error: ${e.message}`);
-            reject(e);
-        });
-    })
-}
-
-function httpRequest(url, options, data){
-    return new Promise(function(resolve, reject){
-        let reqData = JSON.stringify(data);
-        const req = http.request("http://" + url, options,(res) => {
-            console.log(`STATUS: ${res.statusCode}`);
-            console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
-            res.setEncoding('utf8');
-            res.on('data', (chunk) => {
-                console.log(`BODY: ${chunk}`);
-            });
-            res.on('end', () => {
-                console.log('No more data in response.');
-            });
-        });
-
-        req.on('error', (e) => {
-            console.error(`problem with request: ${e.message}`);
-        });
-        // Write data to request body
-        req.write(reqData);
-        req.end();
-    })
-}
-
-function httpsRequest(url, options, data){
-    return new Promise(function(resolve, reject){
-        let reqData = JSON.stringify(data);
-        const req = https.request("https://" + url, options,(res) => {
-            console.log(`STATUS: ${res.statusCode}`);
-            console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
-            res.setEncoding('utf8');
-            res.on('data', (chunk) => {
-                console.log(`BODY: ${chunk}`);
-            });
-            res.on('end', () => {
-                console.log('No more data in response.');
-            });
-        });
-
-        req.on('error', (e) => {
-            console.error(`problem with request: ${e.message}`);
-        });
-        // Write data to request body
-        req.write(reqData);
-        req.end();
-    })
-}
 
 function parseBrightness(percent){
     //percent might be a string with the % symbol at the end. remove it

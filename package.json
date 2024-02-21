@@ -15,6 +15,7 @@
     "@picovoice/pvrecorder-node": "^1.1.0",
     "@picovoice/rhino-node": "^2.1.10",
     "body-parser": "^1.20.2",
+    "colorsys": "^1.0.22",
     "cookie-parser": "~1.4.4",
     "debug": "~4.3.4",
     "eventsource": "^2.0.2",

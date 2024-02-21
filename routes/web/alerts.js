@@ -74,9 +74,9 @@ async function editAction(req, res, next){
     const actionId = req.params.actionId;
 
     const alert = AlertService.getByIdentifier(identifier);
-    const lights = await LightsService.getLights();
-    const lightGroups = await LightsService.getGroups();
-    const scenes = await LightsService.getScenes();
+    const lights = await LightsService.getLights(true);
+    const lightGroups = await LightsService.getGroups(true);
+    const scenes = await LightsService.getScenes(true);
     const skills = SkillService.getAll();
     const entities = {
         lights: lights,
