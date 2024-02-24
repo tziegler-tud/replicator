@@ -8,6 +8,7 @@ import { networkInterfaces } from 'os';
 import Service from "./Service.js";
 import clientService from "./ClientService.js"
 import Client from "../classes/Client.js";
+import {instrument} from "@socket.io/admin-ui";
 
 /**
  * @typedef VoiceCommandObject
@@ -76,9 +77,27 @@ class CommunicationService extends Service {
             else self.selectNetworkInterface(self.networkAddresses.internal[0]);
 
             //start socket.io server
-            const io = new Server(self.server.endpoints.tcp.port);
+            const io = new Server(self.server.endpoints.tcp.port, {
+                cors: {
+                    origin: ["https://admin.socket.io"],
+                    // credentials: true
+                }
+            });
+
+            instrument(io, {
+                auth: false,
+                mode: "development",
+            });
 
             io.use(self.tcpClientAuthHandler);
+
+            io.engine.on("connection_error", (err) => {
+                console.log("Connection error:")
+                console.log(err.req);      // the request object
+                console.log(err.code);     // the error code, for example 1
+                console.log(err.message);  // the error message, for example "Session ID unknown"
+                console.log(err.context);  // some additional error context
+            });
 
             io.on("connection", /** @param socket {IOSocket}*/ function(socket) {
 
@@ -90,7 +109,7 @@ class CommunicationService extends Service {
                     return;
                 }
                 console.log("Client connected: " + client.identifier);
-                socket.on("processCommand", (data) => {
+                socket.on("processCommand", (data, callback) => {
                     self.processClientCommand(socket, data)
                         .then((result)=> {
                             console.log("Successfully processed command obtained from client");
@@ -99,6 +118,7 @@ class CommunicationService extends Service {
                                 error: undefined,
                             }
                             self.tcpSend(socket, "commandSuccessful", data)
+                            callback("got it")
                         })
                         .catch(err => {
                             console.log("Failed to process client command: " + err);
@@ -107,6 +127,8 @@ class CommunicationService extends Service {
                                 error: err,
                             }
                             self.tcpSend(socket, "commandFailed", data)
+                            callback("got it")
+
                         })
                 });
                 socket.on("message", (data) => self.tcpMessage(socket, data));

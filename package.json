@@ -14,6 +14,7 @@
     "@picovoice/porcupine-node": "^2.1.7",
     "@picovoice/pvrecorder-node": "^1.1.0",
     "@picovoice/rhino-node": "^2.1.10",
+    "@socket.io/admin-ui": "^0.5.1",
     "body-parser": "^1.20.2",
     "colorsys": "^1.0.22",
     "cookie-parser": "~1.4.4",
