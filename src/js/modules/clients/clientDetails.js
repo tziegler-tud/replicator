@@ -4,15 +4,16 @@ import Dashboard from "../../classes/dashboard";
 import InteractiveList from "../../components/interactiveList";
 import ComponentObserver from "../../helpers/componentObserver";
 import Snackbar from "../../helpers/snackbar";
+import {MDCDialog} from "@material/dialog";
 
 export default new Module({
     name: "ClientDetailsModule",
     init: function(){
 
         const client = window.page.client;
-        const clientDetails = window.page.clientDetails;
-        const deviceSettings = window.page.deviceSettings;
-        const interfaceSettings = window.page.interfaces;
+        const clientDetails = window.page.clientDetails ?? {};
+        const deviceSettings = window.page.deviceSettings ?? {};
+        const interfaceSettings = window.page.interfaces ?? {};
 
         const snackbar = new Snackbar();
 
@@ -59,6 +60,23 @@ export default new Module({
         catch(e){
             console.log("Failed to initialize TextFields.")
         }
+
+        const dialog = new MDCDialog(document.getElementById("dialog-save"));
+        const textField = new MDCTextField(document.querySelector('.mdc-text-field'));
+        dialog.listen("MDCDialog:closed", (event) => {
+            if(event.detail.action === "save"){
+                const val = document.getElementById("dialog-save-input").value;
+                saveTitle(val)
+                    .then(result => {
+                        location.reload();
+                    })
+            }
+        })
+
+        const editTitleButton = document.getElementById("dashboard-titleEdit-button");
+        editTitleButton.addEventListener("click", function(){
+            if(!dialog.isOpen) dialog.open();
+        })
 
         $(".dashboard-delete-button").click(function(){
             const clientId = $(this).data("id");
@@ -178,6 +196,26 @@ export default new Module({
                 .done(result => {
                     snackbar.show("On-Device settings updated successfully.")
                 })
+        }
+
+        function saveTitle(name){
+            let data = {
+                identifier: name
+            }
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    method: "PUT",
+                    url: "/api/v1/clients/" + client.clientId + "/update",
+                    data: JSON.stringify(data),
+                    contentType: "application/json; charset=UTF-8",
+                    dataType: "json",
+                })
+                    .done(result => {
+                        snackbar.show("Identifier updated successfully.")
+                        resolve();
+                    })
+                    .fail(err => {reject(err)})
+            })
         }
 
         function removeById(id){

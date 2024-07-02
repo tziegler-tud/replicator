@@ -17,6 +17,7 @@ router.post("/:clientId/locations", addClientLocation);
 router.delete("/:clientId/locations", removeClientLocation);
 router.post("/:clientId/settings", setClientDeviceSettings);
 router.post("/:clientId/interface", setClientInterface);
+router.put("/:clientId/update", updateClientInformation);
 router.get("/:clientId", getClientById);
 router.delete("/:clientId", removeClient);
 
@@ -166,6 +167,24 @@ function setClientInterface(req, res, next) {
     clientService.getById(id)
         .then(function(client){
             client.setInterface(type, state)
+                .then(result => {
+                    res.json(result);
+                })
+                .catch(err => {
+                    next(err);
+                })
+        })
+        .catch(err => {
+            next(err);
+        })
+}
+
+function updateClientInformation(req, res, next) {
+    const id = req.params.clientId;
+    const identifier = req.body.identifier;
+    clientService.getById(id)
+        .then(function(client){
+            client.update({identifier: identifier})
                 .then(result => {
                     res.json(result);
                 })

@@ -101,3 +101,36 @@
         </div>
     </div>
 </div>
+
+<div id="dialog-save" class="mdc-dialog">
+    <div class="mdc-dialog__container">
+        <div class="mdc-dialog__surface"
+             role="alertdialog"
+             aria-modal="true"
+             aria-labelledby="my-dialog-title"
+             aria-describedby="my-dialog-content">
+            <h2 class="mdc-dialog__title" id="my-dialog-title">
+                Edit identifier
+            </h2>
+            <div class="mdc-dialog__content" id="my-dialog-content">
+                <label class="mdc-text-field mdc-text-field--filled">
+                    <span class="mdc-text-field__ripple"></span>
+                    <span class="mdc-floating-label" id="dialog-save-label">Identifier</span>
+                    <input id="dialog-save-input" class="mdc-text-field__input" type="text" aria-labelledby="dialog-save-label" value="{{intentHandler.identifier}}">
+                    <span class="mdc-line-ripple"></span>
+                </label>
+            </div>
+            <div class="mdc-dialog__actions">
+                <button type="button" class="mdc-button mdc-dialog__button button--shy" data-mdc-dialog-action="cancel">
+                    <div class="mdc-button__ripple"></div>
+                    <span class="mdc-button__label">Cancel</span>
+                </button>
+                <button type="button" class="mdc-button mdc-dialog__button button--primary" data-mdc-dialog-action="save" data-mdc-dialog-button-default>
+                    <div class="mdc-button__ripple"></div>
+                    <span class="mdc-button__label">Save</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="mdc-dialog__scrim"></div>
+</div>

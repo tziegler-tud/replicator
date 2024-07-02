@@ -221,6 +221,15 @@ export default class Client {
         })
     }
 
+    async update({identifier}){
+        if(identifier) {
+            this.identifier = identifier;
+            await this.saveToDb();
+            return true;
+        }
+        return false;
+    }
+
     /**
      * calls the client api on the requestAuthentication endpoint. Sends serverId and endpoints
      * @returns {Promise<unknown>}
