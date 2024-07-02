@@ -27,10 +27,10 @@ class IntegrationService extends Service{
         })
     }
 
-    async loadIntegration(integrationClass, args){
-        const integration = new integrationClass(args);
+    async loadIntegration(integrationClass, {host, port, apiKey}){
+        const integration = new integrationClass({host, port, apiKey});
         try {
-            const loader = await integration.load(args);
+            const loader = await integration.load({host, port, apiKey});
         }
         catch(e){
             //failed to load integration.

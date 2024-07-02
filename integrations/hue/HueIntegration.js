@@ -58,14 +58,15 @@ export default class HueIntegration extends Integration {
         console.log("Loading " + this.readableName + "...");
         this.Bridge = undefined;
         //try to reach the bridge
-        return new Promise(function(resolve, reject){
-            checkBridge(self.BridgeUrl)
+        return new Promise((resolve, reject) => {
+            this.checkBridge(self.BridgeUrl)
                 .then(checkResult => {
-                    self.BridgeUrl = checkResult.url;
-                    self.Bridge = checkResult.bridge;
+                    this.BridgeUrl = checkResult.url;
+                    this.Bridge = checkResult.bridge;
                     //check user auth
                     authBridge(self.BridgeUrl, self.BridgeUser)
                         .then(result => {
+                            this.log("authorization at Hue Bridge successful.")
                             self.BridgeApi = new BridgeApiV2(self.BridgeUrl, self.BridgeUser);
                             //find lights
                             let lightsPromise = self.BridgeApi.getLights();
@@ -105,7 +106,7 @@ export default class HueIntegration extends Integration {
                                                 .then(()=> {
                                                     self.addScenesToGroups(groups)
                                                         .then(result => {
-                                                            console.log("Phillips Hue Integration initialized successfully. Bridge IP: " + self.BridgeUrl);
+                                                            this.log("Phillips Hue Integration initialized successfully. Bridge IP: " + self.BridgeUrl);
                                                             //subscribe to eventstream
                                                             const eventSource = self.BridgeApi.getEventSource();
                                                             const eventStreamHandler = new EventStreamHandler(self);
@@ -144,6 +145,7 @@ export default class HueIntegration extends Integration {
                                 })
                         })
                         .catch(err => {
+                            this.error("Failed to authorize at Hue Bridge.")
                             reject(errMsg + err)
                         })
                 })
@@ -193,20 +195,19 @@ export default class HueIntegration extends Integration {
 
     }
     addLights(lightsArray) {
-        let self = this;
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) =>  {
             let lightPromises = [];
-            lightsArray.forEach(function (light) {
+            lightsArray.forEach((light)=> {
                 //create unique id based on key and some other props that should not change
                 const uniqueId = light.id;
                 let hueLight = new HueLight({
-                    bridgeApi: self.BridgeApi,
+                    bridgeApi: this.BridgeApi,
                     hueObject: light,
                     identifier: light.metadata.name,
                     lightId: light.id,
                     uniqueId: uniqueId,
                 })
-                self.lightObjects.push(hueLight)
+                this.lightObjects.push(hueLight)
                 LightsService.init.then(() => {
                     lightPromises.push(LightsService.addLight(hueLight))
                 })
@@ -214,7 +215,7 @@ export default class HueIntegration extends Integration {
             LightsService.init.then(() => {
                 Promise.all(lightPromises)
                     .then(result => {
-                        resolve(self.lightObjects);
+                        resolve(this.lightObjects);
                     })
                     .catch(err => {
                         reject(err);
@@ -232,10 +233,10 @@ export default class HueIntegration extends Integration {
     addGroups(groupArray){
         let self = this;
 
-        return new Promise(function (resolve, reject) {
+        return new Promise( (resolve, reject) => {
 
             let promises = [];
-            groupArray.forEach(function (group) {
+            groupArray.forEach((group) => {
                 //create unique id based on key and some other props that should not change
                 const uniqueId = group.id;
                 // find associated grouped_light
@@ -245,7 +246,7 @@ export default class HueIntegration extends Integration {
                 })
 
                 //find associated scenes
-                let scenes = self.scenes.filter(function(scene){
+                let scenes = self.scenes.filter((scene) => {
                     return scene.group.rtype === "room" && scene.group.rid === group.id;
                 })
 
@@ -293,10 +294,10 @@ export default class HueIntegration extends Integration {
     addZones(zoneArray){
         let self = this;
 
-        return new Promise(function (resolve, reject) {
+        return new Promise( (resolve, reject) => {
 
             let promises = [];
-            zoneArray.forEach(function (group) {
+            zoneArray.forEach( (group) => {
                 //create unique id based on key and some other props that should not change
                 const uniqueId = group.id;
                 // find associated grouped_light
@@ -306,7 +307,7 @@ export default class HueIntegration extends Integration {
                 })
 
                 //find associated scenes
-                let scenes = self.scenes.filter(function(scene){
+                let scenes = self.scenes.filter((scene)=>{
                     return scene.group.rtype === "zone" && scene.group.rid === group.id;
                 })
 
@@ -347,9 +348,9 @@ export default class HueIntegration extends Integration {
 
     addScenes(scenesArray) {
         let self = this;
-        return new Promise(function (resolve, reject) {
+        return new Promise( (resolve, reject) => {
             let promises = [];
-            scenesArray.forEach(function (scene) {
+            scenesArray.forEach( (scene) => {
                 //create unique id based on key and some other props that should not change
                 const uniqueId = scene.id;
                 let hueScene = new HueLightScene({
@@ -378,9 +379,9 @@ export default class HueIntegration extends Integration {
 
     addLightsToGroups(groupArray) {
         let self = this;
-        return new Promise(function (resolve, reject) {
+        return new Promise( (resolve, reject) => {
             let p = [];
-            groupArray.forEach(function (group) {
+            groupArray.forEach((group) => {
                 const uniqueId = group.uniqueId;
                 const array = []
                 group.nativeObject.children.forEach(child => {
@@ -419,6 +420,38 @@ export default class HueIntegration extends Integration {
             })
         })
     }
+
+    checkBridge(url) {
+        return new Promise((resolve, reject) => {
+            verifyBridge(url)
+                .then(bridge => {
+                    this.log("Hue Bridge discovered successfully.")
+                    resolve({url: url, bridge: bridge});
+                })
+                .catch(err => {
+                    this.log( "Failed to find Hue Bridge: " + err);
+                    this.warn("Failed to reach Hue Bridge via default IP address. Trying Web lookup...")
+                    //try to find Bridge Ip Address
+                    discoverBridgeIp()
+                        .then(discoveredIpAddress => {
+                            verifyBridge(discoveredIpAddress)
+                                .then(bridge => {
+                                    this.log("Bridge found! IP Adress is: " + discoveredIpAddress);
+                                    this.log("Hue Bridge discovered successfully.")
+                                    resolve({url: url, bridge: bridge});
+                                })
+                                .catch(err => {
+                                    this.log( "Failed to find Hue Bridge: " + err);
+                                    reject(err);
+                                })
+                        })
+                        .catch(err => {
+                            this.warn("Failed to find Hue Bridge. Is your Bridge connected?");
+                            reject(err)
+                        })
+                })
+        })
+    }
 }
 
 class BridgeApiV2 {
@@ -444,7 +477,7 @@ class BridgeApiV2 {
     }
     get(path, options = {}){
         let self = this;
-        return new Promise(function(resolve, reject){
+        return new Promise((resolve,reject)=>{
             let op = Object.assign(options, self.defaultOptions);
             fetch(self.address + path, op)
                 .then(response => {
@@ -473,7 +506,7 @@ class BridgeApiV2 {
 
     post(path, data={}, options = {}){
         let self = this;
-        return new Promise(function(resolve, reject) {
+        return new Promise((resolve,reject)=> {
             const postHeaders = {'Content-Type': 'application/json'};
             let op = Object.assign(options, self.defaultOptions);
             op.headers = Object.assign(op.headers, postHeaders);
@@ -504,7 +537,7 @@ class BridgeApiV2 {
     }
     put(path, data = {}, options = {}){
         let self = this;
-        return new Promise(function(resolve, reject) {
+        return new Promise((resolve,reject)=> {
             const postHeaders = {'Content-Type': 'application/json'};
             let op = Object.assign(options, self.defaultOptions);
             op.headers = Object.assign(op.headers, postHeaders);
@@ -646,7 +679,7 @@ class BridgeApiV2 {
     }
     getLightState(lightId) {
         let self = this;
-        return new Promise(function(resolve, reject){
+        return new Promise((resolve,reject)=>{
             self.get("resource/light/"+lightId)
                 .then(result => {
                     if(result.errors.length > 0) {
@@ -671,7 +704,7 @@ class BridgeApiV2 {
 
     getGroupedLightState(lightId) {
         let self = this;
-        return new Promise(function(resolve, reject){
+        return new Promise((resolve,reject)=>{
             self.get("resource/grouped_light/"+lightId)
                 .then(response => {
                     if(response.errors.length > 0) {
@@ -711,47 +744,15 @@ class BridgeApiV2 {
     }
 }
 
-function checkBridge(url) {
-    let self = this;
-    return new Promise(function(resolve, reject){
-        verifyBridge(url)
-            .then(bridge => {
-                resolve({url: url, bridge: bridge});
-            })
-            .catch(err => {
-                console.warn("Failed to reach Hue Bridge via default IP address. Trying Web lookup...")
-                //try to find Bridge Ip Address
-                discoverBridgeIp()
-                    .then(discoveredIpAddress => {
-                        console.log("Bridge found! IP Adress is: " + discoveredIpAddress);
-                        verifyBridge(discoveredIpAddress)
-                            .then(bridge => {
-                                resolve({url: url, bridge: bridge});
-                            })
-                            .catch(err => {
-                                reject(err);
-                            })
-                    })
-                    .catch(err => {
-                        console.warn("Failed to find Hue Bridge. Is your Bridge connected?");
-                        reject(err)
-                    })
-            })
-    })
-}
-
 function verifyBridge(url){
-    const errMsg = "Failed to find Hue Bridge: ";
-    return new Promise(function(resolve, reject){
+    return new Promise((resolve,reject)=>{
         if(url) {
             httpGet(url + "/api/0/config")
                 .then(result => {
                     //successfull. Return bridge info
-                    console.log("Hue Bridge discovered successfully.")
                     resolve(result);
                 })
                 .catch(error => {
-                    console.log(errMsg);
                     reject(error);
                 })
         }
@@ -760,15 +761,13 @@ function verifyBridge(url){
 }
 
 function authBridge(bridgeUrl, bridgeUser){
-    return new Promise(function(resolve, reject){
+    return new Promise((resolve,reject)=>{
         httpGet(bridgeUrl + "/api/" + bridgeUser)
             .then(result => {
                 //successfull.
-                console.log("authorization at Hue Bridge successful.")
                 resolve(result);
             })
             .catch(error => {
-                console.log("Failed to authorize at Hue Bridge.")
                 reject(error);
             })
     })
@@ -776,7 +775,7 @@ function authBridge(bridgeUrl, bridgeUser){
 
 
 function getBridgeLights(bridgeUrl, bridgeUser){
-    return new Promise(function(resolve, reject){
+    return new Promise((resolve,reject)=> {
         httpGet(bridgeUrl + "/api/" + bridgeUser + "/lights")
             .then(result => {
                 resolve(result);
@@ -788,7 +787,7 @@ function getBridgeLights(bridgeUrl, bridgeUser){
 }
 
 function discoverBridgeIp(){
-    return new Promise(function(resolve, reject){
+    return new Promise((resolve,reject)=> {
         httpsGet("discovery.meethue.com",)
             .then(result=>{
                 if(result[0].internalipaddress) {

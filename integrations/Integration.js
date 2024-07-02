@@ -73,6 +73,18 @@ export default class Integration {
         NOTLOADED: 0,
         LOADED: 1
     }
+
+    log(message){
+        console.log("["+this.readableName+"]: " + message);
+    }
+
+    warn(message){
+        console.log("["+this.readableName+"]: WARNING: " + message);
+    }
+
+    error(message){
+        console.log("["+this.readableName+"]: ERROR: " + message);
+    }
 }
 
 

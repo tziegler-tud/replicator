@@ -3,10 +3,11 @@ import fetch from "node-fetch";
 import EventSource from "eventsource";
 
 export default class DeconzBridgeApi {
-    constructor(url, apiKey){
-        this.url = url;
+    constructor({host, port=80, apiKey}){
+        this.url = host;
+        this.port = port;
         this.apiKey = apiKey;
-        this.address = "http://" + this.url + "/api/" + this.apiKey;
+        this.address = "http://" + this.url + ":" + this.port + "/api/" + this.apiKey;
 
         this.httpAgent = new http.Agent({
             rejectUnauthorized: false,
