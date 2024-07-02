@@ -23,18 +23,21 @@ export default class DeconzIntegration extends Integration {
         this.sceneObjects = [];
         this.sensorObjects = [];
 
-        this.BridgeUrl = host;
-        this.BridgeUser = apiKey;
+        this.host = host;
+        this.apiKey = apiKey;
+
+        this.BridgeUrl = undefined;
+        this.BridgeUser = undefined;
         this.initStarted = false;
 
     }
 
-    async initFunc({BridgeUrl, BridgeUser}) {
+    async initFunc() {
         let self = this;
-        if (BridgeUrl) this.BridgeUrl = BridgeUrl;
-        if (BridgeUser) this.BridgeUser = BridgeUser;
+        this.BridgeUrl = this.host + ":" + this.port;
+        this.BridgeUser = this.apiKey;
         const errMsg = "Failed to load " + this.readableName + ": ";
-        console.log("Loading " + this.readableName + "...");
+        this.log("Loading " + this.readableName + "...");
 
         //try to reach the bridge
         return new Promise((resolve, reject) => {
@@ -45,7 +48,7 @@ export default class DeconzIntegration extends Integration {
                     //check user auth
                     this.authBridge()
                         .then(fullConfiguration => {
-                            self.BridgeApi = new DeconzBridgeApi(self.BridgeUrl, self.BridgeUser);
+                            self.BridgeApi = new DeconzBridgeApi({host: this.host, port: this.port, apiKey: this.apiKey});
 
                             let configPromise = self.BridgeApi.getConfiguration();
 
@@ -78,7 +81,7 @@ export default class DeconzIntegration extends Integration {
                                                     self.addScenesFromGroups(groups)
                                                         .then(result => {
                                                             // //subscribe to eventstream
-                                                            const eventStreamHandler = new EventStreamHandler(self, self.BridgeUrl, self.BridgeConfiguration.websocketport)
+                                                            const eventStreamHandler = new EventStreamHandler(self, this.host, this.BridgeConfiguration.websocketport)
                                                             resolve(self);
                                                         })
                                                         .catch(err => {
@@ -108,14 +111,16 @@ export default class DeconzIntegration extends Integration {
         return new Promise((resolve, reject) => {
             this.verifyBridge(url)
                 .then(bridge => {
+                    this.log("Deconz Bridge discovered successfully.");
                     resolve({url: url, bridge: bridge});
                 })
                 .catch(err => {
-                    console.warn("Failed to reach Hue Bridge via default IP address. Trying Web lookup...")
+                    this.log("Failed to find Deconz Bridge: " + err);
+                    this.log("Failed to reach Hue Bridge via default IP address. Trying Web lookup...")
                     //try to find Bridge Ip Address
                     this.discoverBridgeIp()
                         .then(discoveredIpAddress => {
-                            console.log("Bridge found! IP Adress is: " + discoveredIpAddress);
+                            this.log("Bridge found! IP Adress is: " + discoveredIpAddress);
                             this.verifyBridge(discoveredIpAddress)
                                 .then(bridge => {
                                     resolve({url: url, bridge: bridge});
@@ -133,17 +138,14 @@ export default class DeconzIntegration extends Integration {
     }
 
     verifyBridge(url){
-        const errMsg = "Failed to find Deconz Bridge: ";
         return new Promise(function(resolve, reject){
             if(url) {
                 httpGet(url + "/api/config")
                     .then(result => {
                         //successfull. Return bridge info
-                        console.log("Deconz Bridge discovered successfully.")
                         resolve(result);
                     })
                     .catch(error => {
-                        console.log(errMsg);
                         reject(error);
                     })
             }
@@ -155,11 +157,11 @@ export default class DeconzIntegration extends Integration {
         return new Promise((resolve, reject) => {
             httpGet(this.BridgeUrl + "/api/" + this.BridgeUser)
                 .then(result => {
-                    console.log("authorization at Deconz Bridge successful.")
+                    this.log("authorization at Deconz Bridge successful.")
                     resolve(result);
                 })
                 .catch(error => {
-                    console.log("Failed to authorize at Deconz Bridge.")
+                    this.log("Failed to authorize at Deconz Bridge.")
                     reject(error);
                 })
         })
