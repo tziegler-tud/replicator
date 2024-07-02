@@ -286,7 +286,7 @@ export default class DeconzIntegration extends Integration {
                     const scene = scenes[id];
                     if(scene === undefined) return;
                     //create unique id based on key and some other props that should not change
-                    const uniqueId = "deconzScene--" +scene.id;
+                    const uniqueId = "deconzScene--group-" + group.id + "--scene-" +scene.id;
                     let deconzScene = new DeconzLightScene({
                         bridgeApi: self.BridgeApi,
                         hueObject: scene,
