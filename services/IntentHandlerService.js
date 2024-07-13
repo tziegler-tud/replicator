@@ -190,6 +190,7 @@ class IntentHandlerService extends Service{
                     let rtIntent = self.populateRuntimeIntent(json.intent);
                     json.clients = rtClients;
                     json.intent = rtIntent;
+                    if (!json.variables) json.variables = {};
                     resolve(json);
                 })
                 .catch(err => {

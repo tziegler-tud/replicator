@@ -1,7 +1,7 @@
 <div class="configurationParameter component-container {{componentName}}-component-container dashboard-list-container">
     <ul class="dashboard-list">
         <li class="dashboard-list-item {{#ifEquals data.type "select"}}dashboard-list-item--select{{/ifEquals}}">
-            <label class="configParamter-label dashboard-list-item-entry" for="configParamter-input--{{data.identifier}}">{{data.identifier}}</label>
+            <label class="configParamter-label dashboard-list-item-entry" for="configParamter-input--{{data.identifier}}">{{data.title}}</label>
             {{#switch data.type}}
                 {{#case "text"}}
                     <label class="replicator-form-element mdc-text-field mdc-text-field--filled">

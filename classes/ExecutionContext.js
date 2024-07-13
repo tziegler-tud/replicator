@@ -37,9 +37,13 @@ export default class ExecutionContext {
         let skillRunners = [];
         return new Promise(function(resolve, reject){
             self.intentHandler.actions.forEach(function(action){
+                action = action.toJSON();
                 self.currentAction = action;
                 const skillIdentifier = action.skill.identifier;
-                const config = action.config;
+                let config = {}
+                for (const param of action.configuration.parameters){
+                    config[param.identifier] = param.value ?? param.default;
+                }
 
                 //apply variable mappings
                 const variables = action.variables;

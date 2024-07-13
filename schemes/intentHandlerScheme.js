@@ -76,7 +76,11 @@ var IntentHandlerScheme = new Schema({
             }],
             configuration: {
                 parameters: [{
+                    _id: false,
                     identifier: {
+                        type: String
+                    },
+                    title: {
                         type: String
                     },
                     type: {

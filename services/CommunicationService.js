@@ -118,7 +118,7 @@ class CommunicationService extends Service {
                                 error: undefined,
                             }
                             self.tcpSend(socket, "commandSuccessful", data)
-                            callback("got it")
+                            // callback("got it")
                         })
                         .catch(err => {
                             console.log("Failed to process client command: " + err);
@@ -127,8 +127,7 @@ class CommunicationService extends Service {
                                 error: err,
                             }
                             self.tcpSend(socket, "commandFailed", data)
-                            callback("got it")
-
+                            // callback("got it")
                         })
                 });
                 socket.on("message", (data) => self.tcpMessage(socket, data));

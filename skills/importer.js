@@ -11,7 +11,7 @@ import lightSceneAdjust from "./Light/lightScene/adjust.js";
 import httpRequest from "./Connections/http/httpRequest.js";
 import debugMessage from "./Debug/Debug/debug.js";
 import alertState from "./Alerts/Alerts/state.js";
-import {PlaySoundFileLocal} from "./Client/Sound/sound.js"
+import playSoundLocal from "./Client/Sound/playSoundLocal.js"
 
 class SkillImporter {
     constructor(){
@@ -44,7 +44,7 @@ class SkillImporter {
             },
             Client: {
                 Sound: {
-                    playSoundFileLocal: importSkill(PlaySoundFileLocal),
+                    playSoundFileLocal: importSkill(playSoundLocal),
                 }
             },
             Connections: {

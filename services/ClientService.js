@@ -62,6 +62,10 @@ class ClientService extends Service{
         })
     }
 
+    /**
+     * Returs all clients as run-time objects
+     * @returns {Promise<Client[]>}
+     */
     getAllClients() {
         let self = this;
         return new Promise(function(resolve, reject){
@@ -70,6 +74,10 @@ class ClientService extends Service{
         })
     }
 
+    /**
+     * Returns all clients in serialized format
+     * @returns {Promise<Object[]>}
+     */
     getAllClientsJSON() {
         let self = this;
         return new Promise(function(resolve, reject){
