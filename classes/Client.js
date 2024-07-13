@@ -271,6 +271,9 @@ export default class Client {
         if(this.connection.connected){
             return CommunicationService.tcpSendWithResponse(this.connection.socket, command, payload)
         }
+        else return new Promise((resolve, reject) => {
+            reject("Client not connected");
+        })
     }
 
     /**
