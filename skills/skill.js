@@ -12,6 +12,8 @@ export default class Skill {
         lightGroup: "LightGroup",
         lightScene: "LightScene",
 
+        client: "Client",
+
         Alerts: {
             Alerts: {
                 alert_type: "alert_type",
