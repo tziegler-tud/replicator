@@ -77,10 +77,11 @@ export default new Module({
                 if(index >= 0){
                     const parameter = action.configuration.parameters[index];
                     const type = parameter.type;
+                    const title = parameter.title ?? parameter.identifier;
                     const defaultValue = parameter.default;
                     const value = parameter.value;
                     const options = parameter.options;
-                    const comp = new ConfigurationParameterComponent({element: this, config: {}, data: {type: type, identifier: identifier, default: defaultValue, value: value, options: options}});
+                    const comp = new ConfigurationParameterComponent({element: this, config: {}, data: {type: type, identifier: identifier, title: title, default: defaultValue, value: value, options: options}});
                     comp.render()
                         .then(()=>{
                             //create new observer
