@@ -13,9 +13,8 @@ let PlaySoundFileLocalSingle = new Skill({
     },
     configuration: {
         parameters: [
-            {identifier: "testString", type: "text", default: "test"},
-            {identifier: "testNumber", type: "number", default: 1},
-            {identifier: "testSelect", type: "select", default: "GET", options: [{label: "GET", value: "GET"}, {label: "Post", value:"POST"}]}
+            {identifier: "duration", title: "duration (sec)", type: "number", default: 0},
+            {identifier: "delay", title: "delay (sec)", type: "number", default: 0},
         ]
     },
     handler: async function({handlerArgs, configuration}){
@@ -23,6 +22,8 @@ let PlaySoundFileLocalSingle = new Skill({
         const data = {
             command: "playSoundLocal",
             filename: handlerArgs.filename,
+            duration: configuration.duration,
+            delay: configuration.delay,
         }
         //this was intended to handle multiple clients, but input mapping does not support this right now
         if(handlerArgs.clientIds) {
@@ -49,7 +50,7 @@ let PlaySoundFileLocalAll = new Skill({
     configuration: {
         parameters: [
             {identifier: "duration", title: "duration (sec)", type: "number", default: 0},
-            {identifier: "delay", title: "delay (sec)", type: "number", default: 1},
+            {identifier: "delay", title: "delay (sec)", type: "number", default: 0},
         ]
     },
     handler: async function({handlerArgs, configuration}) {

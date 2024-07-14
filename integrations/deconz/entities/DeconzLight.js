@@ -1,5 +1,6 @@
 import Light from "../../../entities/Light.js";
 import ColorParser from "../../../helpers/colorParser.js";
+import state from "../../../skills/Light/light/state.js";
 
 const hueMax = 65535;
 /**
@@ -55,6 +56,8 @@ export default class DeconzLight extends Light {
      * @param identifier
      * @param integration
      */
+
+
     constructor({bridgeApi, nativeObject, uniqueId, deconzLightId, lightId, identifier="MyDeconzLight", integration}={}){
         super({uniqueId: uniqueId, identifier: identifier, nativeObject: nativeObject, configuration: {
                 brightness: {
@@ -143,6 +146,21 @@ export default class DeconzLight extends Light {
 
     /**
      *
+     * @param {DeconzNativeLight} deconzLight
+     * @returns {DeconzNativeLightStateUpdate}
+     */
+    parseNativeToStateUpdate(deconzLight) {
+        return {
+            bri: deconzLight.state.bri,
+            ct: deconzLight.state.ct,
+            hue: deconzLight.state.hue,
+            sat: deconzLight.state.sat,
+            xy: deconzLight.state.xy,
+        }
+    }
+
+    /**
+     *
      * @param state {LightStateUpdate}
      * @returns {DeconzNativeLightStateUpdate}
      */
@@ -201,6 +219,19 @@ export default class DeconzLight extends Light {
 
     /**
      *
+     * @param {DeconzLight} deconzLight
+     * @returns {Promise<void>}
+     */
+    async restoreState(deconzLight){
+        let state = this.parseStateChangeToNativeUpdate(deconzLight.state)
+        // if(deconzLight.nativeObject) {
+        //     state = this.parseNativeToStateUpdate(deconzLight.nativeObject);
+        // }
+        this.bridgeApi.setLightState(this.lightId, state)
+    }
+
+    /**
+     *
      * @returns {Promise<object>}
      */
     async getState(){
@@ -242,5 +273,26 @@ export default class DeconzLight extends Light {
         return this.setState({
             action: "select",
         })
+    }
+
+    /**
+     *
+     * @returns {DeconzLight}
+     */
+    clone() {
+        let l = new DeconzLight({
+            bridgeApi: this.bridgeApi,
+            nativeObject: JSON.parse(JSON.stringify(this.nativeObject)),
+            uniqueId: this.uniqueId,
+            deconzLightId: this.deconzLightId,
+            lightId: this.lightId,
+            identifier: this.identifier,
+            integration: this.integration,
+        });
+        l.id = this.id;
+        l.configuration = this.configuration;
+        l.properties = this.properties;
+        l.state = this.state;
+        return l;
     }
 }

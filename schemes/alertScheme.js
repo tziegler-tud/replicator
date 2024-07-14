@@ -87,6 +87,9 @@ var AlertScheme = new Schema({
                     }],
                     configuration: {
                         parameters: [{
+                            title: {
+                                type: String,
+                            },
                             identifier: {
                                 type: String
                             },

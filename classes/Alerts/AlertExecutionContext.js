@@ -96,8 +96,10 @@ export default class ExecutionContext {
 
         //save light state if set
         let lightStateBackup;
+        let lightStateBackup2;
         if(this.restoreLightState){
             lightStateBackup = await LightsService.saveLightsState();
+            console.log(lightStateBackup)
         }
 
         while(!this.terminated && this.endTime > Date.now()) {
@@ -174,7 +176,11 @@ class Phase {
         this.actions.forEach(action => {
             let runner = {};
             const skillIdentifier = action.skill.identifier;
-            runner.config = action.configuration;
+            let config = {}
+            for (const param of action.configuration.parameters){
+                config[param.identifier] = param.value ?? param.default;
+            }
+            runner.config = config
             runner.variables = action.variables;
             runner.skill = SkillService.getSkillByIdentifier(skillIdentifier);
 
