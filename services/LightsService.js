@@ -2,6 +2,7 @@ import https from 'https';
 import http from 'http';
 import Service from "./Service.js";
 import db from '../schemes/mongo.js';
+import Light from "../entities/Light.js";
 const DbLight = db.Light;
 const DbLightGroup = db.LightGroup;
 const DbLightScene = db.LightScene;
@@ -277,7 +278,7 @@ class LightsService extends Service {
      *
      * @returns {Promise<Light[]>}
      */
-    getLights(json = false){
+    getLightsAsync(json = false){
         let self = this;
         return new Promise(function(resolve, reject){
             let p = [];
@@ -293,6 +294,14 @@ class LightsService extends Service {
                 })
         })
 
+    }
+
+    getLights(json = false){
+        let p = [];
+        this.lights.forEach(light => {
+            p.push(json ? light.getJson() : light.get());
+        })
+        return p;
     }
 
     getGroups(json = false){
@@ -545,7 +554,13 @@ class LightsService extends Service {
     }
 
     async saveLightsState(){
-        return await this.getLights();
+        let p = [];
+        const lightsArray = this.getLights();
+        for (const light of lightsArray) {
+            p.push(light.clone());
+        }
+        return p;
+
     }
 
     /**
@@ -556,7 +571,7 @@ class LightsService extends Service {
         for(const lightConfig of lights){
             //find light
             const light = this.findLightById(lightConfig.id);
-            await light.setState(lightConfig.state);
+            await light.restoreState(lightConfig);
         }
         return true;
     }

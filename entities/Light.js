@@ -146,6 +146,10 @@ export default class Light {
         Object.assign(this.state, state);
     }
 
+    async restoreState(light){
+        return this.setState(light.state);
+    }
+
     getInternalState(){
         return this.state;
     }
@@ -265,5 +269,22 @@ export default class Light {
         if (brightness > max) return max;
         if (brightness < min) return min;
         return brightness
+    }
+
+    /**
+     *
+     * @returns {Light}
+     */
+    clone() {
+        let l = new Light({
+            uniqueId: this.uniqueId,
+            identifier: this.identifier,
+            nativeObject: this.nativeObject,
+            configuration: this.configuration,
+        });
+        l.id = this.id;
+        l.state = this.state;
+        l.configuration = this.configuration;
+        l.properties = this.properties;
     }
 }

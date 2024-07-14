@@ -161,6 +161,27 @@ export default class HueLight extends Light {
 
     /**
      *
+     * @param state {HueNativeLight}
+     * @returns {HueNativeLightStateUpdate}
+     */
+    parseNativeToStateUpdate(state){
+        let oj = {
+            on: state.on,
+            dimming: state.dimming,
+        }
+
+        if(state.color_temperature && state.color_temperature.mirek !== null) {
+            oj.color_temperature = state.color_temperature;
+        }
+        if(state.color) {
+            oj.color = state.color;
+        }
+        // if(state.alert) oj.alert = state.alert;
+        return oj;
+    }
+
+    /**
+     *
      * @param state {LightStateUpdate}
      * @returns {HueNativeLightStateUpdate}
      */
@@ -263,6 +284,20 @@ export default class HueLight extends Light {
         this.bridgeApi.setLightState(this.lightId, this.parseStateChangeToHue(state));
     }
 
+    async restoreState(hueLight){
+        let state = this.parseStateChangeToHue(hueLight.state)
+        if(hueLight.nativeObject) {
+            state = this.parseNativeToStateUpdate(hueLight.nativeObject);
+        }
+        this.bridgeApi.setLightState(this.lightId, state)
+            .then(response => {
+                return response;
+            })
+            .catch(err => {
+                return err;
+            })
+    }
+
     /**
      *
      * @returns {Promise<LightState>}
@@ -336,5 +371,24 @@ export default class HueLight extends Light {
         return this.setState({
             action: "breathe",
         })
+    }
+
+
+    /**
+     * @returns {HueLight}
+     */
+    clone() {
+        let l = new HueLight({
+            bridgeApi: this.bridgeApi,
+            hueObject: JSON.parse(JSON.stringify(this.nativeObject)),
+            uniqueId: this.uniqueId,
+            identifier: this.identifier,
+            integration: this.integration,
+        });
+        l.id = this.id;
+        l.configuration = this.configuration;
+        l.properties = this.properties;
+        l.state = this.state;
+        return l;
     }
 }
