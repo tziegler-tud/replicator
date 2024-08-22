@@ -11,6 +11,7 @@ import { create } from 'express-handlebars';
 import endpoints from './config/endpoints.json' assert { type: 'json' };
 import hueConfig from './config/hueConfig.json' assert { type: 'json' };
 import deconzConfig from './config/deconzConfig.json' assert { type: 'json' };
+import picovoiceConfig from './config/picovoice.json' assert { type: 'json' };
 
 import {apiErrorHandler, webErrorHandler} from "./helpers/error-handler.js";
 
@@ -24,6 +25,8 @@ import IntegrationService from "./services/IntegrationService.js";
 import SettingsService from "./services/SettingsService.js";
 import AlertService from "./services/AlertService.js";
 import SkillService from "./services/SkillService.js";
+import PicovoiceLLMService from "./services/PicovoiceLLMService.js";
+
 
 import apiIndexRouter from './routes/api/v1/index.js';
 import clientRouter from './routes/api/v1/client.js';
@@ -138,6 +141,29 @@ const integrationService = new Promise(function(resolve, reject){
 const intentHandlerService = IntentHandlerService.start();
 const alertService = AlertService.start({});
 const skillService = SkillService.start({})
+
+const picovoiceLLMService = PicovoiceLLMService.start({
+    accessKey: picovoiceConfig.accessKey,
+    modelPath: picovoiceConfig.modelPath,
+})
+    .then(()=>{
+        let response = PicovoiceLLMService.generateAnswer("Are there Klingons nearby?");
+        console.log(response);
+        response = PicovoiceLLMService.generateAnswer("I want you to answer like you are a computer abord a starfleet vessel, from the movie franchise StarTrek.");
+        console.log(response);
+        response = PicovoiceLLMService.generateAnswer("What date is it today?");
+        console.log(response);
+        response = PicovoiceLLMService.generateAnswer("I want you to answer the following question like you are a computer abord a starfleet vessel, from the movie franchise StarTrek. Are there Klingons nearby?");
+        console.log(response);
+        response = PicovoiceLLMService.generateAnswer("Is a whaleshark a mamal or a fish?");
+        console.log(response);
+    })
+    .catch(err => {
+        console.log("Failed to start PicovoiceLLMService: " + err)
+    })
+
+
+
 
 
 /**
