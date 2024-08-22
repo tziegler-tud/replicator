@@ -102,7 +102,7 @@ app.use('/', webErrorHandler);
 const settingsService = SettingsService.start({})
 
 // IntentService.start();
-const intentService = IntentService.start({config: "/rhinoModels/v4/replicator_v0_4_0.yml"});
+const intentService = IntentService.start({config: "/rhinoModels/v4/replicator_v0_4_2.yml"});
 
 //init voice command service
 const voiceCommandService =VoiceCommandService.start({});
