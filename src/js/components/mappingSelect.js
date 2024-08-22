@@ -331,7 +331,7 @@ export default class MappingSelect extends Component{
                                                     const entitySelectObserver = new ComponentObserver("confirmed", function(event, data){
                                                         console.log("EntitySelect finished:");
                                                         console.log(JSON.stringify(data));
-                                                        input.value = data.entity;
+                                                        input.val(data.entity)
                                                         stage3.change();
                                                     })
                                                     entitySelect.addObserver(entitySelectObserver)
