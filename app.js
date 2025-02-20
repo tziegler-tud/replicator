@@ -24,6 +24,7 @@ import IntegrationService from "./services/IntegrationService.js";
 import SettingsService from "./services/SettingsService.js";
 import AlertService from "./services/AlertService.js";
 import SkillService from "./services/SkillService.js";
+import SensorService from "./services/SensorService.js";
 
 import apiIndexRouter from './routes/api/v1/index.js';
 import clientRouter from './routes/api/v1/client.js';
@@ -116,6 +117,7 @@ const communicationService =CommunicationService.start({});
 
 //init lights service
 const lightsService =LightsService.start({});
+const sensorService =SensorService.start({});
 
 //load Integration Service
 const integrationService = new Promise(function(resolve, reject){
@@ -155,6 +157,7 @@ const servicesArray = [
     intentHandlerService,
     alertService,
     skillService,
+    sensorService,
 ]
 
 

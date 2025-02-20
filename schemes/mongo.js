@@ -22,6 +22,7 @@ import Settings from "./settingsScheme.js"
 import Intent from "./intentScheme.js"
 import IntentHandler from "./intentHandlerScheme.js"
 import Alert from "./alertScheme.js"
+import Sensor from "./sensorScheme.js"
 let db = {
     Client: Client,
     Location: Location,
@@ -32,5 +33,6 @@ let db = {
     Intent: Intent,
     IntentHandler: IntentHandler,
     Alert: Alert,
+    Sensor: Sensor,
 }
 export default db;

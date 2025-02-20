@@ -5,6 +5,8 @@ import DeconzLight from "./entities/DeconzLight.js";
 import DeconzLightGroup from "./entities/DeconzLightGroup.js";
 import DeconzLightScene from "./entities/DeconzLightScene.js";
 import EventStreamHandler from "./EventStreamHandler.js";
+import DeconzSensor from "./entities/DeconzSensor.js";
+import SensorService from "../../services/SensorService.js";
 
 export default class DeconzIntegration extends Integration {
     constructor({host, port=80, apiKey} = {}) {
@@ -70,10 +72,10 @@ export default class DeconzIntegration extends Integration {
                                     //add lights to runtime
                                     let lightsPromise = self.addLights(lights)
                                     let groupsPromise = self.addGroups(groups);
-                                    // let sensorsPromise = self.addSensors(sensors);
+                                    let sensorsPromise = self.addSensors(sensors);
 
 
-                                    Promise.all([lightsPromise, groupsPromise])
+                                    Promise.all([lightsPromise, groupsPromise, sensorsPromise])
                                         .then(result => {
                                             const groups = result[1]
                                             self.addLightsToGroups(groups)
@@ -272,7 +274,39 @@ export default class DeconzIntegration extends Integration {
     }
 
     async addSensors(sensorsObject) {
-        return true
+        return new Promise( (resolve, reject) => {
+            let sensorPromises = [];
+            let sensorIds = Object.keys(sensorsObject);
+            sensorIds.forEach( (id) => {
+                /**
+                 * @type {DeconzNativeLight}
+                 */
+                const entity = sensorsObject[id];
+                if(entity === undefined) return;
+                //create unique id based on key and some other props that should not change
+                const uniqueId = entity.uniqueid;
+                let deconzSensor = new DeconzSensor({
+                    bridgeApi: this.BridgeApi,
+                    nativeObject: entity,
+                    identifier: entity.name,
+                    deconzId: id,
+                    uniqueId: uniqueId,
+                })
+                this.sensorObjects.push(deconzSensor)
+                SensorService.init.then(() => {
+                    sensorPromises.push(SensorService.addSensor(deconzSensor))
+                })
+            })
+            SensorService.init.then(() => {
+                Promise.all(sensorPromises)
+                    .then(result => {
+                        resolve(this.sensorObjects);
+                    })
+                    .catch(err => {
+                        reject(err);
+                    })
+            })
+        });
     }
 
     addScenesFromGroups(groupsArray) {
