@@ -9,6 +9,7 @@ export default {
     IntentHandlerAdd: "IntentHandlerAddModule",
     SKILLS: "SkillModule",
     ENTITIES: "EntitiesModule",
+    ENTITYDETAILS: "EntityDetailsModule",
     INTEGRATIONS: "IntegrationsModule",
     ALERTS: "AlertsModule",
     AlertsDetais: "AlertsDetailsModule",

@@ -23,6 +23,7 @@ import Intent from "./intentScheme.js"
 import IntentHandler from "./intentHandlerScheme.js"
 import Alert from "./alertScheme.js"
 import Sensor from "./sensorScheme.js"
+import TtsFiles from "./ttsFilesScheme.js"
 let db = {
     Client: Client,
     Location: Location,
@@ -34,5 +35,6 @@ let db = {
     IntentHandler: IntentHandler,
     Alert: Alert,
     Sensor: Sensor,
+    TtsFiles: TtsFiles,
 }
 export default db;

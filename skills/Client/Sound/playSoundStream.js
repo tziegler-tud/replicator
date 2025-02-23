@@ -1,13 +1,15 @@
 import Skill from "../../skill.js";
-import TtsService from "../../../services/TtsService.js";
+import LightsService from "../../../services/LightsService.js";
+import fetch from 'node-fetch';
 import ClientService from "../../../services/ClientService.js";
 
-let PlayTTSOnClient = new Skill({
-    identifier: "PlayTTS-SingleClient",
-    description: "Text-to-speech output on a single client",
+
+let PlaySoundStreamSingle = new Skill({
+    identifier: "PlaySoundStream-SingleClient",
+    description: "Play a sound file from a remote source on a client",
     variables: {
-        clientId: Skill.variableTypes.client,
-        text: Skill.variableTypes.TEMPLATE,
+        clientIds: Skill.variableTypes.client,
+        source: Skill.variableTypes.STRING,
     },
     configuration: {
         parameters: [
@@ -17,22 +19,16 @@ let PlayTTSOnClient = new Skill({
     },
     handler: async function({handlerArgs, configuration}){
 
-        const content = await TtsService.resolveTemplate(handlerArgs.text);
-        //create audio file
-        const filename = await TtsService.getAudio(content)
-        const source = TtsService.getFileUrl(filename);
-
         const data = {
             command: "playAudioStream",
-            source: source,
+            source: handlerArgs.source,
             duration: configuration.duration,
             delay: configuration.delay,
         }
-
-        if(handlerArgs.clientId) {
-            const clientId = handlerArgs.clientId;
+        //this was intended to handle multiple clients, but input mapping does not support this right now
+        if(handlerArgs.clientIds) {
+            const clientId = handlerArgs.clientIds;
             const client  = await ClientService.getById(clientId);
-
             client.sendTcpWithResponse("action", data)
                 .then(response => {
 
@@ -44,4 +40,4 @@ let PlayTTSOnClient = new Skill({
     }
 })
 
-export default {PlayTTSOnClient}
+export default {PlaySoundStreamSingle}

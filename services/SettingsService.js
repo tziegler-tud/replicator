@@ -118,6 +118,19 @@ class SettingsService {
         this.settingsObject = this.settings.doc;
         return this.settingsObject;
     }
+
+    getLocalDate() {
+        return new Date().toLocaleDateString();
+    }
+
+    getLocalDateTime() {
+        return new Date().toLocaleString();
+    }
+
+    getLocalTime() {
+        return new Date().toLocaleTimeString();
+    }
+
     statusEnum = {
         NOTSTARTED: 0,
         RUNNING: 1,
