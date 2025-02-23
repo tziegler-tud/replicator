@@ -110,7 +110,7 @@ app.use('/', webErrorHandler);
 const settingsService = SettingsService.start({})
 
 // IntentService.start();
-const intentService = IntentService.start({config: "/rhinoModels/v4/Replicator_v0_4_2.yml"});
+const intentService = IntentService.start({config: path.resolve(global.appRoot, settingsConfig.picovoice.rhino)});
 
 //init voice command service
 const voiceCommandService =VoiceCommandService.start({});
