@@ -1,6 +1,13 @@
 
+import ColorParser from "../helpers/colorParser.js";
+import Entity from "./Entity.js";
+
+
 /**
- * @class Light
+ * @typedef LightConfiguration
+ * @property {Object} brightness
+ * @property {number} brightness.max Maximum brightness value. Defaults to 255
+ * @property {number} brightness.min Minimum brightness value. Defaults to 0
  */
 
 /**
@@ -44,8 +51,6 @@
  * @property {number} [color_temperature]
  */
 
-import ColorParser from "../helpers/colorParser.js";
-import Entity from "./Entity.js";
 
 /**
  * @typedef {Object} LightColorObject
@@ -62,8 +67,19 @@ import Entity from "./Entity.js";
  * @property {number} xy.y CIE xy color space y coordinate [0-1]
  */
 
-
+/**
+ * @class Light
+ * @property {String} uniqueId
+ * @property {String} identifier
+ * @property {String} lightId
+ * @property {Object} nativeObject
+ * @property {LightConfiguration} configuration
+ */
 export default class Light extends Entity {
+    /**
+     *
+     * @type {LightConfiguration}
+     */
     static defaultConfiguration = {
         brightness: {
             max: 100,
@@ -71,9 +87,18 @@ export default class Light extends Entity {
         }
     };
 
-    constructor({uniqueId, identifier= "NewDefaultLight", nativeObject={}, configuration={}}={}){
+    /**
+     *
+     * @param {String} uniqueId
+     * @param {String} identifier
+     * @param {String} lightId
+     * @param {Object} nativeObject
+     * @param {LightConfiguration} configuration
+     */
+    constructor({uniqueId, identifier= "NewDefaultLight", lightId, nativeObject={}, configuration={}}={}){
         const config = Object.assign(Light.defaultConfiguration, configuration);
-        super({uniqueId, identifier, nativeObject, config});
+        super({uniqueId, identifier, nativeObject, configuration: config});
+        this.lightId = lightId;
         this.state = {
             on: false,
             brightness: 0,

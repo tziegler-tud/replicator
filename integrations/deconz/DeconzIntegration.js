@@ -8,6 +8,9 @@ import EventStreamHandler from "./EventStreamHandler.js";
 import DeconzSensor from "./entities/DeconzSensor.js";
 import SensorService from "../../services/SensorService.js";
 
+/** @typedef {import('../../entities/LightGroup.js').LightGroup} LightGroup */
+
+
 export default class DeconzIntegration extends Integration {
     constructor({host, port=80, apiKey} = {}) {
         super();
@@ -18,7 +21,7 @@ export default class DeconzIntegration extends Integration {
         }
         this.port = port
         this.locations = [];
-        this.lights = [];
+
 
         this.lightObjects = [];
         this.groupObjects = [];
@@ -65,9 +68,9 @@ export default class DeconzIntegration extends Integration {
                                     const sensors = result[2];
                                     self.BridgeConfiguration = result[3];
 
-                                    self.lights = lights;
-                                    self.groups = groups;
-                                    self.sensors = sensors;
+                                    self.lightObjects = lights;
+                                    self.groupObjects = groups;
+                                    self.sensorObject = sensors;
 
                                     //add lights to runtime
                                     let lightsPromise = self.addLights(lights)
@@ -192,7 +195,7 @@ export default class DeconzIntegration extends Integration {
         return new Promise(function (resolve, reject) {
             let lightPromises = [];
             let lightIds = Object.keys(lightsObject);
-            lightIds.forEach(function (id) {
+            lightIds.forEach((id) => {
                 /**
                  * @type {DeconzNativeLight}
                  */
@@ -208,7 +211,7 @@ export default class DeconzIntegration extends Integration {
                     deconzLightId: id,
                     uniqueId: uniqueId,
                 })
-                self.lightObjects.push(deconzLight)
+                self.lights.push(deconzLight)
                 LightsService.init.then(() => {
                     lightPromises.push(LightsService.addLight(deconzLight))
                 })
@@ -216,7 +219,7 @@ export default class DeconzIntegration extends Integration {
             LightsService.init.then(() => {
                 Promise.all(lightPromises)
                     .then(result => {
-                        resolve(self.lightObjects);
+                        resolve(self.lights);
                     })
                     .catch(err => {
                         reject(err);
@@ -252,11 +255,10 @@ export default class DeconzIntegration extends Integration {
                     bridgeApi: self.BridgeApi,
                     nativeObject: group,
                     identifier: group.name,
-                    deconzGroupId: id,
                     groupId: id,
                     uniqueId: uniqueId
                 })
-                self.groupObjects.push(deconzGroup)
+                self.groups.push(deconzGroup)
                 LightsService.init.then(() => {
                     promises.push(LightsService.addGroup(deconzGroup))
                 })
@@ -264,7 +266,7 @@ export default class DeconzIntegration extends Integration {
             LightsService.init.then(() => {
                 Promise.all(promises)
                     .then(result => {
-                        resolve(self.groupObjects);
+                        resolve(self.groups);
                     })
                     .catch(err => {
                         reject(err);
@@ -273,13 +275,23 @@ export default class DeconzIntegration extends Integration {
         });
     }
 
+    /**
+     *
+     * @param {Object} sensorsObject
+     * @returns {Promise<unknown>}
+     */
     async addSensors(sensorsObject) {
         return new Promise( (resolve, reject) => {
             let sensorPromises = [];
             let sensorIds = Object.keys(sensorsObject);
-            sensorIds.forEach( (id) => {
+            sensorIds.forEach(
                 /**
-                 * @type {DeconzNativeLight}
+                 *
+                 * @param {string} id
+                 */
+                (id) => {
+                /**
+                 * @type {DeconzNativeSensor}
                  */
                 const entity = sensorsObject[id];
                 if(entity === undefined) return;
@@ -289,10 +301,10 @@ export default class DeconzIntegration extends Integration {
                     bridgeApi: this.BridgeApi,
                     nativeObject: entity,
                     identifier: entity.name,
-                    deconzId: id,
+                    sensorId: id,
                     uniqueId: uniqueId,
                 })
-                this.sensorObjects.push(deconzSensor)
+                this.sensors.push(deconzSensor)
                 SensorService.init.then(() => {
                     sensorPromises.push(SensorService.addSensor(deconzSensor))
                 })
@@ -300,7 +312,7 @@ export default class DeconzIntegration extends Integration {
             SensorService.init.then(() => {
                 Promise.all(sensorPromises)
                     .then(result => {
-                        resolve(this.sensorObjects);
+                        resolve(this.sensors);
                     })
                     .catch(err => {
                         reject(err);
@@ -329,7 +341,7 @@ export default class DeconzIntegration extends Integration {
                         uniqueId: uniqueId,
                         deconzGroup: group,
                     })
-                    self.sceneObjects.push(deconzScene)
+                    self.scenes.push(deconzScene)
                     LightsService.init.then(() => {
                         promises.push(LightsService.addScene(deconzScene))
                     })
@@ -337,7 +349,7 @@ export default class DeconzIntegration extends Integration {
                 LightsService.init.then(() => {
                     Promise.all(promises)
                         .then(result => {
-                            resolve(self.sceneObjects);
+                            resolve(self.scenes);
                         })
                         .catch(err => {
                             reject(err);
@@ -352,13 +364,19 @@ export default class DeconzIntegration extends Integration {
         let self = this;
         return new Promise(function (resolve, reject) {
             let p = [];
-            groupArray.forEach(function (group) {
+            groupArray.forEach((group) => {
                 const uniqueId = group.uniqueId;
                 const array = []
                 group.nativeObject.lights.forEach(lightId => {
                     //find light
-                    let light = self.lightObjects.find(light => {
-                        return light.deconzLightId === lightId
+                    let light = self.lights.find(
+                        /**
+                         *
+                         * @param {Light} light
+                         * @returns {boolean}
+                         */
+                        light => {
+                        return light.lightId === lightId
                     });
                     if(light) array.push(light.uniqueId);
                 })
@@ -373,28 +391,6 @@ export default class DeconzIntegration extends Integration {
                     reject(err);
                 })
         })
-    }
-
-    getResource(uniqueId){
-        //check lights
-        let resources = [...this.lightObjects, ...this.groupObjects, ...this.sceneObjects];
-        return resources.find(o => o.uniqueId === uniqueId);
-    }
-
-    getLight(lightId){
-        return this.lightObjects.find(o => o.deconzLightId === lightId);
-    }
-
-    getGroup(groupId){
-        return this.groupObjects.find(o => o.deconzGroupId === groupId);
-    }
-
-    getScene(sceneId){
-        return this.sceneObjects.find(o => o.deconzSceneId === sceneId);
-    }
-
-    getSensor(sensorId){
-        return this.sensorObjects.find(o => o.deconzGroupId === sensorId);
     }
 }
 

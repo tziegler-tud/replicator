@@ -5,6 +5,10 @@ const DbSensor = db.Sensor;
 class SensorService extends EntityService {
     constructor() {
         super();
+        /**
+         *
+         * @type {Sensor[]}
+         */
         this.sensors = [];
         this.name = "SensorService"
     }
@@ -41,6 +45,12 @@ class SensorService extends EntityService {
         })
     }
 
+
+    /**
+     *
+     * @param {Boolean} json - return json representation
+     * @returns {Sensor[]}
+     */
     getSensors(json= false){
         let p = [];
         this.sensors.forEach(sen => {
@@ -50,20 +60,29 @@ class SensorService extends EntityService {
     }
 
     /**
+     *
+     * @param id
+     * @returns {Promise<Sensor|undefined>}
+     */
+    async getSensorById(id){
+        return this.findSensorById(id)?.get();
+    }
+
+    /**
      * @param {String} id
-     * @returns {Entity | undefined}
+     * @returns {Sensor | undefined}
      */
     findSensorById(id) {
-        return this.entities.find(entity => entity.id.toString() === id.toString());
+        return this.sensors.find(entity => entity.id.toString() === id.toString());
     }
 
     /**
      *
      * @param {String} uniqueId
-     * @returns {Entity | undefined}
+     * @returns {Sensor | undefined}
      */
-    findSensorByUniqueId(uniqueId) {
-        return this.entities.find(entity => entity.uniqueId === uniqueId);
+    getSensorByUniqueId(uniqueId) {
+        return this.sensors.find(entity => entity.uniqueId === uniqueId);
     }
 }
 export default new SensorService();

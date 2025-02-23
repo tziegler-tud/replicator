@@ -1,4 +1,7 @@
-import Module from "./module.js"
+import Module from "../module.js"
+import {MDCDialog} from "@material/dialog";
+import {MDCTextField} from "@material/textfield";
+import Dashboard from "../../classes/dashboard";
 
 
 export default new Module({
@@ -12,6 +15,9 @@ export default new Module({
         })
         $(".scene-card").click(function(){
             window.location.href= "/entities/scenes/" + this.dataset.id;
+        })
+        $(".sensor-card").click(function(){
+            window.location.href= "/entities/sensors/" + this.dataset.id;
         })
     }
 })

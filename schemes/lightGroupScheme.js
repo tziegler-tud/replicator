@@ -8,6 +8,9 @@ var LightGroupScheme = new Schema({
         required: true,
         unique: true,
     },
+    displayName: {
+        type: String,
+    },
     identifier: {
         type: String,
     },

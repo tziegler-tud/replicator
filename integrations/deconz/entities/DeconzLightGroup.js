@@ -2,10 +2,6 @@ import LightGroup from "../../../entities/LightGroup.js";
 const hueMax = 65535;
 
 /**
- * @class DeconzLightGroup
- */
-
-/**
  * @typedef DeconzNativeLightGroup
  * @property {DeconzNativeLightGroupState} action The last action which was send to the group.
  * @property {string[]} devicemembership A list of device ids (sensors) if this group was created by a device.
@@ -47,22 +43,32 @@ const hueMax = 65535;
  * @property {number} transitiontime Transition time in 1/10 seconds between two states.
  */
 
+/**
+ * @class DeconzLightGroup
+ * @property {String} uniqueId
+ * @property {String} identifier
+ * @property {String} groupId
+ * @property {Object} nativeObject
+ * @property {LightConfiguration} configuration
+ * @property {DeconzBridgeApi} bridgeApi
+ * @property {String} deconzGroupId
+ */
 export default class DeconzLightGroup extends LightGroup {
     /**
      *
      * @param uniqueId
      * @param identifier
-     * @param {string} deconzGroupId
-     * @param {DeconzNativeLightGroup} nativeObject
+     * @param {String} groupId
      * @param {DeconzBridgeApi} bridgeApi
-     * @param configuration
+     * @param {DeconzNativeLightGroup} nativeObject
+     * @param {LightConfiguration} configuration
      */
-    constructor({uniqueId, identifier= "NewDeconzLightGroup", deconzGroupId, bridgeApi, nativeObject={}, configuration={}}={}){
-        super({uniqueId: uniqueId, identifier: identifier, nativeObject: nativeObject, configuration: configuration});
+    constructor({uniqueId, identifier= "NewDeconzLightGroup", groupId, bridgeApi, nativeObject={}, configuration={}}={}){
+        super({uniqueId: uniqueId, identifier: identifier, groupId: groupId, nativeObject: nativeObject, configuration: configuration});
         this.lights = [];
         this.scenes = [];
         this.bridgeApi = bridgeApi;
-        this.deconzGroupId = deconzGroupId;
+        this.deconzGroupId = groupId;
     }
 
     get(){

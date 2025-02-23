@@ -8,6 +8,9 @@ var LightScheme = new Schema({
         type: String,
         unique: true,
     },
+    displayName: {
+        type: String,
+    },
     alias: {
         type: String,
     },

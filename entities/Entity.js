@@ -1,11 +1,21 @@
+/**
+ * @typedef {Object} EntityConfiguration
+ */
 
 /**
  * @class Entity
+ * @property {string} id internal database id *
+ * @property {String} uniqueId
+ * @property {String} identifier
+ * @property {String} lightId
+ * @property {Object} nativeObject
+ * @property {EntityConfiguration} configuration
  */
 export default class Entity {
     constructor({uniqueId, identifier= "NewDefaultSensor", nativeObject={}, configuration={}}={}){
         this.id = undefined;
         this.uniqueId = uniqueId;
+        this.displayName = identifier;
         this.identifier = identifier;
         this.state = {};
         this.configuration = configuration;

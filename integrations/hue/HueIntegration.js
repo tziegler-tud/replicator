@@ -24,15 +24,11 @@ export default class HueIntegration extends Integration {
         }
         this.port = port;
         this.locations = [];
-        this.lights = [];
-        this.groups = [];
-        this.grouped_lights = [];
-        this.scenes = [];
-        this.sensors = [];
 
         this.lightObjects = [];
         this.groupObjects = [];
         this.sceneObjects = [];
+        this.sensorObjects = [];
 
         this.BridgeUrl = host;
         this.BridgeUser = apiKey;
@@ -42,15 +38,6 @@ export default class HueIntegration extends Integration {
     initFunc({BridgeUrl, BridgeUser}){
         let self = this;
         this.locations = [];
-        this.lights = [];
-        this.groups = [];
-        this.grouped_lights = [];
-        this.scenes = [];
-        this.sensors = [];
-
-        this.lightObjects = [];
-        this.groupObjects = [];
-        this.sceneObjects = [];
 
         if(BridgeUrl) this.BridgeUrl = BridgeUrl;
         if(BridgeUser) this.BridgeUser = BridgeUser;
@@ -86,12 +73,12 @@ export default class HueIntegration extends Integration {
                                     const scenes = result[4];
                                     const sensors = result[5];
 
-                                    self.lights = lights;
-                                    self.grouped_lights = groups;
+                                    self.lightObjects = lights;
+                                    self.groupObjects = groups;
                                     self.rooms = rooms;
                                     self.zones = zones;
-                                    self.scenes = scenes;
-                                    self.sensors = sensors;
+                                    self.sceneObjects = scenes;
+                                    self.sensorObjects = sensors;
 
                                     //add lights to runtime
                                     let lightsPromise = self.addLights(lights)
@@ -102,7 +89,7 @@ export default class HueIntegration extends Integration {
                                     Promise.all([lightsPromise, groupsPromise, scenesPromise])
                                         .then(result => {
                                             const groups = result[1]
-                                            self.addLightsToGroups(groups)
+                                            self.addLightsToGroups(this.groups)
                                                 .then(()=> {
                                                     self.addScenesToGroups(groups)
                                                         .then(result => {
@@ -156,44 +143,6 @@ export default class HueIntegration extends Integration {
 
     }
 
-    addLightsV1() {
-        let self = this;
-        return new Promise(function (resolve, reject) {
-            LightsService.init.then(() => {
-                let lightPromises = [];
-                Object.keys(self.lights).forEach(function (key) {
-                    const light = self.lights[key];
-                    //create unique id based on key and some other props that should not change
-                    const uniqueId = light.uniqueid;
-                    let hueLight = new HueLight({
-                        bridgeApi: self.BridgeApi,
-                        hueState: light.state,
-                        identifier: light.name,
-                        lightId: key,
-                        uniqueId: uniqueId,
-                    })
-                    lightPromises.push(LightsService.addLight(hueLight))
-                })
-                Promise.all(lightPromises)
-                    .then(result => {
-                        resolve(result);
-                    })
-                    .catch(err => {
-                        reject(err);
-                    })
-            })
-        });
-    }
-
-    getResource(uniqueId){
-        //check lights
-        let resources = [...this.lightObjects, ...this.groupObjects, ...this.sceneObjects];
-        return resources.find(o => o.uniqueId === uniqueId);
-    }
-
-    addSensors(sensorsObject){
-
-    }
     addLights(lightsArray) {
         return new Promise((resolve, reject) =>  {
             let lightPromises = [];
@@ -207,7 +156,7 @@ export default class HueIntegration extends Integration {
                     lightId: light.id,
                     uniqueId: uniqueId,
                 })
-                this.lightObjects.push(hueLight)
+                this.lights.push(hueLight)
                 LightsService.init.then(() => {
                     lightPromises.push(LightsService.addLight(hueLight))
                 })
@@ -215,7 +164,7 @@ export default class HueIntegration extends Integration {
             LightsService.init.then(() => {
                 Promise.all(lightPromises)
                     .then(result => {
-                        resolve(this.lightObjects);
+                        resolve(this.lights);
                     })
                     .catch(err => {
                         reject(err);
@@ -241,12 +190,17 @@ export default class HueIntegration extends Integration {
                 const uniqueId = group.id;
                 // find associated grouped_light
                 const groupedLightId = group.services.find(service => service.rtype === "grouped_light").rid;
-                const groupedLightJSON = self.grouped_lights.find(grouped_light => {
+                const groupedLightJSON = self.groupObjects.find(grouped_light => {
                     return grouped_light.id === groupedLightId;
                 })
 
                 //find associated scenes
-                let scenes = self.scenes.filter((scene) => {
+                let scenes = self.scenes.filter(
+                    /**
+                     * @param {LightScene} scene
+                     * @returns {boolean}
+                     */
+                    (scene) => {
                     return scene.group.rtype === "room" && scene.group.rid === group.id;
                 })
 
@@ -268,7 +222,7 @@ export default class HueIntegration extends Integration {
                     groupedLight: groupedLight,
                     hueScenes: sceneIds,
                 })
-                self.groupObjects.push(hueGroup)
+                self.groups.push(hueGroup)
                 LightsService.init.then(() => {
                     promises.push(LightsService.addGroup(hueGroup))
                 })
@@ -276,7 +230,7 @@ export default class HueIntegration extends Integration {
             LightsService.init.then(() => {
                 Promise.all(promises)
                     .then(result => {
-                        resolve(self.groupObjects);
+                        resolve(self.groups);
                     })
                     .catch(err => {
                         reject(err);
@@ -302,7 +256,7 @@ export default class HueIntegration extends Integration {
                 const uniqueId = group.id;
                 // find associated grouped_light
                 const groupedLightId = group.services.find(service => service.rtype === "grouped_light").rid;
-                const groupedLightJSON = self.grouped_lights.find(grouped_light => {
+                const groupedLightJSON = self.groupObjects.find(grouped_light => {
                     return grouped_light.id === groupedLightId;
                 })
 
@@ -329,7 +283,7 @@ export default class HueIntegration extends Integration {
                     groupedLight: groupedLight,
                     hueScenes: sceneIds,
                 })
-                self.groupObjects.push(hueGroup)
+                self.groups.push(hueGroup)
                 LightsService.init.then(() => {
                     promises.push(LightsService.addGroup(hueGroup))
                 })
@@ -337,7 +291,7 @@ export default class HueIntegration extends Integration {
             LightsService.init.then(() => {
                 Promise.all(promises)
                     .then(result => {
-                        resolve(self.groupObjects);
+                        resolve(self.groups);
                     })
                     .catch(err => {
                         reject(err);
@@ -360,7 +314,7 @@ export default class HueIntegration extends Integration {
                     sceneId: scene.id,
                     uniqueId: uniqueId,
                 })
-                self.sceneObjects.push(hueScene)
+                self.scenes.push(hueScene)
                 LightsService.init.then(() => {
                     promises.push(LightsService.addScene(hueScene))
                 })
@@ -368,7 +322,7 @@ export default class HueIntegration extends Integration {
             LightsService.init.then(() => {
                 Promise.all(promises)
                     .then(result => {
-                        resolve(self.sceneObjects);
+                        resolve(self.scenes);
                     })
                     .catch(err => {
                         reject(err);
@@ -378,7 +332,6 @@ export default class HueIntegration extends Integration {
     }
 
     addLightsToGroups(groupArray) {
-        let self = this;
         return new Promise( (resolve, reject) => {
             let p = [];
             groupArray.forEach((group) => {
@@ -387,7 +340,7 @@ export default class HueIntegration extends Integration {
                 group.nativeObject.children.forEach(child => {
                     if (child.rtype === "device"){
                         //find light
-                        let light = self.lightObjects.find(light => {
+                        let light = this.lights.find(light => {
                             return light.nativeObject.owner.rid === child.rid
                         });
                         if(light) array.push(light.uniqueId);

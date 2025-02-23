@@ -12,6 +12,7 @@ router.get("/", entities)
 router.get("/lights/:id", lightDetails)
 router.get("/groups/:id", groupDetails)
 router.get("/scenes/:id", sceneDetails)
+router.get("/sensors/:id", sensorDetails)
 
 
 function entities(req, res, next){
@@ -53,6 +54,7 @@ function lightDetails(req, res, next){
                 page: {
                     modules: [
                         MODULES.ENTITIES,
+                        MODULES.ENTITYDETAILS
                     ],
                     nav: {
                         currentEntry: "entities"
@@ -72,6 +74,7 @@ function groupDetails(req, res, next){
                 page: {
                     modules: [
                         MODULES.ENTITIES,
+                        MODULES.ENTITYDETAILS
                     ],
                     nav: {
                         currentEntry: "entities"
@@ -91,6 +94,26 @@ function sceneDetails(req, res, next){
                 page: {
                     modules: [
                         MODULES.ENTITIES,
+                        MODULES.ENTITYDETAILS
+                    ],
+                    nav: {
+                        currentEntry: "entities"
+                    }
+                }
+            });
+        })
+}
+
+function sensorDetails(req, res, next){
+    //get clients
+    SensorService.getSensorById(req.params.id)
+        .then(scene => {
+            res.render("entities/details", {
+                entity: scene,
+                page: {
+                    modules: [
+                        MODULES.ENTITIES,
+                        MODULES.ENTITYDETAILS
                     ],
                     nav: {
                         currentEntry: "entities"

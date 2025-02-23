@@ -45,7 +45,16 @@ const hueMax = 65535;
  * @property {number[]} [xy] Set the CIE xy color space coordinates as array [x, y] of real values (0–1).
  */
 
-
+/**
+ * @class DeconzLight
+ * @property {String} uniqueId
+ * @property {String} identifier
+ * @property {String} lightId
+ * @property {String} deconzLightId
+ * @property {Object} nativeObject
+ * @property {DeconzBridgeApi} bridgeApi
+ * @property {LightConfiguration} configuration
+ */
 export default class DeconzLight extends Light {
     /**
      *
@@ -59,7 +68,7 @@ export default class DeconzLight extends Light {
 
 
     constructor({bridgeApi, nativeObject, uniqueId, deconzLightId, lightId, identifier="MyDeconzLight", integration}={}){
-        super({uniqueId: uniqueId, identifier: identifier, nativeObject: nativeObject, configuration: {
+        super({uniqueId: uniqueId, identifier: identifier, lightId: lightId, nativeObject: nativeObject, configuration: {
                 brightness: {
                     max: 255,
                     min: 0,
