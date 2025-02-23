@@ -1,0 +1,6 @@
+{
+  "tts": {
+    "piperPath": "/path/to/piper/executable",
+    "piperModel": "/path/to/piper/model.onnx"
+  }
+}
