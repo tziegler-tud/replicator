@@ -2,6 +2,7 @@ import express from 'express';
 import LightsService from "../../services/LightsService.js";
 var router = express.Router();
 import MODULES from "./modules.js";
+import SensorService from "../../services/SensorService.js";
 
 /**
  * hooked at /intents
@@ -11,6 +12,7 @@ router.get("/", entities)
 router.get("/lights/:id", lightDetails)
 router.get("/groups/:id", groupDetails)
 router.get("/scenes/:id", sceneDetails)
+router.get("/sensors/:id", sensorDetails)
 
 
 function entities(req, res, next){
@@ -19,12 +21,14 @@ function entities(req, res, next){
     const lightsP = LightsService.getLights();
     const lightGroupsP = LightsService.getGroups();
     const scenesP = LightsService.getScenes();
-    Promise.all([lightsP, lightGroupsP,scenesP])
-        .then(function([lights, lightGroups, scenes]) {
+    const sensorsP = SensorService.getSensors();
+    Promise.all([lightsP, lightGroupsP,scenesP, sensorsP])
+        .then(function([lights, lightGroups, scenes, sensors]) {
             const entities = {
                 lights: lights,
                 lightGroups: lightGroups,
                 scenes: scenes,
+                sensors: sensors
             }
             res.render("entities/all", {
                 entities: entities,
@@ -50,6 +54,7 @@ function lightDetails(req, res, next){
                 page: {
                     modules: [
                         MODULES.ENTITIES,
+                        MODULES.ENTITYDETAILS
                     ],
                     nav: {
                         currentEntry: "entities"
@@ -69,6 +74,7 @@ function groupDetails(req, res, next){
                 page: {
                     modules: [
                         MODULES.ENTITIES,
+                        MODULES.ENTITYDETAILS
                     ],
                     nav: {
                         currentEntry: "entities"
@@ -88,6 +94,26 @@ function sceneDetails(req, res, next){
                 page: {
                     modules: [
                         MODULES.ENTITIES,
+                        MODULES.ENTITYDETAILS
+                    ],
+                    nav: {
+                        currentEntry: "entities"
+                    }
+                }
+            });
+        })
+}
+
+function sensorDetails(req, res, next){
+    //get clients
+    SensorService.getSensorById(req.params.id)
+        .then(scene => {
+            res.render("entities/details", {
+                entity: scene,
+                page: {
+                    modules: [
+                        MODULES.ENTITIES,
+                        MODULES.ENTITYDETAILS
                     ],
                     nav: {
                         currentEntry: "entities"

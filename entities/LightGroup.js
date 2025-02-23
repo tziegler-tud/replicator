@@ -1,11 +1,4 @@
-/**
- * @class LightGroup
- * @property {string} uniqueId
- * @property {string} id internal database id
- * @property {Light[]} lights
- * @property {LightScene[]} scenes
- * @property {LightGroupState} state
- */
+
 
 /**
  * @typedef LightGroupState
@@ -32,12 +25,31 @@
 import Light from "./Light.js";
 import LightScene from "./LightScene.js";
 
+/**
+ * @class LightGroup
+ * @property {string} uniqueId
+ * @property {string} id internal database id
+ * @property {Light[]} lights
+ * @property {LightScene[]} scenes
+ * @property {LightGroupState} state
+ * @property {string} groupId
+ */
 export default class LightGroup extends Light {
-    constructor({uniqueId, identifier= "NewDefaultLightGroup", nativeObject={}, configuration={}}={}){
-        super({uniqueId: uniqueId, identifier: identifier, nativeObject: nativeObject, configuration: configuration});
+
+    /**
+     *
+     * @param {String} uniqueId
+     * @param {String} identifier
+     * @param {String} groupId
+     * @param {Object} nativeObject
+     * @param {LightConfiguration} configuration
+     */
+    constructor({uniqueId, identifier= "NewDefaultLightGroup", groupId, nativeObject={}, configuration={}}={}){
+        super({uniqueId: uniqueId, identifier: identifier, lightId: groupId, nativeObject: nativeObject, configuration: configuration});
         this.lights = [];
         this.scenes = [];
         this.integration = "default";
+        this.groupId = groupId;
     }
 
     get(){

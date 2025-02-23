@@ -5,10 +5,16 @@ import DialogComponent from "./DialogComponent";
 import {MDCList} from "@material/list";
 
 export default class EntitySelectDialog extends DialogComponent{
+    static variants = {
+        ID: "ID",
+        TEMPLATE: "TEMPLATE",
+    }
+
     constructor({element, config={}}={}, data={entities: {}}) {
         super({name: "entitySelect", element: element, config: config, data: data});
 
         this.entities = data.entities;
+        this.variant = data.variant;
         this.stages = {};
         this.selected = undefined;
         this.templateUrl = "/js/components/templates/entitySelectDialog.hbs";

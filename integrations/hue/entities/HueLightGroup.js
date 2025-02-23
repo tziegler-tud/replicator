@@ -2,7 +2,7 @@ import LightGroup from "../../../entities/LightGroup.js";
 
 export default class HueLightGroup extends LightGroup {
     constructor({bridgeApi, hueObject, uniqueId, groupId, identifier="MyHueLight", integration, groupedLight, hueScenes}={}){
-        super({uniqueId: uniqueId, identifier: identifier, nativeObject: hueObject, configuration: {
+        super({uniqueId: uniqueId, identifier: identifier, lightId: groupId, nativeObject: hueObject, configuration: {
             brightness: {
                     max: 100,
                     min: 0,

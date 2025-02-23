@@ -8,6 +8,8 @@ export default class Skill {
         OBJECT: "object",
         FUNCTION: "function",
 
+        TEMPLATE: "template", //a string representation using {templating Syntax}
+
         light: "Light",
         lightGroup: "LightGroup",
         lightScene: "LightScene",

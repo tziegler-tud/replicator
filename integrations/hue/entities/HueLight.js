@@ -99,9 +99,17 @@ import ColorParser from "../../../helpers/colorParser.js";
  */
 
 
+/**
+ * @class HueLight
+ * @property {String} uniqueId
+ * @property {String} identifier
+ * @property {String} lightId
+ * @property {Object} nativeObject
+ * @property {LightConfiguration} configuration
+ */
 export default class HueLight extends Light {
     constructor({bridgeApi, hueObject, uniqueId, lightId, identifier="MyHueLight", integration}={}){
-        super({uniqueId: uniqueId, identifier: identifier, nativeObject: hueObject, configuration: {
+        super({uniqueId: uniqueId, identifier: identifier, lightId, nativeObject: hueObject, configuration: {
                 brightness: {
                     max: 100,
                     min: 0,

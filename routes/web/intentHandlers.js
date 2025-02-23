@@ -6,6 +6,7 @@ import LightsService from "../../services/LightsService.js";
 import SkillService from "../../services/SkillService.js";
 var router = express.Router();
 import MODULES from "./modules.js";
+import SensorService from "../../services/SensorService.js";
 
 /**
  * hooked at /intenthandlers
@@ -95,12 +96,14 @@ function addAction(req, res, next){
             const lightsP = LightsService.getLights();
             const lightGroupsP = LightsService.getGroups();
             const scenesP = LightsService.getScenes();
+            const sensors = SensorService.getSensors();
             Promise.all([lightsP, lightGroupsP,scenesP])
                 .then(function([lights, lightGroups, scenes]) {
                     const entities = {
                         lights: lights,
                         lightGroups: lightGroups,
                         scenes: scenes,
+                        sensors: sensors,
                     }
                     res.render("intenthandlers/addAction", {
                         intentHandler: intentHandlerJSON,
@@ -142,12 +145,14 @@ function editAction(req, res, next){
             const lightsP = LightsService.getLights();
             const lightGroupsP = LightsService.getGroups();
             const scenesP = LightsService.getScenes();
+            const sensors = SensorService.getSensors();
             Promise.all([lightsP, lightGroupsP,scenesP])
                 .then(function([lights, lightGroups, scenes]) {
                     const entities = {
                         lights: lights,
                         lightGroups: lightGroups,
                         scenes: scenes,
+                        sensors: sensors,
                     }
                     res.render("intenthandlers/editAction", {
                         intentHandler: intentHandlerJSON,

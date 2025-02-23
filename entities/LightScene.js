@@ -1,5 +1,11 @@
 /**
  * @class LightScene
+ * @property {String} uniqueId
+ * @property {String} identifier
+ * @property {Object} nativeObject
+ * @property {LightConfiguration} configuration
+ * @property {LightGroup[]} groups
+ * @property {Light[]} lights
  */
 export default class LightScene {
     constructor(uniqueId, identifier="NewLightScene", nativeObject={}){

@@ -1,6 +1,13 @@
 
+import ColorParser from "../helpers/colorParser.js";
+import Entity from "./Entity.js";
+
+
 /**
- * @class Light
+ * @typedef LightConfiguration
+ * @property {Object} brightness
+ * @property {number} brightness.max Maximum brightness value. Defaults to 255
+ * @property {number} brightness.min Minimum brightness value. Defaults to 0
  */
 
 /**
@@ -44,7 +51,6 @@
  * @property {number} [color_temperature]
  */
 
-import ColorParser from "../helpers/colorParser.js";
 
 /**
  * @typedef {Object} LightColorObject
@@ -61,12 +67,38 @@ import ColorParser from "../helpers/colorParser.js";
  * @property {number} xy.y CIE xy color space y coordinate [0-1]
  */
 
+/**
+ * @class Light
+ * @property {String} uniqueId
+ * @property {String} identifier
+ * @property {String} lightId
+ * @property {Object} nativeObject
+ * @property {LightConfiguration} configuration
+ */
+export default class Light extends Entity {
+    /**
+     *
+     * @type {LightConfiguration}
+     */
+    static defaultConfiguration = {
+        brightness: {
+            max: 100,
+            min: 0,
+        }
+    };
 
-export default class Light {
-    constructor({uniqueId, identifier= "NewDefaultLight", nativeObject={}, configuration={}}={}){
-        this.id = undefined;
-        this.uniqueId = uniqueId;
-        this.identifier = identifier;
+    /**
+     *
+     * @param {String} uniqueId
+     * @param {String} identifier
+     * @param {String} lightId
+     * @param {Object} nativeObject
+     * @param {LightConfiguration} configuration
+     */
+    constructor({uniqueId, identifier= "NewDefaultLight", lightId, nativeObject={}, configuration={}}={}){
+        const config = Object.assign(Light.defaultConfiguration, configuration);
+        super({uniqueId, identifier, nativeObject, configuration: config});
+        this.lightId = lightId;
         this.state = {
             on: false,
             brightness: 0,
@@ -77,19 +109,7 @@ export default class Light {
             action: "none",
             color: {},
         };
-        let defaultConfiguration = {
-            brightness: {
-                max: 100,
-                min: 0,
-            }
-        }
-        this.configuration = Object.assign(defaultConfiguration, configuration);
-        this.colorParser = new ColorParser({maxBrightness: this.configuration.brightness.max});
-        this.nativeObject = nativeObject;
-        this.settings = {
-            identifier: identifier,
-        };
-        this.properties = {};
+        this.colorParser = new ColorParser({maxBrightness: this.configuration.brightness?.max});
     }
 
     /**
@@ -110,33 +130,6 @@ export default class Light {
         }
     }
 
-    get() {
-        // return {
-        //     id: this.id,
-        //     uniqueId: this.uniqueId,
-        //     identifier: this.identifier,
-        //     state: this.state,
-        // }
-        return this;
-    }
-
-    getJson(){
-        return {
-            id: this.id,
-            uniqueId: this.uniqueId,
-            identifier: this.identifier,
-            state: this.state,
-            configuration: this.configuration ,
-            nativeObject: this.nativeObject,
-            settings: this.settings,
-            properties: this.properties,
-        }
-    }
-
-    async getState(){
-        return this.state;
-    }
-
     /**
      *
      * @param state {LightStateUpdate}
@@ -146,15 +139,13 @@ export default class Light {
         Object.assign(this.state, state);
     }
 
+    /**
+     *
+     * @param {Light} light
+     * @returns {Promise<void>}
+     */
     async restoreState(light){
         return this.setState(light.state);
-    }
-
-    getInternalState(){
-        return this.state;
-    }
-    setInternalState(state){
-        Object.assign(this.state, state);
     }
 
     /**
@@ -201,27 +192,6 @@ export default class Light {
     async setColorRgb({r,g,b}){
         return this.setState({color: {rgb: {r:r, g:g, b:b}}})
 
-    }
-
-
-    loadSettings(dbSettings){
-        this.settings = dbSettings;
-        this.id = dbSettings.id;
-        this.identifier = dbSettings.identifier;
-    }
-
-    saveToDb(){
-        let self = this;
-        return new Promise(function(resolve, reject){
-            self.settings.save()
-                .then(settings => {
-                    self.settings=settings;
-                    resolve(self);
-                })
-                .catch(err => {
-                    reject(err);
-                })
-        })
     }
 
     /**

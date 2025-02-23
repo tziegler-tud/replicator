@@ -1,12 +1,27 @@
 import http from "http";
 import https from "https";
 
+import Light from "../entities/Light.js";
+import LightGroup from "../entities/LightGroup.js";
+import LightScene from "../entities/LightScene.js";
+import Sensor from "../entities/Sensor.js";
+
+/** @typedef {import('../entities/Light.js').Light} Light */
+/** @typedef {import('../entities/LightGroup.js').LightGroup} LightGroup */
+/** @typedef {import('../entities/LightScene.js').LightScene} LightScene */
+/** @typedef {import('../entities/Sensor.js').Sensor} Sensor */
+
+
 /**
  * @class
  * @abstract
  * Abstract Integration class.
  * Implementations of this class should expose a singleton instance to the app, useable by imports.
  * Module export of such a class should be a new instance.
+ * @property {Light[]} lights
+ * @property {LightGroup[]} groups
+ * @property {LightScene[]} scenes
+ * @property {Sensor[]} sensors
  */
 export default class Integration {
     constructor(){
@@ -20,9 +35,25 @@ export default class Integration {
             data: {},
         }
 
+        /**
+         * @type {Light[]}
+         */
         this.lights = [];
-        this.grouped_lights = [];
+        /**
+         *
+         * @type {LightGroup[]}
+         */
+        this.groups = [];
+        /**
+         *
+         * @type {LightScene[]}
+         */
         this.scenes = [];
+        /**
+         *
+         * @type {Sensor[]}
+         */
+        this.sensors = [];
     }
 
     /**
@@ -63,12 +94,6 @@ export default class Integration {
         return Object.assign(this.integration, i);
     }
 
-    getResource(uniqueId){
-        console.log("Integration::getResource: Warning - method not implemented.")
-        return undefined;
-    }
-
-
     statusEnum = {
         NOTLOADED: 0,
         LOADED: 1
@@ -84,6 +109,53 @@ export default class Integration {
 
     error(message){
         console.log("["+this.readableName+"]: ERROR: " + message);
+    }
+
+    /**
+     *
+     * @param {string} uniqueId
+     * @returns {Light | LightGroup | LightScene | Sensor}
+     */
+    getResource(uniqueId){
+        //check lights
+        let resources = [...this.lights, ...this.groups, ...this.scenes, ...this.sensors];
+        return resources.find(o => o.uniqueId === uniqueId);
+    }
+
+    /**
+     *
+     * @param {string} lightId
+     * @returns {Light}
+     */
+    getLight(lightId){
+        return this.lights.find(o => o.lightId === lightId);
+    }
+
+    /**
+     *
+     * @param {string} groupId
+     * @returns {LightGroup}
+     */
+    getGroup(groupId){
+        return this.groups.find(o => o.groupId === groupId);
+    }
+
+    /**
+     *
+     * @param {string} sceneId
+     * @returns {LightScene}
+     */
+    getScene(sceneId){
+        return this.scenes.find(o => o.sceneId === sceneId);
+    }
+
+    /**
+     *
+     * @param {string} sensorId
+     * @returns {Sensor}
+     */
+    getSensor(sensorId){
+        return this.sensors.find(o => o.sensorId === sensorId);
     }
 }
 

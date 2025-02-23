@@ -194,6 +194,10 @@ class CommunicationService extends Service {
         })
     }
 
+    getHttpUrl() {
+        return "http://"+this.server.endpoints.http.address + ":" + this.server.endpoints.http.port;
+    }
+
     tcpMessage(socket, data){
         console.log(data);
         socket.emit("message", data);

@@ -64,5 +64,29 @@
                 {{/each}}
             </div>
         </div>
+        <div class="dashboard-section dashboard-section-cards">
+            <div class="dashboard-section-header">
+                <span class="dashboard-section-header--title">
+                    Sensors
+                </span>
+            </div>
+            <div class="dashboard-cardSet">
+                {{#each entities.sensors}}
+                    <div class="dashboard-card card element-card entity-card sensor-card" data-id="{{this.id}}">
+                        <div class="card-header">{{this.identifier}}</div>
+                        <div class="card-body">
+                            <div class="card-property-container">
+                                {{#each this.state}}
+                                    <div class="card-property">
+                                        <span class="card-property--label">{{@key}}</span>
+                                        <span class="card-property--value">{{this}}</span>
+                                    </div>
+                                {{/each}}
+                            </div>
+                        </div>
+                    </div>
+                {{/each}}
+            </div>
+        </div>
     </div>
 </div>

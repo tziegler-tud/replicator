@@ -1,6 +1,20 @@
 import LightScene from "../../../entities/LightScene.js";
 
+/**
+ * @typedef DeconzNativeLightScene
+ */
+
 export default class DeconzLightScene extends LightScene {
+    /**
+     *
+     * @param {DeconzBridgeApi} bridgeApi
+     * @param {DeconzNativeLightScene} nativeObject
+     * @param {string} uniqueId
+     * @param {string} sceneId
+     * @param {DeconzLightGroup} deconzGroup
+     * @param {string} identifier
+     * @param integration
+     */
     constructor({bridgeApi, nativeObject, uniqueId, sceneId, deconzGroup, identifier="MyHueScene", integration}){
         super(uniqueId, identifier);
         this.sceneId = sceneId;
@@ -9,7 +23,6 @@ export default class DeconzLightScene extends LightScene {
         this.nativeObject = nativeObject;
         this.groupUniqueId = deconzGroup.uniqueId;
         this.deconzGroupId = deconzGroup.nativeObject.id;
-        this.deconzSceneId = sceneId;
         this.group = deconzGroup;
     }
 

@@ -228,6 +228,26 @@ export default class DeconzBridgeApi {
 
     /**
      *
+     * @param sensorId
+     * @returns {Promise<DeconzNativeSensor>}
+     */
+    getSensorState(sensorId) {
+        let self = this;
+        return new Promise(function(resolve, reject){
+            self.get("/sensors/"+sensorId)
+                .then(result => {
+                    if(result.error) {
+                        reject(result.error);
+                    }
+                    else {
+                        resolve(result);
+                    }
+                })
+        });
+    }
+
+    /**
+     *
      * @param {string} lightId
      * @param {DeconzNativeLightStateUpdate} state
      * @returns {Promise<*>}

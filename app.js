@@ -11,6 +11,7 @@ import { create } from 'express-handlebars';
 import endpoints from './config/endpoints.json' assert { type: 'json' };
 import hueConfig from './config/hueConfig.json' assert { type: 'json' };
 import deconzConfig from './config/deconzConfig.json' assert { type: 'json' };
+import settingsConfig from './config/config.json' assert { type: 'json' };
 
 import {apiErrorHandler, webErrorHandler} from "./helpers/error-handler.js";
 
@@ -24,6 +25,9 @@ import IntegrationService from "./services/IntegrationService.js";
 import SettingsService from "./services/SettingsService.js";
 import AlertService from "./services/AlertService.js";
 import SkillService from "./services/SkillService.js";
+import SensorService from "./services/SensorService.js";
+import TtsService from "./services/TtsService.js";
+import AudioService from "./services/AudioService.js";
 
 import apiIndexRouter from './routes/api/v1/index.js';
 import clientRouter from './routes/api/v1/client.js';
@@ -41,6 +45,8 @@ import webIntentHandlerRouter from './routes/web/intentHandlers.js';
 import webEntitiesRouter from './routes/web/entities.js';
 import webIntegrationsRouter from './routes/web/integrations.js';
 import webAlertsRouter from './routes/web/alerts.js';
+
+import streamRouter from './routes/stream/stream.js';
 
 
 
@@ -83,6 +89,8 @@ app.use('/api/v1/integrations', integrationsRouter);
 app.use('/api/v1/alerts', alertsRouter);
 app.use("/api", apiErrorHandler);
 
+app.use("/stream", streamRouter)
+
 app.use('/', webIndexRouter);
 app.use('/clients', webClientRouter);
 app.use('/intents', webIntentRouter);
@@ -116,6 +124,8 @@ const communicationService =CommunicationService.start({});
 
 //init lights service
 const lightsService =LightsService.start({});
+const sensorService =SensorService.start({});
+
 
 //load Integration Service
 const integrationService = new Promise(function(resolve, reject){
@@ -139,6 +149,9 @@ const intentHandlerService = IntentHandlerService.start();
 const alertService = AlertService.start({});
 const skillService = SkillService.start({})
 
+const ttsService = TtsService.start({})
+const audioService = AudioService.start({})
+
 
 /**
  * testing
@@ -155,6 +168,9 @@ const servicesArray = [
     intentHandlerService,
     alertService,
     skillService,
+    sensorService,
+    ttsService,
+    audioService
 ]
 
 
