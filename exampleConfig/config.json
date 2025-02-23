@@ -1,0 +1,6 @@
+{
+  "tts": {
+    "piperPath": "/home/tom/Desktop/piper/piper/piper",
+    "piperModel": "/home/tom/Desktop/piper/models/en_US-lessac-medium.onnx"
+  }
+}
