@@ -1,4 +1,7 @@
 {
+  "picovoice": {
+    "rhino": "rhinoModels/v4/Replicator_v0_4_3.yml"
+  },
   "tts": {
     "piperPath": "/path/to/piper/executable",
     "piperModel": "/path/to/piper/model.onnx"

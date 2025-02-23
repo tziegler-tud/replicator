@@ -61,25 +61,24 @@ class IntentService extends Service{
     }
 
     loadConfig(path){
-        let self = this;
-        self.debug("IntentService is loading config file...");
-        return new Promise(function(resolve, reject){
+        this.debug("IntentService is loading config file...");
+        return new Promise((resolve, reject) => {
             //read yaml file
             try {
-                const doc = yaml.load(fs.readFileSync(appRoot + path, 'utf8'));
-                self.parseDoc(doc)
-                    .then(function(result){
-                        self.debug("IntentService config loaded successfully.");
-                        self.configLoaded = true;
-                        self.configPath = path;
+                const doc = yaml.load(fs.readFileSync(path, 'utf8'));
+                this.parseDoc(doc)
+                    .then((result)=> {
+                        this.debug("IntentService config loaded successfully.");
+                        this.configLoaded = true;
+                        this.configPath = path;
                         resolve()
                     })
-                    .catch(function(error){
-                        self.debug("Error: IntentService - Failed to load config: " + error);
+                    .catch((error) =>{
+                        this.debug("Error: IntentService - Failed to load config: " + error);
                         reject();
                     })
             } catch (e) {
-                self.debug("Error: " + e);
+                this.debug("Error: " + e);
                 reject(e);
             }
         })
