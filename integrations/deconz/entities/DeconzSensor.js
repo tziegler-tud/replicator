@@ -43,6 +43,7 @@ export default class DeconzSensor extends Sensor {
         super({uniqueId: uniqueId, identifier: identifier, nativeObject: nativeObject, configuration: {}});
 
         this.deconzId = sensorId;
+        this.sensorId = sensorId;
         /**
          * @type {DeconzBridgeApi}
          */
@@ -113,7 +114,7 @@ export default class DeconzSensor extends Sensor {
      * @returns {Promise<SensorState>}
      */
     async getState(){
-        this.nativeObject = await this.bridgeApi.getSensorState(this.deconzId);
+        this.nativeObject = await this.bridgeApi.getSensorState(this.sensorId);
         this.state = this.parseNativeToState(this.nativeObject);
         return this.state;
     }
