@@ -78,12 +78,12 @@ export default class EventStreamHandler {
                 light.setInternalState({state: deconzEvent.state})
                 break;
             case "scenes":
+                break;
+            case "sensors":
                 const sensor = this.integration.getSensor(deconzEvent.id);
                 if(sensor === undefined || deconzEvent.state === undefined) return false;
                 //update group state
                 sensor.setInternalState({state: deconzEvent.state})
-                break;
-            case "sensors":
                 break;
         }
 
