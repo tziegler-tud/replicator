@@ -109,6 +109,9 @@ class CommunicationService extends Service {
                     return;
                 }
                 console.log("Client connected: " + client.identifier);
+                console.log("Updating client information...");
+                client.updateClientInformation();
+
                 socket.on("processCommand", (data, callback) => {
                     self.processClientCommand(socket, data)
                         .then((result)=> {
