@@ -112,6 +112,8 @@ class CommunicationService extends Service {
                 }
                 console.log("Client connected: " + client.identifier);
                 LogService.addLogEntry(LogService.types.INFO, "Client connected: " + client.identifier)
+                console.log("Updating client information...");
+                client.updateClientInformation();
 
                 socket.on("processCommand", (data, callback) => {
                     self.processClientCommand(socket, data)

@@ -453,6 +453,40 @@ export default class Client {
         })
     }
 
+    getDeviceInformation(){
+        let self = this;
+        return new Promise((resolve, reject)=> {
+            self.sendTcpWithResponse("info", {})
+                .then(response => {
+                    resolve(response);
+                })
+                .catch(err => {
+                    console.error("Failed to send tcp request: " + err)
+                })
+        })
+    }
+
+    updateClientInformation(){
+        let self = this;
+        return new Promise((resolve, reject)=> {
+            self.sendTcpWithResponse("info", {})
+                .then(response => {
+                    const url = response.url;
+                    const version = response.version;
+                    const identifier = response.identifier;
+
+                    this.url = url;
+                    this.version = version;
+                    this.identifier = identifier;
+
+                    resolve(response);
+                })
+                .catch(err => {
+                    console.error("Failed to send tcp request: " + err)
+                })
+        })
+    }
+
     getDeviceSettings(){
         let self = this;
         return new Promise((resolve, reject)=> {
