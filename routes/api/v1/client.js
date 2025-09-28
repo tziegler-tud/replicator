@@ -3,7 +3,7 @@ var router = express.Router();
 
 import clientService from "../../../services/ClientService.js";
 
-import endpoints from '../../../config/endpoints.json' assert { type: 'json' };
+import endpoints from '../../../config/endpoints.json' with { type: 'json' };
 
 
 
