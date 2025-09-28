@@ -18,7 +18,7 @@ class SkillService extends Service{
 
     constructor(){
         super();
-        this.debugLabel = "SkillService: ";
+        this.serviceName = "SkillService";
         this.skills = {};
     }
 

@@ -280,7 +280,7 @@ export default class Client {
      *
      * @param commandData {CommandObject}
      * @param emitter
-     * @returns {Promise<unknown>}
+     * @returns {Promise<VoiceCommandProcessingResult>}
      */
     processCommand(commandData, emitter){
         const self = this;

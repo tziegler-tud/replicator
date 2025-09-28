@@ -22,6 +22,7 @@ class ClientService extends Service{
     }
     constructor(init=false){
         super();
+        this.serviceName = "ClientService";
         let self = this;
 
         /**

@@ -14,4 +14,5 @@ export default {
     ALERTS: "AlertsModule",
     AlertsDetais: "AlertsDetailsModule",
     AlertsAction: "AlertsActionModule",
+    Log: "LogModule",
 }

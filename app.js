@@ -8,10 +8,10 @@ import { fileURLToPath } from 'url';
 
 import { create } from 'express-handlebars';
 
-import endpoints from './config/endpoints.json' assert { type: 'json' };
-import hueConfig from './config/hueConfig.json' assert { type: 'json' };
-import deconzConfig from './config/deconzConfig.json' assert { type: 'json' };
-import settingsConfig from './config/config.json' assert { type: 'json' };
+import endpoints from './config/endpoints.json' with { type: 'json' };
+import hueConfig from './config/hueConfig.json' with { type: 'json' };
+import deconzConfig from './config/deconzConfig.json' with { type: 'json' };
+import settingsConfig from './config/config.json' with { type: 'json' };
 
 import {apiErrorHandler, webErrorHandler} from "./helpers/error-handler.js";
 
@@ -28,6 +28,7 @@ import SkillService from "./services/SkillService.js";
 import SensorService from "./services/SensorService.js";
 import TtsService from "./services/TtsService.js";
 import AudioService from "./services/AudioService.js";
+import LogService from "./services/LogService.js";
 
 import apiIndexRouter from './routes/api/v1/index.js';
 import clientRouter from './routes/api/v1/client.js';
@@ -45,6 +46,7 @@ import webIntentHandlerRouter from './routes/web/intentHandlers.js';
 import webEntitiesRouter from './routes/web/entities.js';
 import webIntegrationsRouter from './routes/web/integrations.js';
 import webAlertsRouter from './routes/web/alerts.js';
+import webLogRouter from './routes/web/log.js';
 
 import streamRouter from './routes/stream/stream.js';
 
@@ -58,6 +60,7 @@ global.appRoot = path.resolve(__dirname);
 
 // view engine setup
 import handlebarsHelpers from "./helpers/handlebars/helpers.js"
+import Log from "./routes/web/log.js";
 const hbs = create({
     helpers: handlebarsHelpers,
 })
@@ -98,6 +101,7 @@ app.use('/intenthandlers', webIntentHandlerRouter);
 app.use('/entities', webEntitiesRouter);
 app.use('/integrations', webIntegrationsRouter);
 app.use('/alerts', webAlertsRouter);
+app.use('/log', webLogRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -157,7 +161,11 @@ const audioService = AudioService.start({})
  * testing
  */
 
-const servicesArray = [
+/**
+ *
+ * @type {Promise<Service>[]}
+ */
+const servicesPromiseArray = [
     settingsService,
     intentService,
     voiceCommandService,
@@ -173,6 +181,23 @@ const servicesArray = [
     audioService
 ]
 
+
+Promise.all(servicesPromiseArray)
+    .then(()=>{
+        LogService.addLogEntry(LogService.types.WARNING, "System startup complete. All systems operating within normal parameters")
+})
+    .catch(e=>{
+        let failed = [];
+        for (const service in servicesPromiseArray) {
+            if(!(service instanceof Promise))
+                failed.push("Unknown service")
+            else
+               service.catch(e=>{
+                   failed.push(service.serviceName);
+               })
+        }
+        LogService.addLogEntry(LogService.types.STATUS, "System startup complete. Erros detected. The following services failed to start: " + failed.toString())
+    })
 
 // import createIntentHandler from "./test/intentHandlers.js";
 // Promise.all(servicesArray).then(()=> {

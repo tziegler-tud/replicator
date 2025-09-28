@@ -12,10 +12,11 @@ import Integrations from "./modules/integrations";
 import Alerts from "./modules/alerts/alerts.js";
 import AlertDetails from "./modules/alerts/alertDetails.js";
 import AlertAction from "./modules/alerts/alertAction.js";
+import Log from "./modules/log/log.js";
 
 export default class ModuleLoader {
     constructor(){
-        this.modules = [Dashboard, Clients, ClientDetails, Intents, IntentHandlers, IntentHandlerAdd, IntentHandlerDetails, IntentHandlerAction, Entities, EntityDetails, Integrations, Alerts, AlertDetails, AlertAction];
+        this.modules = [Dashboard, Clients, ClientDetails, Intents, IntentHandlers, IntentHandlerAdd, IntentHandlerDetails, IntentHandlerAction, Entities, EntityDetails, Integrations, Alerts, AlertDetails, AlertAction, Log];
 
     }
 

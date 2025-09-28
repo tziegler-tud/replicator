@@ -1,4 +1,7 @@
+@use "@material/list";
 @import "./variables";
+
+@include list.deprecated-core-styles();
 
 .text--primary {
   color: $font-content-primary;

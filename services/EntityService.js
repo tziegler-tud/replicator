@@ -8,11 +8,11 @@ export default class EntityService extends Service {
         super();
         this.entities = [];
         this.name = "EntityService";
+        this.serviceName = "EntityService";
     }
 
     initFunc() {
         let self = this;
-        console.log("Initializing EntityService...");
         return new Promise(function (resolve, reject) {
             resolve();
         })

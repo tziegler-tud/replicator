@@ -9,6 +9,7 @@ import Service from "./Service.js";
 import clientService from "./ClientService.js"
 import Client from "../classes/Client.js";
 import {instrument} from "@socket.io/admin-ui";
+import LogService from "./LogService.js";
 
 /**
  * @typedef VoiceCommandObject
@@ -36,6 +37,7 @@ import {instrument} from "@socket.io/admin-ui";
 class CommunicationService extends Service {
     constructor(){
         super();
+        this.serviceName = "CommunicationService";
         let self = this;
         this.tcpPort = 9000;
         this.httpPort = 3100;
@@ -109,10 +111,13 @@ class CommunicationService extends Service {
                     return;
                 }
                 console.log("Client connected: " + client.identifier);
+                LogService.addLogEntry(LogService.types.INFO, "Client connected: " + client.identifier)
+
                 socket.on("processCommand", (data, callback) => {
                     self.processClientCommand(socket, data)
-                        .then((result)=> {
+                        .then((executionResult)=> {
                             console.log("Successfully processed command obtained from client");
+                            LogService.logCommandResult(client, executionResult)
                             data.result = {
                                 success: true,
                                 error: undefined,
@@ -120,11 +125,12 @@ class CommunicationService extends Service {
                             self.tcpSend(socket, "commandSuccessful", data)
                             // callback("got it")
                         })
-                        .catch(err => {
-                            console.log("Failed to process client command: " + err);
+                        .catch(executionResult => {
+                            console.log("Failed to process client command: " + executionResult.error);
+                            LogService.logCommandResult(client, executionResult)
                             data.result = {
                                 success: false,
-                                error: err,
+                                error: executionResult.error,
                             }
                             self.tcpSend(socket, "commandFailed", data)
                             // callback("got it")
@@ -136,6 +142,8 @@ class CommunicationService extends Service {
                     clientService.disconnectClient(client)
                         .then(result => {
                             console.log("Client status set to disconnected: " + client.identifier);
+                            LogService.addLogEntry(LogService.types.INFO, "Client disconnected: " + client.identifier)
+
                         })
                 });
             });
@@ -171,6 +179,7 @@ class CommunicationService extends Service {
                                 //registration successful.
                                 //attach server Identifier
                                 result.serverId = self.server.serverId;
+                                LogService.addLogEntry(LogService.types.INFO, "Registered new client: " + result.client.identifier)
                                 let response = {
                                     err: undefined,
                                     response: tcpResponse.tpcResponse.REGISTRATION.SUCCESSFULL,
@@ -257,14 +266,14 @@ class CommunicationService extends Service {
      *
      * @param socket {IOSocket}
      * @param commandData {CommandObject}
-     * @returns {Promise<unknown>}
+     * @returns {Promise<ClientCommandProcessingResult>}
      */
     processClientCommand(socket, commandData){
         console.log("processing client command:");
         const commandClientId = commandData.clientId;
 
         return new Promise(function(resolve, reject){
-            if(!socket.attachedClient.clientId === commandClientId) {
+            if(socket.attachedClient.clientId !== commandClientId) {
                 //missmatch. Something is wrong
                 let err = new TcpError(tcpResponse.tpcResponse.ARGUMENTS.INVALIDCLIENTID);
                 socket.emit("error", err);
@@ -280,7 +289,7 @@ class CommunicationService extends Service {
             const emitter = new Emitter(socket);
             client.processCommand(commandData, emitter)
                 .then(result => {
-                    resolve();
+                    resolve(result);
                 })
                 .catch(err => {
                     reject(err);

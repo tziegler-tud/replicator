@@ -1,0 +1,25 @@
+<div class="dashboard-container">
+    <div class="dashboard-inner">
+        <div class="dashboard-section dashboard-section-cards">
+            <div class="dashboard-section-header">
+                <span class="dashboard-section-header--title">
+                    System Log
+                </span>
+            </div>
+            <div class="dashboard-list log-list">
+                <ul class="mdc-deprecated-list mdc-deprecated-list--two-line">
+                    {{test}}
+                    {{#each logEntries}}
+                        <li class="mdc-deprecated-list-item dashboard-listEntry log-listEntry"  data-name="{{this._id}}" tabindex="0" >
+                            <span class="mdc-deprecated-list-item__ripple"></span>
+                            <span class="mdc-deprecated-list-item__text">
+                              <span class="mdc-deprecated-list-item__primary-text">{{this.type}} | {{this.message}}</span>
+                              <span class="mdc-deprecated-list-item__secondary-text">{{this.date}} | {{this.details}}</span>
+                            </span>
+                        </li>
+                    {{/each}}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
