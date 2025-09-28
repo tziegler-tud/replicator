@@ -1,4 +1,4 @@
-import config from '../config/db.json' assert { type: 'json' };
+import config from '../config/db.json' with { type: 'json' };
 import mongoose from 'mongoose';
 mongoose.set('debug', false);
 
@@ -24,6 +24,8 @@ import IntentHandler from "./intentHandlerScheme.js"
 import Alert from "./alertScheme.js"
 import Sensor from "./sensorScheme.js"
 import TtsFiles from "./ttsFilesScheme.js"
+import Webhook from "./WebhookScheme.js"
+import Logs from "./LogScheme.js"
 let db = {
     Client: Client,
     Location: Location,
@@ -31,10 +33,12 @@ let db = {
     LightGroup: LightGroup,
     LightScene: LightScene,
     Settings: Settings,
-    Intent: Intent,
+    IntentModel: Intent,
     IntentHandler: IntentHandler,
     Alert: Alert,
     Sensor: Sensor,
     TtsFiles: TtsFiles,
+    Webhook: Webhook,
+    Logs: Logs,
 }
 export default db;

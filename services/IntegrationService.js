@@ -13,6 +13,7 @@ import DeconzIntegration from "../integrations/deconz/DeconzIntegration.js";
 class IntegrationService extends Service{
     constructor(){
         super();
+        this.serviceName = "IntegrationService";
         /**
          * @type {Integration[]}
          */

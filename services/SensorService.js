@@ -10,7 +10,7 @@ class SensorService extends EntityService {
          * @type {Sensor[]}
          */
         this.sensors = [];
-        this.name = "SensorService"
+        this.serviceName = "SensorService"
     }
 
     /**

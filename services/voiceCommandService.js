@@ -3,6 +3,16 @@ import Service from "./Service.js";
 import IntentService from "./IntentService.js";
 import IntentHandlerService from "./IntentHandlerService.js";
 
+
+/**
+ * @typedef VoiceCommandProcessingResult
+ * @property {Boolean} isUnderstood
+ * @property {Intent} intent
+ * @property {Object} slots
+ * @property {ExecutionContextResult} executionContextResult
+ * @property {Error} error
+ */
+
 /**
  * @typedef VoiceCommandObject
  * @property isUnderstood {Boolean} true if the command was understood
@@ -13,6 +23,7 @@ import IntentHandlerService from "./IntentHandlerService.js";
 class VoiceCommandService extends Service {
     constructor(args={}, init=false){
         super();
+        this.serviceName = "VoiceCommandService";
         let self = this;
         this.args = args;
         this.mutex = false;
@@ -34,6 +45,7 @@ class VoiceCommandService extends Service {
      * @param command {VoiceCommandObject}
      * @param emitter {Emitter}
      * @param args {Object}
+     * @returns Promise<VoiceCommandPorcessingResult>
      */
     processClientCommand(client, command, emitter, args) {
         let self = this;
@@ -65,26 +77,76 @@ class VoiceCommandService extends Service {
                                         .then(ec => {
                                             ec.run({command: command})
                                                 .then(result => {
-                                                    resolve();
+                                                    /**
+                                                     * @type {VoiceCommandProcessingResult}
+                                                     */
+                                                    const processResult = {
+                                                        isUnderstood: true,
+                                                        intent: intent,
+                                                        slots: commandVariables,
+                                                        executionContextResult: result,
+                                                        error: null
+                                                    }
+                                                    resolve(result);
                                                 })
                                                 .catch(err => {
-                                                    reject(err);
+                                                    /**
+                                                     * @type {VoiceCommandProcessingResult}
+                                                     */
+                                                    const processResult = {
+                                                        isUnderstood: true,
+                                                        intent: intent,
+                                                        slots: commandVariables,
+                                                        executionContextResult: null,
+                                                        error: err
+                                                    }
+                                                    reject(processResult);
                                                 })
                                         })
                                 })
                             } else {
+                                /**
+                                 * @type {VoiceCommandProcessingResult}
+                                 */
+                                const processResult = {
+                                    isUnderstood: true,
+                                    intent: intent,
+                                    slots: commandVariables,
+                                    executionContextResult: undefined,
+                                    error: new Error("No matching handlers found.")
+                                }
                                 //no handler found
-                                reject("No matching handler found.");
+                                reject(processResult);
                             }
                         })
                         .catch(err => {
+                            /**
+                             * @type {VoiceCommandProcessingResult}
+                             */
+                            const processResult = {
+                                isUnderstood: true,
+                                intent: intent,
+                                slots: commandVariables,
+                                executionContextResult: undefined,
+                                error: err
+                            }
                             reject(err);
                         })
                 }
             })
             .catch(err=> {
                 console.log("VoiceCommandService not initialized.");
-                reject(err);
+                /**
+                 * @type {VoiceCommandProcessingResult}
+                 */
+                const processResult = {
+                    isUnderstood: undefined,
+                    intent: undefined,
+                    slots: undefined,
+                    executionContextResult: undefined,
+                    error: err
+                }
+                reject(processResult);
             })
         })
     }

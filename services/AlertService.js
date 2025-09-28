@@ -18,6 +18,8 @@ class AlertService extends Service {
         this.activeAlert = undefined;
         this.activeContext = undefined;
 
+        this.serviceName = "AlertService";
+
         /**
          *
          * @type {Alert[]}

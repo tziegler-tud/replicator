@@ -44,7 +44,7 @@ class IntentHandlerService extends Service{
 
     constructor(){
         super();
-        this.debugLabel = "IntentHandlerService: ";
+        this.serviceName = "IntentHandlerService";
         this.skills = {};
     }
 
@@ -216,10 +216,17 @@ class IntentHandlerService extends Service{
 
     /**
      *
-      * @param intent {Intent}
+     * @param intent {Intent}
+     * @param slots {Object}
+     * @param client {Client}
+     * @returns Promise<IntentHandler[]>
      */
     async getMatchingHandlers(intent, slots, client) {
         let handlers = await IntentHandler.find({intent: intent.identifier});
+        /**
+         *
+         * @type {IntentHandler[]}
+         */
         let qualified = []
         if(!handlers) {
             return []
@@ -353,7 +360,12 @@ class IntentHandlerService extends Service{
     }
 
 
-
+    /**
+     *
+     * @param intentHandler {IntentHandler}
+     * @param client {Client}
+     * @returns {Promise<ExecutionContext>}
+     */
     createExecutionContext(intentHandler, {client}){
         let self = this;
         return new Promise(function(resolve, reject){

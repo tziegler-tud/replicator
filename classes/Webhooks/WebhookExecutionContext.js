@@ -1,17 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
-import IntentHandlerService from "../services/IntentHandlerService.js";
-import Debug from "../helpers/debug.js"
-import SettingsService from "../services/SettingsService.js";
-import SkillService from "../services/SkillService.js";
+import Debug from "../../helpers/debug.js"
+import SettingsService from "../../services/SettingsService.js";
+import SkillService from "../../services/SkillService.js";
+import LightsService from "../../services/LightsService.js";
 
-/**
- * @typedef ExecutionContextResult
- * @property {String} id
- * @property {STATE} result
- * @property {SkillExecutionResult} finisherResult
- */
-
-export default class ExecutionContext {
+export default class WebhookExecutionContext {
     static STATE = {
         INITIALIZED: 0,
         RUNNING: 1,
@@ -21,31 +14,39 @@ export default class ExecutionContext {
         STOPPED: 5,
         FAILED: 6,
     }
-    constructor(intentHandler, client, properties){
+    constructor(alert){
         this.id = uuidv4();
-        this.intentHandler = intentHandler;
-        this.client = client;
-        this.state = ExecutionContext.STATE.INITIALIZED;
+        /**
+         * @type Alert
+         */
+        // this.alert = alert;
+        this.identifier = alert.identifier;
+        this.restoreLightState = alert.restoreLightState;
+        this.state = WebhookExecutionContext.STATE.INITIALIZED;
+        this.runners = [];
+        this.actions = [];
+        this.finisher = undefined;
 
-        //generate runtime properties to be used by dynamicProperty assignments
-        this.properties = properties;
+    }
+
+    getIdentifier(){
+        return this.identifier;
     }
 
     /**
      *
      * @param command {VoiceCommandObject}
-     * @returns {Promise<ExecutionContextResult>}
+     * @returns {Promise<unknown>}
      */
     run({command}){
-        Debug.debug("Executing intentHandler: " + this.intentHandler.identifier);
-        let self = this;
-        this.state = ExecutionContext.STATE.RUNNING;
+        Debug.debug("Executing Webhook: " + this.identifier);
+        this.state = WebhookExecutionContext.STATE.RUNNING;
         this.currentAction = undefined;
         let skillRunners = [];
-        return new Promise(function(resolve, reject){
-            self.intentHandler.actions.forEach(function(action){
+        return new Promise((resolve, reject) => {
+            this.actions.forEach(function(action){
                 action = action.toJSON();
-                self.currentAction = action;
+                this.currentAction = action;
                 const skillIdentifier = action.skill.identifier;
                 let config = {}
                 for (const param of action.configuration.parameters){
@@ -59,7 +60,7 @@ export default class ExecutionContext {
 
                 Debug.debug("Running skill: " + skillIdentifier);
 
-                variables.forEach(function(variable) {
+                variables.forEach((variable) =>{
                     let result = undefined;
                     let slot = undefined;
                     switch(variable.mapping.mappingType) {
@@ -92,7 +93,7 @@ export default class ExecutionContext {
                                 result = undefined;
                             }
                             else {
-                                let property = self.properties.find(property => property.key === variable.mapping.variable);
+                                let property = this.properties.find(property => property.key === variable.mapping.variable);
                                 result = property ? property.value : undefined;
                             }
                             break;
@@ -101,7 +102,7 @@ export default class ExecutionContext {
                                 result = undefined;
                             }
                             else {
-                                let property = self.properties.find(property => property.key === variable.mapping.variable);
+                                let property = this.properties.find(property => property.key === variable.mapping.variable);
                                 if(property) {
                                     result = variable.mapping.value[property.value];
                                 }
@@ -128,51 +129,38 @@ export default class ExecutionContext {
                     //all skills run successfully.
 
                     //run finisher
-                    self.state = ExecutionContext.STATE.FINISHING;
-                    /**
-                     *
-                     * @type {Promise<SkillExecutionResult>}
-                     */
-                    let finisherPromise = new Promise(function(resolve, reject){
-                        if(self.intentHandler.finisher.active){
-                            let finisherSkill = SkillService.getSkillByIdentifier(self.intentHandler.finisher.skill);
+                    this.state = WebhookExecutionContext.STATE.FINISHING;
+                    let finisherPromise = new Promise((resolve, reject) => {
+                        if(this.finisher.active){
+                            let finisherSkill = SkillService.getSkillByIdentifier(this.finisher.skill);
                             finisherSkill.run({
                                 handlerArgs: args,
-                                configuration: self.intentHandler.finisher.skill,
+                                configuration: this.finisher.skill,
                             })
-                                .then(finisherExecutionResult => {
-                                    resolve(finisherExecutionResult);
+                                .then(result => {
+                                    resolve(result);
                                 })
                         }
                         else resolve(undefined);
                     })
 
-                    finisherPromise.then(
-                        finisherResult => {
-                            //inform client that the execution context finished
-                            self.state = ExecutionContext.STATE.FINISHED;
-                            /**
-                             * @type ExecutionContextResult
-                             */
-                            const result = {
-                                id: self.id,
-                                result: self.state,
-                                finisherResult: finisherResult,
-                            }
-                            resolve(result);
+                    finisherPromise.then(finisherResult => {
+                        //inform client that the execution context finished
+                        this.state = WebhookExecutionContext.STATE.FINISHED;
+                        const result = {
+                            id: this.id,
+                            result: this.state,
+                            finisher: finisherResult,
+                        }
+                        resolve(result);
                     })
                 })
                 .catch(err => {
                     //at least one skill failed to run
-                    self.state = ExecutionContext.STATE.FAILED;
+                    this.state = WebhookExecutionContext.STATE.FAILED;
                     reject(err);
                 })
         })
-    }
-
-    stop(){
-        //check if running
-
     }
 
 }

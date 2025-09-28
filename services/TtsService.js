@@ -1,6 +1,6 @@
 import Service from "./Service.js";
 import child_process from "node:child_process";
-import settingsConfig from '../config/config.json' assert { type: 'json' };
+import settingsConfig from '../config/config.json' with { type: 'json' };
 import path from "path";
 import db from '../schemes/mongo.js';
 import CommunicationService from "./CommunicationService.js";
@@ -20,7 +20,7 @@ class TtsService extends Service {
          * @type {Sensor[]}
          */
         this.sensors = [];
-        this.name = "TtsService"
+        this.serviceName = "TtsService"
         this.piperPath = undefined;
         this.piperModel = undefined;
         this.outputPathRelative =  "data/out/tts/"

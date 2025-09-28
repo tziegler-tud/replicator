@@ -10,6 +10,7 @@ const DbLightScene = db.LightScene;
 class LightsService extends Service {
     constructor(){
         super();
+        this.serviceName = "LightsService";
         this.groups = [];
         this.lights = [];
         this.scenes = [];

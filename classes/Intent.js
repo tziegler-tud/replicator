@@ -1,10 +1,6 @@
 import db from '../schemes/mongo.js';
-const dbIntent = db.Intent;
+const dbIntent = db.IntentModel;
 
-/**
- * Intent
- * @class
- */
 export default class Intent {
     /**
      *

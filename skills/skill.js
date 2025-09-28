@@ -1,3 +1,10 @@
+/**
+ * @typedef SkillExecutionResult
+ * @property {RUNRESULT} runResult
+ * @property {String} skill Skill identifier
+ * @property {Error} error
+ */
+
 export default class Skill {
     static variableTypes = {
         STRING: "string",
@@ -28,6 +35,13 @@ export default class Skill {
         }
     };
 
+    static RUNRESULT = {
+        SUCCESS: 0,
+        FAILED: 1,
+        TIMEOUT: 2,
+        ABORTED: 3,
+    }
+
 
     /**
      * @typedef SkillVariable
@@ -51,6 +65,7 @@ export default class Skill {
      * @param handler {Function} handler function. Receives the following arguments: handlerArgs, configuration, intentHandler. Can be async
      */
     constructor({identifier="Skill-"+Date.now(), title=identifier, description="No description available", variables={}, configuration={}, handler}={}) {
+
         this.identifier = identifier;
         this.description = description;
         this.variables = variables;
@@ -69,6 +84,13 @@ export default class Skill {
         this.handler = func;
     }
 
+    /**
+     *
+     * @param handlerArgs
+     * @param configuration {SkillConfigurationObject}
+     * @param intentHandler {IntentHandler}
+     * @returns {Promise<SkillExecutionResult>}
+     */
     run({handlerArgs, configuration, intentHandler}){
         let self = this;
         return new Promise(function(resolve, reject){
@@ -100,12 +122,22 @@ export default class Skill {
                     intentHandler: intentHandler
                 })
                     .then(result => {
-                        resolve(result);
+                        let skillExecutionResult = {
+                            skill: self.identifier,
+                            state: Skill.RUNRESULT.SUCCESS,
+                            error: undefined,
+                        }
+                        resolve(skillExecutionResult);
                     })
                     .catch(err => {
                         const msg = "Failed to run skill: An error occured: " + err;
                         const e = new Error(msg);
-                        reject(e);
+                        let skillExecutionResult = {
+                            skill: self.identifier,
+                            state: Skill.RUNRESULT.FAILED,
+                            error: e,
+                        }
+                        reject(SkillExecutionResult);
                     })
             }
         })

@@ -18,7 +18,8 @@ class SettingsService {
             self.rejectInit = reject;
         })
 
-        this.debugLabel = "SettingsService: ";
+        this.serviceName = "SettingsService";
+        this.debugLabel = this.serviceName  + ": ";
         this.settings = undefined;
         this.settingsObject = {};
         this.defaultSettings = {
@@ -34,7 +35,7 @@ class SettingsService {
         this.initFunc(args)
             .then(result => {
                 self.status = self.statusEnum.RUNNING;
-                self.resolveInit();
+                self.resolveInit(this);
             })
             .catch(err => {
                 self.status = self.statusEnum.FAILED;

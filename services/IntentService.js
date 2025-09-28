@@ -4,7 +4,7 @@ import Service from "./Service.js";
 import Intent from "../classes/Intent.js";
 import SettingsService from "./SettingsService.js";
 import db from '../schemes/mongo.js';
-const dbIntent = db.Intent;
+const dbIntent = db.IntentModel;
 
 /**
  * @typedef SlotObject {Object}
@@ -25,7 +25,7 @@ class IntentService extends Service{
         this.slots = [];
         this.macros = [];
         this.configLoaded = false;
-        this.debugLabel = "IntentService: ";
+        this.serviceName = "IntentService";
     }
 
     initFunc({config}={}){
