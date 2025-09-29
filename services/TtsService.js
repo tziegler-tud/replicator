@@ -169,9 +169,10 @@ class TtsService extends Service {
 
             },
             system: {
-             localDate: SettingsService.getLocalDate(),
-             localDateTime: SettingsService.getLocalDateTime(),
-             localTime: SettingsService.getLocalTime(),
+                localDate: SettingsService.getLocalDate(),
+                localDateTime: SettingsService.getLocalDateTime(),
+                localTime: SettingsService.getLocalTime(),
+                localTimeMilitary: this.getMilitaryTimeString(new Date()),
             },
         }
         return template.replace(/\{([^}]+)\}/g, (match, key) => {
@@ -189,6 +190,20 @@ class TtsService extends Service {
                 return acc;
             }, {});
         }
+    }
+
+    getMilitaryTimeString(time){
+        const d = new Date(time);
+        let hours = d.getHours();
+        let minutes = d.getMinutes();
+        let timeString = "";
+        if(hours < 10) {
+            timeString = "o " + (hours*100 + minutes).toString() + " hours";
+        }
+        else {
+            timeString = hours.toString() + " hundred" + minutes.toString() + " hours"
+        }
+        return timeString
     }
 }
 
