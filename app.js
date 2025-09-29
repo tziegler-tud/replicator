@@ -29,6 +29,7 @@ import SensorService from "./services/SensorService.js";
 import TtsService from "./services/TtsService.js";
 import AudioService from "./services/AudioService.js";
 import LogService from "./services/LogService.js";
+import SystemEntityService from "./services/SystemEntityService.js";
 
 import apiIndexRouter from './routes/api/v1/index.js';
 import clientRouter from './routes/api/v1/client.js';
@@ -129,6 +130,7 @@ const communicationService =CommunicationService.start({});
 //init lights service
 const lightsService =LightsService.start({});
 const sensorService =SensorService.start({});
+const systemEntityService = SystemEntityService.start({});
 
 
 //load Integration Service
