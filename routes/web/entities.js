@@ -3,6 +3,7 @@ import LightsService from "../../services/LightsService.js";
 var router = express.Router();
 import MODULES from "./modules.js";
 import SensorService from "../../services/SensorService.js";
+import SystemEntityService from "../../services/SystemEntityService.js";
 
 /**
  * hooked at /intents
@@ -22,13 +23,16 @@ function entities(req, res, next){
     const lightGroupsP = LightsService.getGroups();
     const scenesP = LightsService.getScenes();
     const sensorsP = SensorService.getSensors();
+    const system = SystemEntityService.getEntities()
+
     Promise.all([lightsP, lightGroupsP,scenesP, sensorsP])
         .then(function([lights, lightGroups, scenes, sensors]) {
             const entities = {
                 lights: lights,
                 lightGroups: lightGroups,
                 scenes: scenes,
-                sensors: sensors
+                sensors: sensors,
+                system: system,
             }
             res.render("entities/all", {
                 entities: entities,

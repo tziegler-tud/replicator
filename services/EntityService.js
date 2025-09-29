@@ -1,7 +1,4 @@
 import Service from "./Service.js";
-import db from '../schemes/mongo.js';
-import Entity from "../entities/Entity.js";
-const DbEntity = db.Entity;
 
 export default class EntityService extends Service {
     constructor() {
@@ -13,20 +10,20 @@ export default class EntityService extends Service {
 
     initFunc() {
         let self = this;
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) =>  {
             resolve();
         })
     }
 
     /**
      *
-     * @param sensor {Sensor}
+     * @param entity {Entity}
      * @returns {Promise<unknown>}
      */
-    addEntity(sensor) {
+    addEntity(entity) {
         return new Promise((resolve, reject) => {
-            console.log("not implemented.")
-            reject();
+            this.entities.push(entity);
+            resolve(entity);
         })
     }
 
@@ -45,5 +42,14 @@ export default class EntityService extends Service {
      */
     findEntityByUniqueId(uniqueId) {
         return this.entities.find(entity => entity.uniqueId === uniqueId);
+    }
+
+    /**
+     *
+     * @param {Boolean} json - return json representation
+     * @returns {Entity[]}
+     */
+    getEntities(json= false){
+        return this.entities
     }
 }
